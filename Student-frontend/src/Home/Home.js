@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import React, { Component} from 'react';
+import { Link } from "react-router-dom";
 import { Button } from 'react-bootstrap';
 import {ButtonGroup} from 'react-bootstrap';
 import './Home.css'
@@ -19,11 +20,8 @@ class Home extends Component {
             <h4>
               Welcome Student!
             </h4>
-            <ButtonGroup vertical>
-              <Button bsStyle="primary">Enter Class</Button>
 
-              <Button bsStyle="primary">See Balance</Button>
-              </ButtonGroup>
+            <Link to="/RegClass" className="btn btn-primary" size="lg">Enter Class</Link>
           </div>
         }
         {!isAuthenticated() &&

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Navbar, Button, Nav, NavItem } from 'react-bootstrap';
 import './App.css';
 import Home from './Home/Home';
-
+import RegClass from './RegClass';
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react.min.js"></script>
 
 
