@@ -87,15 +87,15 @@ class MyCourses extends React.Component {
                 <CardFooter className="border-top d-flex">
                   <div className="card-post__author d-flex">
                     <div className="d-flex flex-column justify-content-center ml-3">
-                    <Button size="sm" theme="white">
-                      <a href={"/course-details/" + post.id}><i className="far fa-edit mr-1" /> View more</a>
-                    </Button>
+                    <a href={"/course-details/" + post.id}><Button size="sm" theme="white">
+                      <i className="far fa-edit mr-1" /> View more
+                    </Button></a>
                     </div>
                   </div>
                   <div className="my-auto ml-auto">
-                    <Button size="sm" theme="white">
+                    <a href={"/lesson/" + post.id}><Button size="sm" theme="white">
                       <i className="far fa-bookmark mr-1" /> Start lesson
-                    </Button>
+                    </Button></a>
                   </div>
                 </CardFooter>
               </Card>
