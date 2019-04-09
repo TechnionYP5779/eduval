@@ -20,9 +20,9 @@ import PageTitle from "../components/common/PageTitle";
 class CourseDetails extends React.Component {
     constructor(props) {
         super(props);
-    
+
         this.state = {
-    
+
           // Third list of posts.
           PostsListThree: [
             {
@@ -251,7 +251,7 @@ class CourseDetails extends React.Component {
                     placeholder="15.03.2019"
                   />
                 </Col>
-              
+
                 {/* End */}
                 <Col md="6" className="form-group">
                   <label htmlFor="feEmail">End</label>
@@ -277,15 +277,17 @@ class CourseDetails extends React.Component {
                   <FormTextarea id="feDescription" rows="5" />
                 </Col>
               </Row>
-              <Button theme="accent">Update Course</Button>
-              <Button theme="accent" style={{float:"right"}}>Start lesson</Button>
+              <Button outline theme="accent">Update Course</Button>
+              <a href={"/lesson/" + this.props.match.params.id}>
+              <Button theme="success" onClick={()=>{}} style={{float:"right"}}>Start lesson</Button>
+              </a>
             </Form>
           </Col>
         </Row>
       </ListGroupItem>
     </ListGroup>
   </Card>
-    
+
       <Col>
         <Card small className="mb-4">
           <CardHeader className="border-bottom">
@@ -294,7 +296,7 @@ class CourseDetails extends React.Component {
           <CardBody className="p-0 pb-3">
             <table className="table mb-0">
               <thead className="bg-light">
-              
+
                 <tr>
                   <th scope="col" className="border-0">
                     #

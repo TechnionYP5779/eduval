@@ -103,41 +103,55 @@ class Lesson extends React.Component {
         {
           name: "Rraany1",
           id: 1,
+          earned_points: 0,
           chosen: false
         },
         {
           name: "Rrany2",
           id: 2,
+          earned_points: 1,
           chosen: false
         },
         {
-          name: "Rany3",
+          name: "Rani Rany Ran",
           id: 3,
+          earned_points: 20,
           chosen: false
         },
         {
           name: "Raani4",
           id: 4,
+          earned_points: 8,
+          chosen: false
+        },
+        {
+          name: "Raani4",
+          id: 4,
+          earned_points: 8,
           chosen: false
         },
         {
           name: "Raany5",
           id: 5,
+          earned_points: 4,
           chosen: false
         },
         {
           name: "Raany5",
           id: 5,
+          earned_points: 1,
           chosen: false
         },
         {
           name: "Raany5",
           id: 5,
+          earned_points: 0,
           chosen: false
         },
         {
           name: "Ranni6",
           id: 6,
+          earned_points: 0,
           chosen: false
         }
       ],
@@ -175,32 +189,33 @@ class Lesson extends React.Component {
           <Col lg="8" className="mb-4">
             <Card small className="mb-4">
               <CardHeader className="border-bottom">
-                <h6 className="m-0">Attending Students</h6>
+                <h5 className="m-0">Attending Students</h5>
+                <h7 style={{fontSize:"12px"}}>Pick the students you want to send E-Money too</h7>
               </CardHeader>
 
               <ListGroup flush>
                 <ListGroupItem className="p-0 px-3 pt-3">
                   <Row>
 
-                      {students.map((student, idx) => (<Col xs="2">
+                      {students.map((student, idx) => (<Col xs="2" >
                         {
                           student.chosen &&
-                          <Button theme="primary" className="mb-2 mr-1" style={{marginLeft:"16px"}} onClick={()=>{
+                          <Button theme="primary" className="mb-2 mr-1"  onClick={()=>{
                             let tmp = this.state.students;
                             tmp[idx].chosen = false;
                             this.setState({students : tmp});
                           }}>
-                            {student.name}
+                            {student.name} <br/><br/> {student.earned_points}
                           </Button>
                         }
                         {
                           !student.chosen &&
-                          <Button outline theme="primary" className="mb-2 mr-1" style={{marginLeft:"16px"}} onClick={()=>{
+                          <Button outline theme="primary" className="mb-2 mr-1" onClick={()=>{
                             let tmp = this.state.students;
                             tmp[idx].chosen = true;
                             this.setState({students : tmp});
                           }}>
-                            {student.name}
+                            {student.name} <br/><br/> {student.earned_points}
                           </Button>
                         }
                         </Col>
@@ -220,6 +235,9 @@ class Lesson extends React.Component {
                 <h6 className="m-0">Rewards & Emojis</h6>
               </CardHeader>
               <ListGroup flush>
+              <div className="mb-2 pb-1" style={{margin:"10px"}}>
+                <h7 style={{fontSize:"12px"}}>Choose an emoji to send</h7>
+                </div>
                 <Row style={{margin:"2px"}}>
                 {smileys.map((smile, idx) => (
                   <Col xs="3">
@@ -245,6 +263,9 @@ class Lesson extends React.Component {
 
                 </Col>))}
                 </Row>
+                <div className="mb-2 pb-1" style={{margin:"10px"}}>
+                  <h7 style={{fontSize:"12px"}}>Choose amount of E-Money to send</h7>
+                  </div>
               <div className="mb-2 pb-1" style={{margin:"10px"}}>
 
                 <Slider
