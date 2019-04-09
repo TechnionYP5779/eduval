@@ -1,44 +1,34 @@
-import React, { Component } from 'react';
-import { Navbar, Button, Nav, NavItem } from 'react-bootstrap';
-import './App.css';
-import Home from './Home/Home';
+import React from "react";
+import { BrowserRouter as Router, Route } from "react-router-dom";
 
-class App extends Component {
-  goTo(route) {
-    this.props.history.replace(`/${route}`)
-  }
+import routes from "./routes";
+import withTracker from "./withTracker";
 
-  login() {
-    this.props.auth.login();
-  }
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./shards-dashboard/styles/shards-dashboards.1.1.0.min.css";
 
-  logout() {
-    this.props.auth.logout();
-  }
 
-  render() {
-    const { isAuthenticated } = this.props.auth;
 
-    return (
-      <div>
-        <Navbar fluid>
-          <Navbar.Header>
-            <Navbar.Brand>
-              <a href="#">EMon - Teacher</a>
-            </Navbar.Brand>
-            
-          </Navbar.Header>
+export default () => (
 
-            <Nav pullRight>
-                {!isAuthenticated() &&
-                <NavItem onClick={this.login.bind(this)}>Log In</NavItem>}
-                {isAuthenticated() &&
-                <NavItem onClick={this.logout.bind(this)}>Log Out</NavItem>}
-            </Nav>
-        </Navbar>
-      </div>
-    );
-  }
-}
-
-export default App;
+  <Router basename={process.env.REACT_APP_BASENAME || ""}>
+    <div>
+      {routes.map((route, index) => {
+        return (
+          <Route
+            key={index}
+            path={route.path}
+            exact={route.exact}
+            component={withTracker(props => {
+              return (
+                <route.layout {...props}>
+                  <route.component {...props} />
+                </route.layout>
+              );
+            })}
+          />
+        );
+      })}
+    </div>
+  </Router>
+);
