@@ -15,6 +15,8 @@ import Tables from "./views/Tables";
 import MyCourses from "./views/MyCourses";
 import Callback from "./views/Callback";
 import CourseDetails from "./views/CourseDetails";
+import Lesson from "./views/Lesson";
+
 
 export default [
   {
@@ -58,6 +60,11 @@ export default [
     path: "/components-overview",
     layout: ProtectedLayout,
     component: ComponentsOverview
+  },
+  {
+    path: "/lesson/:id",
+    layout: DefaultLayout,
+    component: Lesson
   },
   {
     path: "/tables",
