@@ -11,9 +11,6 @@ const UserProfileLite = () => (
       <PageTitle title="User Profile" subtitle="Overview" md="12" className="ml-sm-auto mr-sm-auto" />
     </Row>
     <Row>
-      <Col lg="4">
-        <UserDetails />
-      </Col>
       <Col lg="8">
         <UserAccountDetails />
       </Col>
