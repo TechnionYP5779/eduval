@@ -14,7 +14,9 @@ import ComponentsOverview from "./views/ComponentsOverview";
 import Tables from "./views/Tables";
 import MyCourses from "./views/MyCourses";
 import Callback from "./views/Callback";
+import CourseDetails from "./views/CourseDetails";
 import Lesson from "./views/Lesson";
+
 
 export default [
   {
@@ -33,6 +35,11 @@ export default [
     path: "/overview",
     layout: DefaultLayout,
     component: Overview
+  },
+  {
+    path: "/course-details/:id",
+    layout: DefaultLayout,
+    component: CourseDetails
   },
   {
     path: "/user-profile-lite",

@@ -55,7 +55,6 @@ const UserAccountDetails = ({ title }) => (
                     type="email"
                     id="feEmail"
                     placeholder="Email Address"
-                    value="sierra@example.com"
                     onChange={() => {}}
                     autoComplete="email"
                   />
@@ -67,49 +66,21 @@ const UserAccountDetails = ({ title }) => (
                     type="password"
                     id="fePassword"
                     placeholder="Password"
-                    value="EX@MPL#P@$$w0RD"
                     onChange={() => {}}
                     autoComplete="current-password"
                   />
                 </Col>
               </Row>
               <FormGroup>
-                <label htmlFor="feAddress">Address</label>
+                <label htmlFor="feAddress">Phone Number</label>
                 <FormInput
+                  type="tel
+                  "
                   id="feAddress"
                   placeholder="Address"
-                  value="1234 Main St."
                   onChange={() => {}}
                 />
               </FormGroup>
-              <Row form>
-                {/* City */}
-                <Col md="6" className="form-group">
-                  <label htmlFor="feCity">City</label>
-                  <FormInput
-                    id="feCity"
-                    placeholder="City"
-                    onChange={() => {}}
-                  />
-                </Col>
-                {/* State */}
-                <Col md="4" className="form-group">
-                  <label htmlFor="feInputState">State</label>
-                  <FormSelect id="feInputState">
-                    <option>Choose...</option>
-                    <option>...</option>
-                  </FormSelect>
-                </Col>
-                {/* Zip Code */}
-                <Col md="2" className="form-group">
-                  <label htmlFor="feZipCode">Zip</label>
-                  <FormInput
-                    id="feZipCode"
-                    placeholder="Zip"
-                    onChange={() => {}}
-                  />
-                </Col>
-              </Row>
               <Row form>
                 {/* Description */}
                 <Col md="12" className="form-group">
