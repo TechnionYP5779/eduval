@@ -16,12 +16,21 @@ class Home extends Component {
     return (
       <div className="container">
         {isAuthenticated() &&
-          <div>
+          <div style={{
+        position: 'absolute',
+        left: '50%',
+        top: '26%',
+        transform: 'translate(-50%, -50%)'
+    }}>
             <h4>
-              Welcome Student!
-            </h4>
+            Welcome Student!
 
+            
+            </h4>
+            <ButtonGroup vertical>
             <Link to="/RegClass" className="btn btn-primary" size="lg">Enter Class</Link>
+            <Link to="/Data" className="btn btn-primary" size="lg">See Data</Link>
+            </ButtonGroup>
           </div>
         }
         {!isAuthenticated() &&
