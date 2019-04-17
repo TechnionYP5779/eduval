@@ -51,14 +51,14 @@ module.exports.getTeacher = (event, context, callback) => {
       //console.log('query output: ', oneTeacherTable);
 
       knex.client.destroy();
-	  if(oneTeacherTable.length()==1){
+	  if(oneTeacherTable.length==1){
 		 callback(null, {
 		  statusCode: 200,
 		  body: JSON.stringify({
 			  data: oneTeacherTable[0]
 		  }),
 		});
-	  }else if(oneTeacherTable.length()==0){
+	  }else if(oneTeacherTable.length==0){
 		 callback(null, {
 		  statusCode: 404,
 		  body: JSON.stringify({
@@ -102,14 +102,14 @@ module.exports.getCourse = (event, context, callback) => {
       //console.log('query output: ', oneCourseTable);
 
       knex.client.destroy();
-	  if(oneCourseTable.length()==1){
+	  if(oneCourseTable.length==1){
 		 callback(null, {
 		  statusCode: 200,
 		  body: JSON.stringify({
 			  data: oneCourseTable[0]
 		  }),
 		});
-	  }else if(oneCourseTable.length()==0){
+	  }else if(oneCourseTable.length==0){
 		 callback(null, {
 		  statusCode: 404,
 		  body: JSON.stringify({
