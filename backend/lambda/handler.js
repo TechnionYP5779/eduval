@@ -186,7 +186,7 @@ module.exports.getRegistredStudents = (event, context, callback) => {
 		 callback(null, {
 		  statusCode: 404,
 		  body: JSON.stringify({
-			  message: 'No one registred.'
+			  message: 'No one registred or the course doesnt exist.'
 		  }),
 		});
 	  }
