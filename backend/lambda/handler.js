@@ -134,3 +134,48 @@ module.exports.getCourse = (event, context, callback) => {
 	  callback(err);
     });
 };
+
+
+
+//input-course id; output-list of students
+//200-succsess 404-no one registred
+module.exports.getRegistredStudents = (event, context, callback) => {
+	
+  //console.log('event received: ', event);
+  if (event.courseId === undefined) {
+        callback("400 Invalid Input, please send us course id in courseId");
+  }
+  // Connect
+  const knex = require('knex')(dbConfig);
+  
+  knex('Registered').where({
+	  courseId:  event.courseId 
+  }).select('studentId').then((Students) => {
+
+	  
+      knex.client.destroy();
+	  if(Students.length>0){
+		 callback(null, {
+		  statusCode: 200,
+		  body: JSON.stringify({
+			  data: Students
+		  }),
+		}); 
+	  }else if(Students.length==0){
+		 callback(null, {
+		  statusCode: 404,
+		  body: JSON.stringify({
+			  message: 'No one registred.'
+		  }),
+		});
+	  }
+	  
+    })
+    .catch((err) => {
+      console.log('error occurred: ', err);
+      // Disconnect
+      knex.client.destroy();
+	  callback(err);
+    });
+};
+
