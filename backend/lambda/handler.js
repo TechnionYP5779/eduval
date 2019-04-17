@@ -38,14 +38,21 @@ module.exports.hello();
 module.exports.getTeacher = (event, context, callback) => {
 
   //console.log('event received: ', event);
-  if (event.Auth0Teacher === undefined) {
-        callback("400 Invalid Input, please send us teacher's Auth0 token in Auth0Teacher");
+  if (event.queryStringParameters === undefined || event.queryStringParameters === null || event.queryStringParameters.Auth0Teacher === undefined) {
+        callback(null, {
+      		  statusCode: 400,
+      		  body: JSON.stringify({
+      			  message: "Invalid Input, please send us teacher's Auth0 token in Auth0Teacher!",
+      			  input: event,
+      		})
+        });
+        return;
   }
   // Connect
   const knex = require('knex')(dbConfig);
 
   knex('Teachers').where({
-	  idToken:  event.Auth0Teacher //'Test'
+	  idToken:  event.queryStringParameters.Auth0Teacher //'Test'
   }).select().then((oneTeacherTable) => {
 
       //console.log('query output: ', oneTeacherTable);
@@ -89,14 +96,15 @@ module.exports.getTeacher = (event, context, callback) => {
 module.exports.getCourse = (event, context, callback) => {
 
   //console.log('event received: ', event);
-  if (event.courseId === undefined) {
+  if (event.queryStringParameters === undefined || event.queryStringParameters === null || event.queryStringParameters.courseId === undefined) {
         callback("400 Invalid Input, please send us course id in courseId");
+        return;
   }
   // Connect
   const knex = require('knex')(dbConfig);
 
   knex('Courses').where({
-	  courseId:  event.courseId //'Test'
+	  courseId:  event.queryStringParameters.courseId //'Test'
   }).select().then((oneCourseTable) => {
 
       //console.log('query output: ', oneCourseTable);
