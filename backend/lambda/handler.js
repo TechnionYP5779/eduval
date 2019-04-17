@@ -48,7 +48,7 @@ module.exports.getTeacher = (event, context, callback) => {
 	  authToken:  event.Auth0Teacher //'Test'
   }).select().then((oneTeacherTable) => {
 
-      console.log('query output: ', oneTeacherTable);
+      //console.log('query output: ', oneTeacherTable);
 	  
       knex.client.destroy();
 	  if(oneTeacherTable.length()==1){
@@ -84,6 +84,56 @@ module.exports.getTeacher = (event, context, callback) => {
     });
 };
 
+// input-course id; output-line from db that describes the course(studends aren't here, to get students use getRegistred)
+// 200-succsess 404-user not found, 400-BUUUUG!
+module.exports.getCourse = (event, context, callback) => {
+	
+  //console.log('event received: ', event);
+  if (event.courseId === undefined) {
+        callback("400 Invalid Input, please send us course id in courseId");
+  }
+  // Connect
+  const knex = require('knex')(dbConfig);
+  
+  knex('Courses').where({
+	  courseId:  event.courseId //'Test'
+  }).select().then((oneCourseTable) => {
+
+      //console.log('query output: ', oneCourseTable);
+	  
+      knex.client.destroy();
+	  if(oneCourseTable.length()==1){
+		 callback(null, {
+		  statusCode: 200,
+		  body: JSON.stringify({
+			  data: oneCourseTable[0]
+		  }),
+		}); 
+	  }else if(oneCourseTable.length()==0){
+		 callback(null, {
+		  statusCode: 404,
+		  body: JSON.stringify({
+			  message: 'There is no such course.'
+		  }),
+		});
+	  }else{
+		  callback(null, {
+		  statusCode: 400,
+		  body: JSON.stringify({
+			  message: 'There is a serious problem: more than one course with same id!!! They all are in data, try to handle this bug',
+			  data: oneCourseTable
+		  }),
+		});
+	  }
+	  
+    })
+    .catch((err) => {
+      console.log('error occurred: ', err);
+      // Disconnect
+      knex.client.destroy();
+	  callback(err);
+    });
+};
 
 
 
