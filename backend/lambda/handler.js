@@ -36,20 +36,20 @@ module.exports.hello();
 
 // input teacher's auth 0 token; output line from db that describes the teacher; 200-succsess 404-user not found, 400-BUUUUG!
 module.exports.getTeacher = (event, context, callback) => {
-	
+
   //console.log('event received: ', event);
   if (event.Auth0Teacher === undefined) {
         callback("400 Invalid Input, please send us teacher's Auth0 token in Auth0Teacher");
   }
   // Connect
   const knex = require('knex')(dbConfig);
-  
+
   knex('Teachers').where({
-	  authToken:  event.Auth0Teacher //'Test'
+	  idToken:  event.Auth0Teacher //'Test'
   }).select().then((oneTeacherTable) => {
 
       //console.log('query output: ', oneTeacherTable);
-	  
+
       knex.client.destroy();
 	  if(oneTeacherTable.length()==1){
 		 callback(null, {
@@ -57,7 +57,7 @@ module.exports.getTeacher = (event, context, callback) => {
 		  body: JSON.stringify({
 			  data: oneTeacherTable[0]
 		  }),
-		}); 
+		});
 	  }else if(oneTeacherTable.length()==0){
 		 callback(null, {
 		  statusCode: 404,
@@ -74,7 +74,7 @@ module.exports.getTeacher = (event, context, callback) => {
 		  }),
 		});
 	  }
-	  
+
     })
     .catch((err) => {
       console.log('error occurred: ', err);
@@ -87,20 +87,20 @@ module.exports.getTeacher = (event, context, callback) => {
 // input-course id; output-line from db that describes the course(studends aren't here, to get students use getRegistred)
 // 200-succsess 404-user not found, 400-BUUUUG!
 module.exports.getCourse = (event, context, callback) => {
-	
+
   //console.log('event received: ', event);
   if (event.courseId === undefined) {
         callback("400 Invalid Input, please send us course id in courseId");
   }
   // Connect
   const knex = require('knex')(dbConfig);
-  
+
   knex('Courses').where({
 	  courseId:  event.courseId //'Test'
   }).select().then((oneCourseTable) => {
 
       //console.log('query output: ', oneCourseTable);
-	  
+
       knex.client.destroy();
 	  if(oneCourseTable.length()==1){
 		 callback(null, {
@@ -108,7 +108,7 @@ module.exports.getCourse = (event, context, callback) => {
 		  body: JSON.stringify({
 			  data: oneCourseTable[0]
 		  }),
-		}); 
+		});
 	  }else if(oneCourseTable.length()==0){
 		 callback(null, {
 		  statusCode: 404,
@@ -125,7 +125,7 @@ module.exports.getCourse = (event, context, callback) => {
 		  }),
 		});
 	  }
-	  
+
     })
     .catch((err) => {
       console.log('error occurred: ', err);
@@ -134,7 +134,3 @@ module.exports.getCourse = (event, context, callback) => {
 	  callback(err);
     });
 };
-
-
-
-
