@@ -43,7 +43,6 @@ module.exports.getTeacher = (event, context, callback) => {
       		  statusCode: 400,
       		  body: JSON.stringify({
       			  message: "Invalid Input, please send us teacher's Auth0 token in Auth0Teacher!",
-      			  input: event,
       		})
         });
         return;
@@ -101,7 +100,6 @@ module.exports.getCourse = (event, context, callback) => {
       		  statusCode: 400,
       		  body: JSON.stringify({
       			  message: "Invalid Input, please send us course id in courseId!",
-      			  input: event,
       		})
         });
         return;
@@ -211,7 +209,6 @@ module.exports.getStudent = (event, context, callback) => {
             statusCode: 400,
             body: JSON.stringify({
               message: "Invalid Input, please send us student's Auth0 token in Auth0Student!",
-              input: event,
           })
         });
         return;
