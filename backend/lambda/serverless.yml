@@ -1,80 +1,50 @@
-# Welcome to Serverless!
-#
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
-#
 # For full config options, check the docs:
 #    docs.serverless.com
-#
-# Happy Coding!
 
-service: dbFunctions
+service:        dbFunctions
 
+# contains the credentials needed to connect to the DB
 custom:
-  secrets: ${file(secrets.json)}
-
-# You can pin your service to only deploy with a specific Serverless version
-# Check out our docs for more details
-# frameworkVersion: "=X.X.X"
+    secrets:    ${file(secrets.json)}
 
 provider:
-  name: aws
-  runtime: nodejs8.10
+    name:       aws
+    runtime:    nodejs8.10
+    stage:      dev
+    region:     eu-central-1
+    apiKeys:
+        - myApiKey
 
-# you can overwrite defaults here
-  stage: dev
-  region: eu-central-1
+    # defines environment variables for connecting to DB
+    environment:
+        DB_NAME:        ${self:custom.secrets.DB_NAME}
+        DB_USER:        ${self:custom.secrets.DB_USER}
+        DB_PASSWORD:    ${self:custom.secrets.DB_PASSWORD}
+        DB_HOST:        ${self:custom.secrets.DB_HOST}
+        DB_PORT:        ${self:custom.secrets.DB_PORT}
 
-# you can add statements to the Lambda function's IAM Role here
-#  iamRoleStatements:
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:ListBucket"
-#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:PutObject"
-#      Resource:
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
-#            - "/*"
+    functions:
+        hello:
+            handler: handler.hello
 
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
-  environment:
-#      NODE_ENV: ${self:custom.secrets.NODE_ENV}
-      DB_NAME: ${self:custom.secrets.DB_NAME}
-      DB_USER: ${self:custom.secrets.DB_USER}
-      DB_PASSWORD: ${self:custom.secrets.DB_PASSWORD}
-      DB_HOST: ${self:custom.secrets.DB_HOST}
-      DB_PORT: ${self:custom.secrets.DB_PORT}
-
-# you can add packaging information here
-#package:
-#  include:
-#    - include-me.js
-#    - include-me-dir/**
-#  exclude:
-#    - exclude-me.js
-#    - exclude-me-dir/**
-
-functions:
-  hello:
-    handler: handler.hello
-  getTeacher:
-    handler: handler.getTeacher 
-  getCourse:
-    handler: handler.getCourse
-  getRegistredStudents:
-    handler: handler.getRegistredStudents   
-  getStudent:
-    handler: handler.getStudent  
+        getTeacher:
+            handler: handler.getTeacher
+            description: Get information about a teacher by their ID.
+            events:
+                - http:
+                    path: teacher/{id}
+                    method: get
+                    private: true
+                    request:
+                        parameters:
+                            paths:
+                                id: true
+        getCourse:
+            handler: handler.getCourse
+        getRegistredStudents:
+            handler: handler.getRegistredStudents
+        getStudent:
+            handler: handler.getStudent
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events

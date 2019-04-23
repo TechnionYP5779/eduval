@@ -23,6 +23,11 @@
    ```
    This will contain the credentials needed to connect to the database.
 
+5. Also inside ``backend``, run:
+   ```bash
+   npm Install
+   ```
+
 # Deployment
 Once set up, deployment is easy. After updating a function, when you wish to push out the changes simply run:
 ```bash

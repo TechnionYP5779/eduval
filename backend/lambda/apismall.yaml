@@ -1,0 +1,607 @@
+openapi: 3.0.1
+info:
+  title: EMon API
+  description: blablabla description.
+  version: 1.0.0
+servers:
+  - url: 'https://someserver.eu-central-1.amazonaws.com/'
+tags:
+  - name: teacher
+    description: stuff related to the teachers
+  - name: student
+    description: stuff related to the students
+  - name: course
+    description: course stuff
+  - name: log
+    description: emon transaction stuffz
+paths:
+  /teacher:
+    put:
+      tags:
+        - teacher
+      summary: Update an existing teacher
+      requestBody:
+        description: >-
+          Teacher object that needs to be updated. ID is required, rest is
+          optional.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Teacher'
+        required: true
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '400':
+          description: Invalid ID supplied
+          content: {}
+        '404':
+          description: Teacher not found
+          content: {}
+        '405':
+          description: Validation exception
+          content: {}
+      security:
+        - api_key: []
+    post:
+      tags:
+        - teacher
+      summary: Add a new teacher
+      requestBody:
+        description: Teacher object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Teacher'
+        required: true
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '405':
+          description: Invalid input
+          content: {}
+      security:
+        - api_key: []
+  
+  '/teacher/{teacherId}':
+    get:
+      tags:
+        - teacher
+      summary: Find teacher by ID
+      description: Returns a single teacher
+      parameters:
+        - name: teacherId
+          in: path
+          description: ID of teacher to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Teacher'
+        '400':
+          description: Invalid ID supplied
+          content: {}
+        '404':
+          description: Teacher not found
+          content: {}
+      security:
+        - api_key: []
+    delete:
+      tags:
+        - teacher
+      summary: Deletes a teacher
+      parameters:
+        - name: teacherId
+          in: path
+          description: ID of teacher to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '400':
+          description: Invalid ID supplied
+          content: {}
+        '404':
+          description: Teacher not found
+          content: {}
+      security:
+        - api_key: []
+        
+  '/teacher/byToken/{authToken}':
+    get:
+      tags:
+        - teacher
+      summary: Find teacher by Auth0 token
+      description: Returns a single teacher
+      parameters:
+        - name: authToken
+          in: path
+          description: Auth0 token of teacher to return
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Teacher'
+        '404':
+          description: Teacher not found
+          content: {}
+      security:
+        - api_key: []
+        
+  /student:
+    put:
+      tags:
+        - student
+      summary: Update an existing student
+      requestBody:
+        description: >-
+          Student object that needs to be updated. ID is required, rest is
+          optional.
+        content:
+          application/json:
+            schema:
+                $ref: '#/components/schemas/Student'
+        required: true
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '400':
+          description: Invalid ID supplied
+          content: {}
+        '404':
+          description: Student not found
+          content: {}
+        '405':
+          description: Validation exception
+          content: {}
+      security:
+        - api_key: []
+    post:
+      tags:
+        - student
+      summary: Add a new student
+      requestBody:
+        description: Student object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Student'
+        required: true
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '405':
+          description: Invalid input
+          content: {}
+      security:
+        - api_key: []
+  
+  '/student/{studentId}':
+    get:
+      tags:
+        - student
+      summary: Find teacher by ID
+      description: Returns a single student
+      parameters:
+        - name: studentId
+          in: path
+          description: ID of student to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+        '400':
+          description: Invalid ID supplied
+          content: {}
+        '404':
+          description: Teacher not found
+          content: {}
+      security:
+        - api_key: []
+    delete:
+      tags:
+        - student
+      summary: Deletes a student
+      parameters:
+        - name: studentId
+          in: path
+          description: ID of student to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '400':
+          description: Invalid ID supplied
+          content: {}
+        '404':
+          description: Student not found
+          content: {}
+      security:
+        - api_key: []
+  
+  
+  '/student/byToken/{authToken}':
+    get:
+      tags:
+        - student
+      summary: Find student by Auth0 token
+      description: Returns a single student
+      parameters:
+        - name: authToken
+          in: path
+          description: Auth0 token of student to return
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+        '404':
+          description: Student not found
+          content: {}
+      security:
+        - api_key: []
+  
+  '/student/{studentId}/emonBalance/byCourse/{courseId}':
+    get:
+      tags:
+        - student
+      summary: Find course by ID
+      description: Returns a student's emon balance in a certain course
+      parameters:
+        - name: studentId
+          in: path
+          description: ID of the relevant student
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: courseId
+          in: path
+          description: ID of the requested course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: integer
+                format: int64
+                example: 15
+        '400':
+          description: Invalid ID supplied
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+      security:
+        - api_key: []
+  
+  /course:
+    put:
+      tags:
+        - course
+      summary: Update an existing course
+      requestBody:
+        description: >-
+          Course object that needs to be updated. ID is required.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Course'
+        required: true
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '400':
+          description: Invalid ID supplied
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+        '405':
+          description: Validation exception
+          content: {}
+      security:
+        - api_key: []
+    post:
+      tags:
+        - course
+      summary: Add a new course
+      requestBody:
+        description: Course object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Course'
+        required: true
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '405':
+          description: Invalid input
+          content: {}
+      security:
+        - api_key: []
+  
+  '/course/{courseId}':
+    get:
+      tags:
+        - course
+      summary: Find course by ID
+      description: Returns a single course
+      parameters:
+        - name: courseId
+          in: path
+          description: ID of course to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          description: Invalid ID supplied
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+      security:
+        - api_key: []
+    delete:
+      tags:
+        - course
+      summary: Deletes a course
+      parameters:
+        - name: courseId
+          in: path
+          description: ID of course to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '400':
+          description: Invalid ID supplied
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+      security:
+        - api_key: []
+  
+  '/course/byTeacher/{teacherId}':
+    get:
+      tags:
+        - course
+      summary: Find all courses by a teacher
+      description: Returns an array of courses
+      parameters:
+        - name: teacherId
+          in: path
+          description: ID of the teacher
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Course'
+        '400':
+          description: Invalid ID supplied
+          content: {}
+        '404':
+          description: Teacher not found
+          content: {}
+      security:
+        - api_key: []
+  
+  '/course/byStudent/{studentId}':
+    get:
+      tags:
+        - course
+      summary: Find all courses that a student is taking
+      description: Returns an array of courses
+      parameters:
+        - name: studentId
+          in: path
+          description: ID of the student
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Course'
+        '400':
+          description: Invalid ID supplied
+          content: {}
+        '404':
+          description: Student not found
+          content: {}
+      security:
+        - api_key: []
+  
+  
+  '/log/ofStudent/{studentId}/byCourse/{courseId}':
+    get:
+      tags:
+        - log
+      summary: Get the transaction log
+      description: Returns the transaction log of a student in a course
+      parameters:
+        - name: studentId
+          in: path
+          description: ID of the relevant student
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: courseId
+          in: path
+          description: ID of the requested course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Log'
+        '400':
+          description: Invalid ID supplied
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+      security:
+        - api_key: []
+  
+components:
+  schemas:
+    Teacher:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        authIdToken:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phoneNum:
+          type: string
+    Student:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        authIdToken:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phoneNum:
+          type: string
+          
+    Course:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        teacherId:
+          type: integer
+          format: int64
+        location:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+          
+    Log:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        studentId:
+          type: integer
+          format: int64
+        courseId:
+          type: integer
+          format: int64
+        time:
+          type: string
+          format: date-time
+        messageType:
+          type: string
+        messageReason:
+          type: string
+        value:
+          type: integer
+          format: int64
+ 
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: x-api-key
+      in: header

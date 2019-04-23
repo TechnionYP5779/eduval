@@ -29,16 +29,16 @@ module.exports.hello = (event, context, callback) => {
 	  callback(err);
     });
 };
-/*
-module.exports.hello();
-*/
 
 
-// input teacher's auth 0 token; output line from db that describes the teacher; 200-succsess 404-user not found, 400-BUUUUG!
+/**
+ * API path: teacher/{id}
+ * input: teacher's id
+ * output: json object describing the teacher
+ * return codes: 200 - success 404 - user not found, 400 - bug!
+ */
 module.exports.getTeacher = (event, context, callback) => {
-
-  //console.log('event received: ', event);
-  if (event.queryStringParameters === undefined || event.queryStringParameters === null || event.queryStringParameters.Auth0Teacher === undefined) {
+  if (!("queryStringParameters" in event) || !(event.queryStringParameters) || !(event.queryStringParameters.Auth0Teacher)) {
         callback(null, {
       		  statusCode: 400,
       		  body: JSON.stringify({
@@ -47,6 +47,7 @@ module.exports.getTeacher = (event, context, callback) => {
         });
         return;
   }
+
   // Connect
   const knex = require('knex')(dbConfig);
 
