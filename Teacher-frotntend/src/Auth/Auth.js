@@ -4,6 +4,7 @@ import history from '../history';
 
 class Auth {
 
+
   lock = new Auth0Lock(AUTH_CONFIG.clientId, AUTH_CONFIG.domain, {
     autoclose: true,
     auth: {
@@ -12,8 +13,58 @@ class Auth {
       params: {
         scope: 'openid'
       }
-    }
+    },
+    languageDictionary: {
+      title: "EMon Log-in"
+    },
+    theme: {
+      logo: require('../images/shards-dashboards-logo.svg'),
+      primaryColor: '#007bff'
+    },
+    allowShowPassword: true,
+    additionalSignUpFields: [ {
+    name: "first_name",
+    placeholder: "your first name",
+    // icon: require('../phone_icon.png'),
+    // The following properties are optional
+    ariaLabel: "first_name",
+    // prefill: "street 123",
+    validator: function(first_name) {
+      return {
+         valid: first_name.length > 0,
+         hint: "You're required to provide first name!" // optional
+        };
+      }
+    },
+    {
+    name: "last_name",
+    placeholder: "your last name",
+    // icon: require('../phone_icon.png'),
+    // The following properties are optional
+    ariaLabel: "last_name",
+    // prefill: "street 123",
+    validator: function(last_name) {
+      return {
+         valid: last_name.length > 0,
+         hint: "You're required to provide last name!" // optional
+        };
+      }
+    }, {
+    name: "phone_number",
+    placeholder: "your phone number",
+    // icon: require('../phone_icon.png'),
+    // The following properties are optional
+    ariaLabel: "Phone",
+    // prefill: "street 123",
+    validator: function(phone_number) {
+      return {
+         valid: phone_number.length == 10 || phone_number.length == 0,
+         hint: "Must have 10 digits" // optional
+        };
+      }
+    },]
   });
+
 
   constructor() {
     this.handleAuthentication();
