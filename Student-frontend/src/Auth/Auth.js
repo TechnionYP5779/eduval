@@ -2,7 +2,7 @@ import Auth0Lock from 'auth0-lock';
 import { AUTH_CONFIG } from './auth0-variables';
 import history from '../history';
 
-export default class Auth {
+class Auth {
 
   lock = new Auth0Lock(AUTH_CONFIG.clientId, AUTH_CONFIG.domain, {
     autoclose: true,
@@ -66,4 +66,7 @@ export default class Auth {
     let expiresAt = JSON.parse(localStorage.getItem('expires_at'));
     return new Date().getTime() < expiresAt;
   }
+
 }
+let auth = new Auth();
+export default auth;
