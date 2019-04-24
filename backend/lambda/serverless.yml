@@ -15,6 +15,12 @@ provider:
     apiKeys:
         - myApiKey
 
+    # package:
+    #     include:
+    #         - teacher/**
+    #         - student/**
+    #         - course/**
+
     # defines environment variables for connecting to DB
     environment:
         DB_NAME:        ${self:custom.secrets.DB_NAME}
@@ -23,71 +29,59 @@ provider:
         DB_HOST:        ${self:custom.secrets.DB_HOST}
         DB_PORT:        ${self:custom.secrets.DB_PORT}
 
-    functions:
-        hello:
-            handler: handler.hello
+functions:
+    getTeacherByToken:
+        handler: teacher/get.byToken
+        description: Get information about a teacher by their Auth Token.
+        events:
+            - http:
+                path: teacher/byToken/{authToken}
+                method: get
+                private: true
+                request:
+                    parameters:
+                        paths:
+                            authToken: true
 
-        getTeacher:
-            handler: handler.getTeacher
-            description: Get information about a teacher by their ID.
-            events:
-                - http:
-                    path: teacher/{id}
-                    method: get
-                    private: true
-                    request:
-                        parameters:
-                            paths:
-                                id: true
-        getCourse:
-            handler: handler.getCourse
-        getRegistredStudents:
-            handler: handler.getRegistredStudents
-        getStudent:
-            handler: handler.getStudent
+    getTeacherById:
+        handler: teacher/get.byId
+        description: Get information about a teacher by their ID.
+        events:
+            - http:
+                path: teacher/{teacherId}
+                method: get
+                private: true
+                request:
+                    parameters:
+                        paths:
+                            teacherId: true
+    deleteTeacher:
+        handler: teacher/delete.handler
+        description: Delete teacher with a certain ID.
+        events:
+            - http:
+                path: teacher/{teacherId}
+                method: delete
+                private: true
+                request:
+                    parameters:
+                        paths:
+                            teacherId: true
 
-#    The following are a few example events you can configure
-#    NOTE: Please make sure to change your handler code to work with those events
-#    Check the event documentation for details
-#    events:
-#      - http:
-#          path: users/create
-#          method: get
-#      - websocket: $connect
-#      - s3: ${env:BUCKET}
-#      - schedule: rate(10 minutes)
-#      - sns: greeter-topic
-#      - stream: arn:aws:dynamodb:region:XXXXXX:table/foo/stream/1970-01-01T00:00:00.000
-#      - alexaSkill: amzn1.ask.skill.xx-xx-xx-xx
-#      - alexaSmartHome: amzn1.ask.skill.xx-xx-xx-xx
-#      - iot:
-#          sql: "SELECT * FROM 'some_topic'"
-#      - cloudwatchEvent:
-#          event:
-#            source:
-#              - "aws.ec2"
-#            detail-type:
-#              - "EC2 Instance State-change Notification"
-#            detail:
-#              state:
-#                - pending
-#      - cloudwatchLog: '/aws/lambda/hello'
-#      - cognitoUserPool:
-#          pool: MyUserPool
-#          trigger: PreSignUp
+    updateTeacher:
+        handler: teacher/update.handler
+        description: Update a teacher's information.
+        events:
+            - http:
+                path: teacher
+                method: put
+                private: true
 
-#    Define function environment variables here
-#    environment:
-#      variable2: value2
-
-# you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
+    addTeacher:
+        handler: teacher/create.handler
+        description: Create a new teacher.
+        events:
+            - http:
+                path: teacher
+                method: post
+                private: true
