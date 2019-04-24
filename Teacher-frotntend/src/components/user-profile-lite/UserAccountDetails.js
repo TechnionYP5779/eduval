@@ -74,20 +74,12 @@ const UserAccountDetails = ({ title }) => (
               <FormGroup>
                 <label htmlFor="feAddress">Phone Number</label>
                 <FormInput
-                  type="tel
-                  "
+                  type="tel"
                   id="feAddress"
-                  placeholder="Address"
+                  placeholder="phone-number"
                   onChange={() => {}}
                 />
               </FormGroup>
-              <Row form>
-                {/* Description */}
-                <Col md="12" className="form-group">
-                  <label htmlFor="feDescription">Description</label>
-                  <FormTextarea id="feDescription" rows="5" />
-                </Col>
-              </Row>
               <Button theme="accent">Update Account</Button>
             </Form>
           </Col>
