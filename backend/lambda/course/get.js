@@ -7,6 +7,8 @@ function dbRowToProperObject(obj) {
 	delete obj.courseId;
 	obj.name = obj.courseName;
 	delete obj.courseName;
+	if("studentId" in obj)
+		delete obj.studentId
 	return obj
 }
 
@@ -92,7 +94,7 @@ module.exports.byId = (event, context, callback) => {
 };
 
 // GET course/byTeacher/{teacherId}
-module.exports.byId = (event, context, callback) => {
+module.exports.byTeacherId = (event, context, callback) => {
 	if (!("pathParameters" in event) || !(event.pathParameters) || !(event.pathParameters.teacherId)) {
         callback(null, {
             statusCode: 400,
@@ -150,6 +152,64 @@ module.exports.byId = (event, context, callback) => {
                     body: JSON.stringify(result.map(dbRowToProperObject))
                 });
             }
+
+        })
+        .catch((err) => {
+            console.log('error occurred: ', err);
+            // Disconnect
+            knex.client.destroy();
+            callback(err);
+        });
+};
+
+// GET course/byStudent/{studentId}
+module.exports.byStudent = (event, context, callback) => {
+	if (!("pathParameters" in event) || !(event.pathParameters) || !(event.pathParameters.studentId)) {
+        callback(null, {
+            statusCode: 400,
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Credentials': true
+			},
+            body: JSON.stringify({
+                message: "Invalid Input, please send us the student's ID!",
+            })
+        });
+        return;
+    }
+	else if (isNaN(event.pathParameters.studentId)) {
+		//then the ID is invalid
+		callback(null, {
+            statusCode: 400,
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Credentials': true
+			},
+            body: JSON.stringify({
+                message: "Invalid ID! It should be an integer.",
+            })
+        });
+        return;
+	}
+
+    // Connect
+    const knex = require('knex')(dbConfig);
+
+    knex('Registered').where({
+            studentId: event.pathParameters.studentId
+        }).select()
+		.join('Courses', 'Courses.courseId', 'Registered.courseId')
+		.then((result) => {
+            knex.client.destroy();
+
+			callback(null, {
+				statusCode: 200,
+				headers: {
+					'Access-Control-Allow-Origin': '*',
+					'Access-Control-Allow-Credentials': true
+				},
+				body: JSON.stringify(result.map(dbRowToProperObject))
+			});
 
         })
         .catch((err) => {

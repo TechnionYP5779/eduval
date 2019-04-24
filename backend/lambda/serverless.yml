@@ -176,8 +176,8 @@ functions:
                         paths:
                             courseId: true
     getCoursesByTeacher:
-        handler: course/get.byId
-        description: Get information about a course by their ID.
+        handler: course/get.byTeacherId
+        description: Get courses taught by a certain teacher.
         events:
             - http:
                 path: course/byTeacher/{teacherId}
@@ -188,6 +188,19 @@ functions:
                     parameters:
                         paths:
                             teacherId: true
+    getCoursesByStudent:
+        handler: course/get.byStudent
+        description: Get courses a student is registered in.
+        events:
+            - http:
+                path: course/byStudent/{studentId}
+                method: get
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            studentId: true
     deleteCourse:
         handler: course/delete.handler
         description: Delete course with a certain ID.
@@ -201,3 +214,43 @@ functions:
                     parameters:
                         paths:
                             courseId: true
+    getCourseRegistered:
+        handler: course/registered/get.handler
+        description: Get students registered to course.
+        events:
+            - http:
+                path: course/{courseId}/registered
+                method: get
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    addCourseRegistered:
+        handler: course/registered/add.handler
+        description: Register students to a course.
+        events:
+            - http:
+                path: course/{courseId}/registered
+                method: post
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    removeCourseRegistered:
+        handler: course/registered/remove.handler
+        description: Register students to a course.
+        events:
+            - http:
+                path: course/{courseId}/registered/{studentId}
+                method: post
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+                            studentId: true

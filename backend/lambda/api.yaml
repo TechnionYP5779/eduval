@@ -55,7 +55,7 @@ paths:
       responses:
         '200':
           description: All OK
-          content:
+          content: 
             text/plain:
               schema:
                 type: integer
@@ -67,7 +67,7 @@ paths:
           content: {}
       security:
         - api_key: []
-
+  
   '/teacher/{teacherId}':
     get:
       tags:
@@ -121,7 +121,7 @@ paths:
           content: {}
       security:
         - api_key: []
-
+        
   '/teacher/byToken/{authToken}':
     get:
       tags:
@@ -147,7 +147,7 @@ paths:
           content: {}
       security:
         - api_key: []
-
+        
   /student:
     put:
       tags:
@@ -188,7 +188,7 @@ paths:
       responses:
         '200':
           description: All OK
-          content:
+          content: 
             text/plain:
               schema:
                 type: integer
@@ -200,7 +200,7 @@ paths:
           content: {}
       security:
         - api_key: []
-
+  
   '/student/{studentId}':
     get:
       tags:
@@ -254,8 +254,8 @@ paths:
           content: {}
       security:
         - api_key: []
-
-
+  
+  
   '/student/byToken/{authToken}':
     get:
       tags:
@@ -281,7 +281,7 @@ paths:
           content: {}
       security:
         - api_key: []
-
+  
   '/student/{studentId}/emonBalance/byCourse/{courseId}':
     get:
       tags:
@@ -320,7 +320,7 @@ paths:
           content: {}
       security:
         - api_key: []
-
+  
   /course:
     put:
       tags:
@@ -360,7 +360,7 @@ paths:
       responses:
         '200':
           description: All OK
-          content:
+          content: 
             text/plain:
               schema:
                 type: integer
@@ -372,7 +372,7 @@ paths:
           content: {}
       security:
         - api_key: []
-
+  
   '/course/{courseId}':
     get:
       tags:
@@ -426,7 +426,106 @@ paths:
           content: {}
       security:
         - api_key: []
-
+        
+  
+  '/course/{courseId}/registered':
+    get:
+      tags:
+        - course
+      summary: Get registered students
+      
+      description: Returns the registered students list
+      parameters:
+        - name: courseId
+          in: path
+          description: ID of the relevant course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: All OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Student'
+        '404':
+          description: No such course
+          content: {}
+      security:
+        - api_key: []
+    post:
+      tags:
+        - course
+      summary: Register students to a course
+      
+      description: >-
+        Adds students to the registered students list.
+        
+        Note! does not check validity of course id or supplied students cause i'm lazy. if you pass bad values, you'll get 502.
+      
+      parameters:
+        - name: courseId
+          in: path
+          description: ID of the relevant course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Array of student IDs that should be registered.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: integer
+        required: true
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '405':
+          description: Invalid input
+          content: {}
+      security:
+        - api_key: []
+  
+  '/course/{courseId}/registered/{studentId}':
+    delete:
+      tags:
+        - course
+      summary: Delete a student from a course
+      
+      description: Removes a student from the registered students list
+      parameters:
+        - name: courseId
+          in: path
+          description: ID of the relevant course
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: studentId
+          in: path
+          description: ID of the student
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '404':
+          description: No such registration pair
+          content: {}
+      security:
+        - api_key: []
+  
   '/course/byTeacher/{teacherId}':
     get:
       tags:
@@ -458,7 +557,7 @@ paths:
           content: {}
       security:
         - api_key: []
-
+  
   '/course/byStudent/{studentId}':
     get:
       tags:
@@ -490,8 +589,7 @@ paths:
           content: {}
       security:
         - api_key: []
-
-
+  
   '/log/ofStudent/{studentId}/byCourse/{courseId}':
     get:
       tags:
@@ -530,7 +628,7 @@ paths:
           content: {}
       security:
         - api_key: []
-
+  
 components:
   schemas:
     Teacher:
@@ -548,6 +646,8 @@ components:
           format: email
         phoneNum:
           type: string
+      required:
+      - name
       additionalProperties: false
     Student:
       type: object
@@ -564,7 +664,7 @@ components:
           format: email
         phoneNum:
           type: string
-
+          
     Course:
       type: object
       properties:
@@ -586,7 +686,7 @@ components:
         endDate:
           type: string
           format: date
-
+          
     Log:
       type: object
       properties:
@@ -609,7 +709,7 @@ components:
         value:
           type: integer
           format: int64
-
+ 
   securitySchemes:
     api_key:
       type: apiKey
