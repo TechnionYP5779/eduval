@@ -33,9 +33,6 @@ paths:
         '200':
           description: All OK
           content: {}
-        '400':
-          description: Invalid ID supplied
-          content: {}
         '404':
           description: Teacher not found
           content: {}
@@ -49,7 +46,7 @@ paths:
         - teacher
       summary: Add a new teacher
       requestBody:
-        description: Teacher object that needs to be added
+        description: Teacher object that needs to be added. ID field is optional and is ignored.
         content:
           application/json:
             schema:
@@ -58,13 +55,19 @@ paths:
       responses:
         '200':
           description: All OK
-          content: {}
+          content:
+            text/plain:
+              schema:
+                type: integer
+                format: int64
+                example: 15
+                description: 'ID of inserted teacher'
         '405':
           description: Invalid input
           content: {}
       security:
         - api_key: []
-  
+
   '/teacher/{teacherId}':
     get:
       tags:
@@ -118,7 +121,7 @@ paths:
           content: {}
       security:
         - api_key: []
-        
+
   '/teacher/byToken/{authToken}':
     get:
       tags:
@@ -144,7 +147,7 @@ paths:
           content: {}
       security:
         - api_key: []
-        
+
   /student:
     put:
       tags:
@@ -163,9 +166,6 @@ paths:
         '200':
           description: All OK
           content: {}
-        '400':
-          description: Invalid ID supplied
-          content: {}
         '404':
           description: Student not found
           content: {}
@@ -179,7 +179,7 @@ paths:
         - student
       summary: Add a new student
       requestBody:
-        description: Student object that needs to be added
+        description: Student object that needs to be added. ID field is optional and is ignored.
         content:
           application/json:
             schema:
@@ -188,13 +188,19 @@ paths:
       responses:
         '200':
           description: All OK
-          content: {}
+          content:
+            text/plain:
+              schema:
+                type: integer
+                format: int64
+                example: 15
+                description: 'ID of inserted student'
         '405':
           description: Invalid input
           content: {}
       security:
         - api_key: []
-  
+
   '/student/{studentId}':
     get:
       tags:
@@ -248,8 +254,8 @@ paths:
           content: {}
       security:
         - api_key: []
-  
-  
+
+
   '/student/byToken/{authToken}':
     get:
       tags:
@@ -275,7 +281,7 @@ paths:
           content: {}
       security:
         - api_key: []
-  
+
   '/student/{studentId}/emonBalance/byCourse/{courseId}':
     get:
       tags:
@@ -314,7 +320,7 @@ paths:
           content: {}
       security:
         - api_key: []
-  
+
   /course:
     put:
       tags:
@@ -332,9 +338,6 @@ paths:
         '200':
           description: All OK
           content: {}
-        '400':
-          description: Invalid ID supplied
-          content: {}
         '404':
           description: Course not found
           content: {}
@@ -348,7 +351,7 @@ paths:
         - course
       summary: Add a new course
       requestBody:
-        description: Course object that needs to be added
+        description: Course object that needs to be added. ID field is optional and is ignored.
         content:
           application/json:
             schema:
@@ -357,13 +360,19 @@ paths:
       responses:
         '200':
           description: All OK
-          content: {}
+          content:
+            text/plain:
+              schema:
+                type: integer
+                format: int64
+                example: 15
+                description: 'ID of inserted course'
         '405':
           description: Invalid input
           content: {}
       security:
         - api_key: []
-  
+
   '/course/{courseId}':
     get:
       tags:
@@ -417,7 +426,7 @@ paths:
           content: {}
       security:
         - api_key: []
-  
+
   '/course/byTeacher/{teacherId}':
     get:
       tags:
@@ -449,7 +458,7 @@ paths:
           content: {}
       security:
         - api_key: []
-  
+
   '/course/byStudent/{studentId}':
     get:
       tags:
@@ -481,8 +490,8 @@ paths:
           content: {}
       security:
         - api_key: []
-  
-  
+
+
   '/log/ofStudent/{studentId}/byCourse/{courseId}':
     get:
       tags:
@@ -521,7 +530,7 @@ paths:
           content: {}
       security:
         - api_key: []
-  
+
 components:
   schemas:
     Teacher:
@@ -539,6 +548,7 @@ components:
           format: email
         phoneNum:
           type: string
+      additionalProperties: false
     Student:
       type: object
       properties:
@@ -554,7 +564,7 @@ components:
           format: email
         phoneNum:
           type: string
-          
+
     Course:
       type: object
       properties:
@@ -576,7 +586,7 @@ components:
         endDate:
           type: string
           format: date
-          
+
     Log:
       type: object
       properties:
@@ -599,7 +609,7 @@ components:
         value:
           type: integer
           format: int64
- 
+
   securitySchemes:
     api_key:
       type: apiKey

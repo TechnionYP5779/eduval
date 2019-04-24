@@ -6,5 +6,3 @@ jspm_packages
 .serverless
 
 secrets.json
-api.yaml
-redoc.html
