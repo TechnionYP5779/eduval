@@ -5,14 +5,16 @@ const models = require('../models')
 const validate = require('jsonschema').validate;
 
 function objectToDdRow(obj) {
-	obj.teacherId = obj.id;
-	delete obj.id;
+	if("id" in obj) {
+		obj.studentId = obj.id;
+		delete obj.id;
+	}
 	obj.idToken = obj.authIdToken;
 	delete obj.authIdToken;
 	return obj
 }
 
-// PUT teacher
+// POST student
 module.exports.handler = (event, context, callback) => {
 	if (!event.body) {
         callback(null, {
@@ -24,9 +26,9 @@ module.exports.handler = (event, context, callback) => {
         return;
     }
 
-	var teacherObj;
+	var studentObj;
 	try {
-		teacherObj = JSON.parse(event.body);
+		studentObj = JSON.parse(event.body);
 	} catch (e) {
 		callback(null, {
             statusCode: 405,
@@ -37,10 +39,7 @@ module.exports.handler = (event, context, callback) => {
         return;
 	}
 
-	var oldRequired = models.Teacher.required
-	models.Teacher.required = ["id"]
-	var validateRes = validate(teacherObj, models.Teacher);
-	models.Teacher.required = oldRequired
+	var validateRes = validate(studentObj, models.Student);
 	if(!validateRes.valid) {
 		callback(null, {
             statusCode: 405,
@@ -52,30 +51,22 @@ module.exports.handler = (event, context, callback) => {
 	}
 
 	//convert to format stored in DB, and discard ID
-	teacherObj = objectToDdRow(teacherObj)
+	studentObj = objectToDdRow(studentObj)
+	if("studentId" in studentObj) {
+		delete studentObj.studentId
+	}
 
     // Connect
     const knex = require('knex')(dbConfig);
 
-    knex('Teachers')
-	.where({
-		teacherId: teacherObj.teacherId
-	})
-	.update(teacherObj)
+    knex('Students').insert(studentObj)
 	.then((result) => {
             knex.client.destroy();
-			if(result === 1) {
-				callback(null, {
-					statusCode: 200,
-					body: ""
-				});
-			}
-			else {
-				callback(null, {
-					statusCode: 404,
-					body: ""
-				});
-			}
+			callback(null, {
+				statusCode: 200,
+				body: "" + result[0]			//this contains the ID of the created student
+				}),
+			});
         })
         .catch((err) => {
             console.log('error occurred: ', err);

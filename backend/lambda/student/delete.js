@@ -2,18 +2,18 @@
 
 const dbConfig = require('../db')
 
-// DELETE teacher/{teacherId}
+// DELETE student/{studentId}
 module.exports.handler = (event, context, callback) => {
-	if (!("pathParameters" in event) || !(event.pathParameters) || !(event.pathParameters.teacherId)) {
+	if (!("pathParameters" in event) || !(event.pathParameters) || !(event.pathParameters.studentId)) {
         callback(null, {
             statusCode: 400,
             body: JSON.stringify({
-                message: "Invalid Input, please send us the teacher's ID! Don't even know how this can happen",
+                message: "Invalid Input, please send us the student's ID!",
             })
         });
         return;
     }
-	else if (isNaN(event.pathParameters.teacherId)) {
+	else if (isNaN(event.pathParameters.studentId)) {
 		//then the ID is invalid
 		callback(null, {
             statusCode: 400,
@@ -27,8 +27,8 @@ module.exports.handler = (event, context, callback) => {
     // Connect
     const knex = require('knex')(dbConfig);
 
-    knex('Teachers').where({
-            teacherId: event.pathParameters.teacherId
+    knex('Students').where({
+            studentId: event.pathParameters.studentId
         }).del().then((result) => {
             knex.client.destroy();
 

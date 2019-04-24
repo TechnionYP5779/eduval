@@ -3,25 +3,25 @@
 const dbConfig = require('../db')
 
 function dbRowToProperObject(obj) {
-	obj.id = obj.teacherId;
-	delete obj.teacherId;
+	obj.id = obj.studentId;
+	delete obj.studentId;
 	obj.authIdToken = obj.idToken;
 	delete obj.idToken;
 	return obj
 }
 
-// GET teacher/{teacherId}
+// GET student/{studentId}
 module.exports.byId = (event, context, callback) => {
-	if (!("pathParameters" in event) || !(event.pathParameters) || !(event.pathParameters.teacherId)) {
+	if (!("pathParameters" in event) || !(event.pathParameters) || !(event.pathParameters.studentId)) {
         callback(null, {
             statusCode: 400,
             body: JSON.stringify({
-                message: "Invalid Input, please send us the teacher's ID! Don't even know how this can happen",
+                message: "Invalid Input, please send us the student's ID!",
             })
         });
         return;
     }
-	else if (isNaN(event.pathParameters.teacherId)) {
+	else if (isNaN(event.pathParameters.studentId)) {
 		//then the ID is invalid
 		callback(null, {
             statusCode: 400,
@@ -35,8 +35,8 @@ module.exports.byId = (event, context, callback) => {
     // Connect
     const knex = require('knex')(dbConfig);
 
-    knex('Teachers').where({
-            teacherId: event.pathParameters.teacherId
+    knex('Students').where({
+            studentId: event.pathParameters.studentId
         }).select().then((result) => {
             knex.client.destroy();
 
@@ -49,14 +49,14 @@ module.exports.byId = (event, context, callback) => {
                 callback(null, {
                     statusCode: 404,
                     body: JSON.stringify({
-                        message: 'Teacher not found.'
+                        message: 'Student not found.'
                     }),
                 });
             } else {
                 callback(null, {
                     statusCode: 400,
                     body: JSON.stringify({
-                        message: "There's more than one teacher with this ID?!",
+                        message: "There's more than one student with this ID?!",
                         data: result
                     }),
                 });
@@ -71,13 +71,13 @@ module.exports.byId = (event, context, callback) => {
         });
 };
 
-// GET teacher/byToken/{authToken}
+// GET student/byToken/{authToken}
 module.exports.byToken = (event, context, callback) => {
 	if (!("pathParameters" in event) || !(event.pathParameters) || !(event.pathParameters.authToken)) {
         callback(null, {
             statusCode: 400,
             body: JSON.stringify({
-                message: "Invalid Input, please send us the teacher's token!",
+                message: "Invalid Input, please send us the student's token!",
             })
         });
         return;
@@ -86,7 +86,7 @@ module.exports.byToken = (event, context, callback) => {
     // Connect
     const knex = require('knex')(dbConfig);
 
-    knex('Teachers').where({
+    knex('Students').where({
             idToken: event.pathParameters.authToken
         }).select().then((result) => {
             knex.client.destroy();
@@ -100,14 +100,14 @@ module.exports.byToken = (event, context, callback) => {
                 callback(null, {
                     statusCode: 404,
                     body: JSON.stringify({
-                        message: 'Teacher not found.'
+                        message: 'Student not found.'
                     }),
                 });
             } else {
                 callback(null, {
                     statusCode: 400,
                     body: JSON.stringify({
-                        message: "There's more than one teacher with this token?!",
+                        message: "There's more than one student with this token?!",
                         data: result
                     }),
                 });

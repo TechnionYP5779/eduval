@@ -15,12 +15,6 @@ provider:
     apiKeys:
         - myApiKey
 
-    # package:
-    #     include:
-    #         - teacher/**
-    #         - student/**
-    #         - course/**
-
     # defines environment variables for connecting to DB
     environment:
         DB_NAME:        ${self:custom.secrets.DB_NAME}
@@ -30,6 +24,7 @@ provider:
         DB_PORT:        ${self:custom.secrets.DB_PORT}
 
 functions:
+    #teacher
     getTeacherByToken:
         handler: teacher/get.byToken
         description: Get information about a teacher by their Auth Token.
@@ -42,7 +37,6 @@ functions:
                     parameters:
                         paths:
                             authToken: true
-
     getTeacherById:
         handler: teacher/get.byId
         description: Get information about a teacher by their ID.
@@ -67,7 +61,6 @@ functions:
                     parameters:
                         paths:
                             teacherId: true
-
     updateTeacher:
         handler: teacher/update.handler
         description: Update a teacher's information.
@@ -76,12 +69,65 @@ functions:
                 path: teacher
                 method: put
                 private: true
-
     addTeacher:
         handler: teacher/create.handler
         description: Create a new teacher.
         events:
             - http:
                 path: teacher
+                method: post
+                private: true
+
+    #student
+    getStudentByToken:
+        handler: student/get.byToken
+        description: Get information about a student by their Auth Token.
+        events:
+            - http:
+                path: student/byToken/{authToken}
+                method: get
+                private: true
+                request:
+                    parameters:
+                        paths:
+                            authToken: true
+    getStudentById:
+        handler: student/get.byId
+        description: Get information about a student by their ID.
+        events:
+            - http:
+                path: student/{studentId}
+                method: get
+                private: true
+                request:
+                    parameters:
+                        paths:
+                            studentId: true
+    deleteStudent:
+        handler: student/delete.handler
+        description: Delete student with a certain ID.
+        events:
+            - http:
+                path: student/{studentId}
+                method: delete
+                private: true
+                request:
+                    parameters:
+                        paths:
+                            studentId: true
+    updateStudent:
+        handler: student/update.handler
+        description: Update a student's information.
+        events:
+            - http:
+                path: student
+                method: put
+                private: true
+    addStudent:
+        handler: student/create.handler
+        description: Create a new student.
+        events:
+            - http:
+                path: student
                 method: post
                 private: true
