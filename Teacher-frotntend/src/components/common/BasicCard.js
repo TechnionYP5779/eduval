@@ -16,9 +16,9 @@ class BasicCard extends React.Component {
        categoryTheme: "dark",
        author: "Anna Kunis",
        authorAvatar: require("../../images/avatars/1.jpg"),
-       title: "Welcome to EMon - Teacher Dashboard panel.",
+       title: "Welcome to EMon - Student Dashboard panel.",
        body:
-         "Here at EMon, you can manage your courses, encourge your students to learn by rewarding them with E-Money for attendance and participation and much more. You are more then welcome to discover the features of our system and make sure to send us your notes. Good Luck and Happy Teaching!"
+         "Here at EMon, you can manage your courses, learn, earn E-Money and much more. You are more then welcome to discover the features of our system and make sure to send us your notes. Good Luck and Happy Learning!"
      };
 
      let version_content = {
