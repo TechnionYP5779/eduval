@@ -5,16 +5,16 @@ const models = require('../models')
 const validate = require('jsonschema').validate;
 
 function objectToDdRow(obj) {
-	obj.teacherId = obj.id;
+	obj.courseId = obj.id;
 	delete obj.id;
-	if("authToken" in obj) {
-		obj.idToken = obj.authIdToken;
-		delete obj.authIdToken;
+	if("courseName" in obj) {
+		obj.courseName = obj.name;
+		delete obj.name;
 	}
 	return obj
 }
 
-// PUT teacher
+// PUT course
 module.exports.handler = (event, context, callback) => {
 	if (!event.body) {
         callback(null, {
@@ -30,9 +30,9 @@ module.exports.handler = (event, context, callback) => {
         return;
     }
 
-	var teacherObj;
+	var courseObj;
 	try {
-		teacherObj = JSON.parse(event.body);
+		courseObj = JSON.parse(event.body);
 	} catch (e) {
 		callback(null, {
             statusCode: 405,
@@ -47,10 +47,10 @@ module.exports.handler = (event, context, callback) => {
         return;
 	}
 
-	var oldRequired = models.Teacher.required
-	models.Teacher.required = ["id"]
-	var validateRes = validate(teacherObj, models.Teacher);
-	models.Teacher.required = oldRequired
+	var oldRequired = models.Course.required
+	models.Course.required = ["id"]
+	var validateRes = validate(courseObj, models.Course);
+	models.Course.required = oldRequired
 	if(!validateRes.valid) {
 		callback(null, {
             statusCode: 405,
@@ -66,16 +66,16 @@ module.exports.handler = (event, context, callback) => {
 	}
 
 	//convert to format stored in DB, and discard ID
-	teacherObj = objectToDdRow(teacherObj)
+	courseObj = objectToDdRow(courseObj)
 
     // Connect
     const knex = require('knex')(dbConfig);
 
-    knex('Teachers')
+    knex('Courses')
 	.where({
-		teacherId: teacherObj.teacherId
+		courseId: studentObj.courseId
 	})
-	.update(teacherObj)
+	.update(courseObj)
 	.then((result) => {
             knex.client.destroy();
 			if(result === 1) {

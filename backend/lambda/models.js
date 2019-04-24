@@ -49,6 +49,7 @@ exports.Student = {
 	//if ID is required, it should be excplicitly stated when included.
 	"required": ["authIdToken", "name", "email"]
 };
+
 exports.Course = {
     "type": "object",
     "properties": {

@@ -19,6 +19,10 @@ module.exports.handler = (event, context, callback) => {
 	if (!event.body) {
         callback(null, {
             statusCode: 405,
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Credentials': true
+			},
             body: JSON.stringify({
                 message: "Invalid Input. JSON object required.",
             })
@@ -32,6 +36,10 @@ module.exports.handler = (event, context, callback) => {
 	} catch (e) {
 		callback(null, {
             statusCode: 405,
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Credentials': true
+			},
             body: JSON.stringify({
                 message: "Invalid JSON. Error: " + e.message,
             })
@@ -43,6 +51,10 @@ module.exports.handler = (event, context, callback) => {
 	if(!validateRes.valid) {
 		callback(null, {
             statusCode: 405,
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Credentials': true
+			},
             body: JSON.stringify({
                 message: "Invalid JSON object. Errors: " + JSON.stringify(validateRes.errors),
             })
@@ -64,8 +76,11 @@ module.exports.handler = (event, context, callback) => {
             knex.client.destroy();
 			callback(null, {
 				statusCode: 200,
+				headers: {
+					'Access-Control-Allow-Origin': '*',
+					'Access-Control-Allow-Credentials': true
+				},
 				body: "" + result[0]			//this contains the ID of the created student
-				}),
 			});
         })
         .catch((err) => {

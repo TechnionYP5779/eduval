@@ -23,6 +23,7 @@ provider:
         DB_HOST:        ${self:custom.secrets.DB_HOST}
         DB_PORT:        ${self:custom.secrets.DB_PORT}
 
+#TODO: Implement a more strict CORS policy
 functions:
     #teacher
     getTeacherByToken:
@@ -33,6 +34,7 @@ functions:
                 path: teacher/byToken/{authToken}
                 method: get
                 private: true
+                cors: true
                 request:
                     parameters:
                         paths:
@@ -45,6 +47,7 @@ functions:
                 path: teacher/{teacherId}
                 method: get
                 private: true
+                cors: true
                 request:
                     parameters:
                         paths:
@@ -57,6 +60,7 @@ functions:
                 path: teacher/{teacherId}
                 method: delete
                 private: true
+                cors: true
                 request:
                     parameters:
                         paths:
@@ -69,6 +73,7 @@ functions:
                 path: teacher
                 method: put
                 private: true
+                cors: true
     addTeacher:
         handler: teacher/create.handler
         description: Create a new teacher.
@@ -77,6 +82,7 @@ functions:
                 path: teacher
                 method: post
                 private: true
+                cors: true
 
     #student
     getStudentByToken:
@@ -87,6 +93,7 @@ functions:
                 path: student/byToken/{authToken}
                 method: get
                 private: true
+                cors: true
                 request:
                     parameters:
                         paths:
@@ -99,6 +106,7 @@ functions:
                 path: student/{studentId}
                 method: get
                 private: true
+                cors: true
                 request:
                     parameters:
                         paths:
@@ -111,6 +119,7 @@ functions:
                 path: student/{studentId}
                 method: delete
                 private: true
+                cors: true
                 request:
                     parameters:
                         paths:
@@ -123,6 +132,7 @@ functions:
                 path: student
                 method: put
                 private: true
+                cors: true
     addStudent:
         handler: student/create.handler
         description: Create a new student.
@@ -131,3 +141,63 @@ functions:
                 path: student
                 method: post
                 private: true
+                cors: true
+
+    #course
+    updateCourse:
+        handler: course/update.handler
+        description: Update a course's information.
+        events:
+            - http:
+                path: course
+                method: put
+                private: true
+                cors: true
+    addCourse:
+        handler: course/create.handler
+        description: Create a new course.
+        events:
+            - http:
+                path: course
+                method: post
+                private: true
+                cors: true
+    getCourseById:
+        handler: course/get.byId
+        description: Get information about a course by their ID.
+        events:
+            - http:
+                path: course/{courseId}
+                method: get
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    getCoursesByTeacher:
+        handler: course/get.byId
+        description: Get information about a course by their ID.
+        events:
+            - http:
+                path: course/byTeacher/{teacherId}
+                method: get
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            teacherId: true
+    deleteCourse:
+        handler: course/delete.handler
+        description: Delete course with a certain ID.
+        events:
+            - http:
+                path: course/{courseId}
+                method: delete
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true

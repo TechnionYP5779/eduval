@@ -7,8 +7,10 @@ const validate = require('jsonschema').validate;
 function objectToDdRow(obj) {
 	obj.studentId = obj.id;
 	delete obj.id;
-	obj.idToken = obj.authIdToken;
-	delete obj.authIdToken;
+	if("authToken" in obj) {
+		obj.idToken = obj.authIdToken;
+		delete obj.authIdToken;
+	}
 	return obj
 }
 
@@ -17,6 +19,10 @@ module.exports.handler = (event, context, callback) => {
 	if (!event.body) {
         callback(null, {
             statusCode: 405,
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Credentials': true
+			},
             body: JSON.stringify({
                 message: "Invalid Input. JSON object required.",
             })
@@ -30,6 +36,10 @@ module.exports.handler = (event, context, callback) => {
 	} catch (e) {
 		callback(null, {
             statusCode: 405,
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Credentials': true
+			},
             body: JSON.stringify({
                 message: "Invalid JSON. Error: " + e.message,
             })
@@ -44,6 +54,10 @@ module.exports.handler = (event, context, callback) => {
 	if(!validateRes.valid) {
 		callback(null, {
             statusCode: 405,
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Credentials': true
+			},
             body: JSON.stringify({
                 message: "Invalid JSON object. Errors: " + JSON.stringify(validateRes.errors),
             })
@@ -67,12 +81,20 @@ module.exports.handler = (event, context, callback) => {
 			if(result === 1) {
 				callback(null, {
 					statusCode: 200,
+					headers: {
+						'Access-Control-Allow-Origin': '*',
+						'Access-Control-Allow-Credentials': true
+					},
 					body: ""
 				});
 			}
 			else {
 				callback(null, {
 					statusCode: 404,
+					headers: {
+						'Access-Control-Allow-Origin': '*',
+						'Access-Control-Allow-Credentials': true
+					},
 					body: ""
 				});
 			}

@@ -15,6 +15,10 @@ module.exports.byId = (event, context, callback) => {
 	if (!("pathParameters" in event) || !(event.pathParameters) || !(event.pathParameters.studentId)) {
         callback(null, {
             statusCode: 400,
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Credentials': true
+			},
             body: JSON.stringify({
                 message: "Invalid Input, please send us the student's ID!",
             })
@@ -25,6 +29,10 @@ module.exports.byId = (event, context, callback) => {
 		//then the ID is invalid
 		callback(null, {
             statusCode: 400,
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Credentials': true
+			},
             body: JSON.stringify({
                 message: "Invalid ID! It should be an integer.",
             })
@@ -43,11 +51,19 @@ module.exports.byId = (event, context, callback) => {
             if (result.length == 1) {
                 callback(null, {
                     statusCode: 200,
+					headers: {
+						'Access-Control-Allow-Origin': '*',
+						'Access-Control-Allow-Credentials': true
+					},
                     body: JSON.stringify(dbRowToProperObject(result[0]))
                 });
             } else if (result.length == 0) {
                 callback(null, {
                     statusCode: 404,
+					headers: {
+						'Access-Control-Allow-Origin': '*',
+						'Access-Control-Allow-Credentials': true
+					},
                     body: JSON.stringify({
                         message: 'Student not found.'
                     }),
@@ -55,6 +71,10 @@ module.exports.byId = (event, context, callback) => {
             } else {
                 callback(null, {
                     statusCode: 400,
+					headers: {
+						'Access-Control-Allow-Origin': '*',
+						'Access-Control-Allow-Credentials': true
+					},
                     body: JSON.stringify({
                         message: "There's more than one student with this ID?!",
                         data: result
@@ -76,6 +96,10 @@ module.exports.byToken = (event, context, callback) => {
 	if (!("pathParameters" in event) || !(event.pathParameters) || !(event.pathParameters.authToken)) {
         callback(null, {
             statusCode: 400,
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Credentials': true
+			},
             body: JSON.stringify({
                 message: "Invalid Input, please send us the student's token!",
             })
@@ -94,11 +118,19 @@ module.exports.byToken = (event, context, callback) => {
             if (result.length == 1) {
                 callback(null, {
                     statusCode: 200,
+					headers: {
+						'Access-Control-Allow-Origin': '*',
+						'Access-Control-Allow-Credentials': true
+					},
                     body: JSON.stringify(dbRowToProperObject(result[0]))
                 });
             } else if (result.length == 0) {
                 callback(null, {
                     statusCode: 404,
+					headers: {
+						'Access-Control-Allow-Origin': '*',
+						'Access-Control-Allow-Credentials': true
+					},
                     body: JSON.stringify({
                         message: 'Student not found.'
                     }),
@@ -106,6 +138,10 @@ module.exports.byToken = (event, context, callback) => {
             } else {
                 callback(null, {
                     statusCode: 400,
+					headers: {
+						'Access-Control-Allow-Origin': '*',
+						'Access-Control-Allow-Credentials': true
+					},
                     body: JSON.stringify({
                         message: "There's more than one student with this token?!",
                         data: result

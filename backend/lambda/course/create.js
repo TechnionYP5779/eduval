@@ -5,16 +5,16 @@ const models = require('../models')
 const validate = require('jsonschema').validate;
 
 function objectToDdRow(obj) {
-	obj.teacherId = obj.id;
-	delete obj.id;
-	if("authToken" in obj) {
-		obj.idToken = obj.authIdToken;
-		delete obj.authIdToken;
+	if("id" in obj) {
+		obj.courseId = obj.id;
+		delete obj.id;
 	}
+	obj.courseName = obj.name;
+	delete obj.name;
 	return obj
 }
 
-// PUT teacher
+// POST course
 module.exports.handler = (event, context, callback) => {
 	if (!event.body) {
         callback(null, {
@@ -30,9 +30,9 @@ module.exports.handler = (event, context, callback) => {
         return;
     }
 
-	var teacherObj;
+	var courseObj;
 	try {
-		teacherObj = JSON.parse(event.body);
+		courseObj = JSON.parse(event.body);
 	} catch (e) {
 		callback(null, {
             statusCode: 405,
@@ -47,10 +47,7 @@ module.exports.handler = (event, context, callback) => {
         return;
 	}
 
-	var oldRequired = models.Teacher.required
-	models.Teacher.required = ["id"]
-	var validateRes = validate(teacherObj, models.Teacher);
-	models.Teacher.required = oldRequired
+	var validateRes = validate(courseObj, models.Course);
 	if(!validateRes.valid) {
 		callback(null, {
             statusCode: 405,
@@ -66,38 +63,25 @@ module.exports.handler = (event, context, callback) => {
 	}
 
 	//convert to format stored in DB, and discard ID
-	teacherObj = objectToDdRow(teacherObj)
+	courseObj = objectToDdRow(courseObj)
+	if("courseId" in courseObj) {
+		delete courseObj.courseId
+	}
 
     // Connect
     const knex = require('knex')(dbConfig);
 
-    knex('Teachers')
-	.where({
-		teacherId: teacherObj.teacherId
-	})
-	.update(teacherObj)
+    knex('Courses').insert(courseObj)
 	.then((result) => {
             knex.client.destroy();
-			if(result === 1) {
-				callback(null, {
-					statusCode: 200,
-					headers: {
-						'Access-Control-Allow-Origin': '*',
-						'Access-Control-Allow-Credentials': true
-					},
-					body: ""
-				});
-			}
-			else {
-				callback(null, {
-					statusCode: 404,
-					headers: {
-						'Access-Control-Allow-Origin': '*',
-						'Access-Control-Allow-Credentials': true
-					},
-					body: ""
-				});
-			}
+			callback(null, {
+				statusCode: 200,
+				headers: {
+					'Access-Control-Allow-Origin': '*',
+					'Access-Control-Allow-Credentials': true
+				},
+				body: "" + result[0]			//this contains the ID of the created course
+			});
         })
         .catch((err) => {
             console.log('error occurred: ', err);

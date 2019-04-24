@@ -7,6 +7,10 @@ module.exports.handler = (event, context, callback) => {
 	if (!("pathParameters" in event) || !(event.pathParameters) || !(event.pathParameters.teacherId)) {
         callback(null, {
             statusCode: 400,
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Credentials': true
+			},
             body: JSON.stringify({
                 message: "Invalid Input, please send us the teacher's ID! Don't even know how this can happen",
             })
@@ -17,6 +21,10 @@ module.exports.handler = (event, context, callback) => {
 		//then the ID is invalid
 		callback(null, {
             statusCode: 400,
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Credentials': true
+			},
             body: JSON.stringify({
                 message: "Invalid ID! It should be an integer.",
             })
@@ -35,12 +43,20 @@ module.exports.handler = (event, context, callback) => {
 			if(result === 1) {
 				callback(null, {
 					statusCode: 200,
+					headers: {
+						'Access-Control-Allow-Origin': '*',
+						'Access-Control-Allow-Credentials': true
+					},
 					body: ""
 				});
 			}
 			else {
 				callback(null, {
 					statusCode: 404,
+					headers: {
+						'Access-Control-Allow-Origin': '*',
+						'Access-Control-Allow-Credentials': true
+					},
 					body: ""
 				});
 			}
