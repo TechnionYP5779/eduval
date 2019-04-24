@@ -17,194 +17,160 @@ import {
   CardBody
 } from "shards-react";
 import PageTitle from "../components/common/PageTitle";
+import "./CourseDetails.css"
 class CourseDetails extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
 
+          smileys: [{
+              smile: "🙂",
+              type: "success",
+              id: 1
+            },
+            {
+              smile: "👍",
+              type: "success",
+              id: 2
+            },
+            {
+              smile: "😇",
+              type: "success",
+              id: 3
+            },
+            {
+              smile: "😁",
+              type: "success",
+              id: 4
+            },
+            {
+              smile: "🤐",
+              type: "warning",
+              id: 5
+            },
+            {
+              smile: "😴",
+              type: "warning",
+              id: 6
+            },
+            {
+              smile: "😠",
+              type: "danger",
+              id: 7
+            },
+            {
+              smile: "👎",
+              type: "danger",
+              id: 8
+            }
+          ],
+
           // Third list of posts.
           PostsListThree: [
             {
               id:"1",
-              FirstName: "Stud1",
+              Date: "1/1/2019",
               LastName:"Sixth grade",
-              Phone:"123456789",
+              Sum:"123456789",
+              Smileys: [
+                   "🙂",
+                   "👍",
+              ]
             },
             {
                 id:"2",
-                FirstName: "Stud2",
+                Date: "1/1/2019",
                 LastName:"Sixth grade",
-                Phone:"123456789",
+                Sum:"123456789",
+                Smileys: [
+                     "🙂",
+                     "👍",
+                ]
             },
             {
                 id:"3",
-                FirstName: "Stud3",
+                Date: "1/1/2019",
                 LastName:"Sixth grade",
-                Phone:"123456789",
+                Sum:"123456789",
+                Smileys: [
+                     "🙂",
+                     "👍",
+                ]
             },
             {
                 id:"4",
-                FirstName: "Stud4",
+                Date: "1/1/2019",
                 LastName:"Sixth grade",
-                Phone:"123456789",
+                Sum:"123456789",
+                Smileys: [
+                     "🙂",
+                     "👍",
+                ]
             },
             {
                 id:"5",
-                FirstName: "Stud5",
+                Date: "1/1/2019",
                 LastName:"Sixth grade",
-                Phone:"123456789",
+                Sum:"123456789",
+                Smileys: [
+                     "🙂",
+                     "👍",
+                ]
+
             },
             {
                 id:"6",
-                FirstName: "Stud6",
+                Date: "1/1/2019",
                 LastName:"Sixth grade",
-                Phone:"123456789",
+                Sum:"123456789",
+                Smileys: [
+                     "🙂",
+                     "👍",
+                ]
             },
             {
                 id:"1",
-                FirstName: "Stud1",
+                Date: "1/1/2019",
                 LastName:"Sixth grade",
-                Phone:"123456789",
+                Sum:"123456789",
+                Smileys: [
+                     "🙂",
+                     "👍",
+                ]
               },
               {
                   id:"2",
-                  FirstName: "Stud2",
+                  Date: "1/1/2019",
                   LastName:"Sixth grade",
-                  Phone:"123456789",
+                  Sum:"123456789",
+                  Smileys: [
+                       "🙂",
+                       "👍",
+                  ]
+
               },
               {
                   id:"3",
-                  FirstName: "Stud3",
+                  Date: "1/1/2019",
                   LastName:"Sixth grade",
-                  Phone:"123456789",
+                  Sum:"123456789",
+                  Smileys: [
+                       "🙂",
+                       "👍",
+                  ]
               },
               {
                   id:"4",
-                  FirstName: "Stud4",
+                  Date: "1/1/2019",
                   LastName:"Sixth grade",
-                  Phone:"123456789",
-              },
-              {
-                  id:"5",
-                  FirstName: "Stud5",
-                  LastName:"Sixth grade",
-                  Phone:"123456789",
-              },
-              {
-                  id:"6",
-                  FirstName: "Stud6",
-                  LastName:"Sixth grade",
-                  Phone:"123456789",
-              },
-              {
-                id:"1",
-                FirstName: "Stud1",
-                LastName:"Sixth grade",
-                Phone:"123456789",
-              },
-              {
-                  id:"2",
-                  FirstName: "Stud2",
-                  LastName:"Sixth grade",
-                  Phone:"123456789",
-              },
-              {
-                  id:"3",
-                  FirstName: "Stud3",
-                  LastName:"Sixth grade",
-                  Phone:"123456789",
-              },
-              {
-                  id:"4",
-                  FirstName: "Stud4",
-                  LastName:"Sixth grade",
-                  Phone:"123456789",
-              },
-              {
-                  id:"5",
-                  FirstName: "Stud5",
-                  LastName:"Sixth grade",
-                  Phone:"123456789",
-              },
-              {
-                  id:"6",
-                  FirstName: "Stud6",
-                  LastName:"Sixth grade",
-                  Phone:"123456789",
-              },
-              {
-                id:"1",
-                FirstName: "Stud1",
-                LastName:"Sixth grade",
-                Phone:"123456789",
-              },
-              {
-                  id:"2",
-                  FirstName: "Stud2",
-                  LastName:"Sixth grade",
-                  Phone:"123456789",
-              },
-              {
-                  id:"3",
-                  FirstName: "Stud3",
-                  LastName:"Sixth grade",
-                  Phone:"123456789",
-              },
-              {
-                  id:"4",
-                  FirstName: "Stud4",
-                  LastName:"Sixth grade",
-                  Phone:"123456789",
-              },
-              {
-                  id:"5",
-                  FirstName: "Stud5",
-                  LastName:"Sixth grade",
-                  Phone:"123456789",
-              },
-              {
-                  id:"6",
-                  FirstName: "Stud6",
-                  LastName:"Sixth grade",
-                  Phone:"123456789",
-              },
-              {
-                id:"1",
-                FirstName: "Stud1",
-                LastName:"Sixth grade",
-                Phone:"123456789",
-              },
-              {
-                  id:"2",
-                  FirstName: "Stud2",
-                  LastName:"Sixth grade",
-                  Phone:"123456789",
-              },
-              {
-                  id:"3",
-                  FirstName: "Stud3",
-                  LastName:"Sixth grade",
-                  Phone:"123456789",
-              },
-              {
-                  id:"4",
-                  FirstName: "Stud4",
-                  LastName:"Sixth grade",
-                  Phone:"123456789",
-              },
-              {
-                  id:"5",
-                  FirstName: "Stud5",
-                  LastName:"Sixth grade",
-                  Phone:"123456789",
-              },
-              {
-                  id:"6",
-                  FirstName: "Stud6",
-                  LastName:"Sixth grade",
-                  Phone:"123456789",
+                  Sum:"123456789",
+                  Smileys: [
+                       "🙂",
+                       "👍",
+                  ]
               }
+
           ],
         };
       }
@@ -233,9 +199,9 @@ class CourseDetails extends React.Component {
               <Row form>
                 {/* Course Name */}
                 <Col md="6" className="form-group">
-                  <label htmlFor="feFirstName">Course Name</label>
+                  <label htmlFor="feDate">Course Name</label>
                   <FormInput
-                    id="feFirstName"
+                    id="feDate"
                     placeholder="Course Name"
                     value="Physics 1"
                   />
@@ -291,7 +257,7 @@ class CourseDetails extends React.Component {
       <Col>
         <Card small className="mb-4">
           <CardHeader className="border-bottom">
-            <h6 className="m-0">Active Users</h6>
+            <h6 className="m-0">Recent Lessons</h6>
           </CardHeader>
           <CardBody className="p-0 pb-3">
             <table className="table mb-0">
@@ -302,13 +268,13 @@ class CourseDetails extends React.Component {
                     #
                   </th>
                   <th scope="col" className="border-0">
-                    First Name
+                    Date
                   </th>
                   <th scope="col" className="border-0">
-                    Last Name
+                    Emon Earned
                   </th>
                   <th scope="col" className="border-0">
-                    Phone
+                    Emojis Earned
                   </th>
                 </tr>
               </thead>
@@ -316,9 +282,10 @@ class CourseDetails extends React.Component {
               {PostsListThree.map((post, idx) => (
                 <tr>
                   <td>{post.id}</td>
-                  <td>{post.FirstName}</td>
-                  <td>{post.LastName}</td>
-                  <td>{post.Phone}</td>
+                  <td>{post.Date}</td>
+                  <td>{post.Sum}</td>
+                  <td><ul >{post.Smileys.map((smile,type ,id) => (<li>{smile}</li>))}</ul></td>
+
                 </tr>))}
               </tbody>
             </table>
