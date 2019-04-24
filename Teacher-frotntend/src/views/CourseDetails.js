@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import SmallStats from "./../components/common/SmallStats";
 import {
   Card,
   CardHeader,
@@ -23,48 +24,9 @@ class CourseDetails extends React.Component {
         super(props);
 
         this.state = {
+          balance:555,
 
-          smileys: [{
-              smile: "🙂",
-              type: "success",
-              id: 1
-            },
-            {
-              smile: "👍",
-              type: "success",
-              id: 2
-            },
-            {
-              smile: "😇",
-              type: "success",
-              id: 3
-            },
-            {
-              smile: "😁",
-              type: "success",
-              id: 4
-            },
-            {
-              smile: "🤐",
-              type: "warning",
-              id: 5
-            },
-            {
-              smile: "😴",
-              type: "warning",
-              id: 6
-            },
-            {
-              smile: "😠",
-              type: "danger",
-              id: 7
-            },
-            {
-              smile: "👎",
-              type: "danger",
-              id: 8
-            }
-          ],
+
 
           // Third list of posts.
           PostsListThree: [
@@ -194,61 +156,14 @@ class CourseDetails extends React.Component {
     <ListGroup flush>
       <ListGroupItem className="p-3">
         <Row>
-          <Col>
-            <Form>
-              <Row form>
-                {/* Course Name */}
-                <Col md="6" className="form-group">
-                  <label htmlFor="feDate">Course Name</label>
-                  <FormInput
-                    id="feDate"
-                    placeholder="Course Name"
-                    value="Physics 1"
-                  />
-                </Col>
-                </Row>
-                <Row form>
-                {/* Start */}
-                <Col md="6" className="form-group">
-                  <label htmlFor="feLastName">Start</label>
-                  <FormInput
-                    type="date"
-                    id="feLastName"
-                    placeholder="15.03.2019"
-                  />
-                </Col>
+            <Col >
+            <div style={{fontWeight: 600}}>
+            You have a Balance of {this.state.balance} Emons in this course.<br /><br />
+            Keep up the good work!
+            </div>
+            </Col>
 
-                {/* End */}
-                <Col md="6" className="form-group">
-                  <label htmlFor="feEmail">End</label>
-                  <FormInput
-                    type="date"
-                    id="feEmail"
-                    placeholder="27/07/2019"
-                  />
-                </Col>
-                {/* Course Location */}
-                <Col md="6" className="form-group">
-                  <label htmlFor="feZipCode">Location</label>
-                  <FormInput
-                    id="feZipCode"
-                    placeholder="Location"
-                  />
-                </Col>
-              </Row>
-              <Row form>
-                {/* Description */}
-                <Col md="12" className="form-group">
-                  <label htmlFor="feDescription">Description</label>
-                  <FormTextarea id="feDescription" rows="5" />
-                </Col>
-              </Row>
-              <Button outline theme="accent">Update Course</Button>
-              <a href={"/lesson/" + this.props.match.params.id}>
-              <Button theme="success" onClick={()=>{}} style={{float:"right"}}>Start lesson</Button>
-              </a>
-            </Form>
-          </Col>
+
         </Row>
       </ListGroupItem>
     </ListGroup>
