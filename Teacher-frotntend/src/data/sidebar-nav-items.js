@@ -12,11 +12,6 @@ export default function() {
       to: "/my-courses",
     },
     {
-      title: "Add New Course",
-      htmlBefore: '<i class="material-icons">note_add</i>',
-      to: "/add-new-course",
-    },
-    {
       title: "User Profile",
       htmlBefore: '<i class="material-icons">person</i>',
       to: "/user-profile-lite",

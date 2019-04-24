@@ -74,22 +74,6 @@ Overview.defaultProps = {
       ]
     },
     {
-      label: "Students",
-      value: "182",
-      chartLabels: [null, null, null, null, null, null, null],
-      attrs: { md: "6", sm: "6" },
-      datasets: [
-        {
-          label: "Today",
-          fill: "start",
-          borderWidth: 1.5,
-          backgroundColor: "rgba(23,198,113,0.1)",
-          borderColor: "rgb(23,198,113)",
-          data: [1, 2, 3, 3, 3, 4, 4]
-        }
-      ]
-    },
-    {
       label: "Since",
       value: "April 2019",
       chartLabels: [null, null, null, null, null, null, null],

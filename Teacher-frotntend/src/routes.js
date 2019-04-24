@@ -7,7 +7,6 @@ import { DefaultLayout, ProtectedLayout } from "./layouts";
 // Route Views
 import Overview from "./views/Overview";
 import UserProfileLite from "./views/UserProfileLite";
-import AddNewCourse from "./views/AddNewCourse";
 import Errors from "./views/Errors";
 import ErrorNotLogin from "./views/ErrorNotLogin";
 import ComponentsOverview from "./views/ComponentsOverview";
@@ -45,11 +44,6 @@ export default [
     path: "/user-profile-lite",
     layout: ProtectedLayout,
     component: UserProfileLite
-  },
-  {
-    path: "/add-new-course",
-    layout: ProtectedLayout,
-    component: AddNewCourse
   },
   {
     path: "/errors",
