@@ -30,7 +30,6 @@ import NormalOutlineButtons from "../components/components-overview/NormalOutlin
 import Forms from "../components/components-overview/Forms";
 import FormValidation from "../components/components-overview/FormValidation";
 import CompleteFormExample from "../components/components-overview/CompleteFormExample";
-import Sliders from "../components/components-overview/Sliders";
 import ProgressBars from "../components/components-overview/ProgressBars";
 import ButtonGroups from "../components/components-overview/ButtonGroups";
 import InputGroups from "../components/components-overview/InputGroups";
@@ -47,15 +46,27 @@ class Lesson extends React.Component {
   constructor(props) {
     super(props);
 
-    this.money_input_ref = React.createRef();
-    this.money_slide_ref = React.createRef();
-
     this.state = {
 
       reward_money : 5,
-
+      lesson_id : 5,
+      student_id : 6,
       chosen_smile : -1,
+      chosen_message : -1,
 
+      messages: [{
+          message: "I have a question",
+          id: 1
+      },
+      {
+          message: "I didn't understand",
+          id: 2
+      },
+      {
+          message: "I need to leave the class",
+          id: 3
+      }
+    ],
       smileys: [{
           smile: "🙂",
           type: "success",
@@ -67,27 +78,27 @@ class Lesson extends React.Component {
           id: 2
         },
         {
-          smile: "😇",
+          smile: "☝",
           type: "success",
           id: 3
         },
         {
-          smile: "😁",
+          smile: "✌",
           type: "success",
           id: 4
         },
         {
-          smile: "🤐",
+          smile: "😐",
           type: "warning",
           id: 5
         },
         {
-          smile: "😴",
+          smile: "🙁",
           type: "warning",
           id: 6
         },
         {
-          smile: "😠",
+          smile: "😰",
           type: "danger",
           id: 7
         },
@@ -98,64 +109,7 @@ class Lesson extends React.Component {
         }
       ],
 
-      // Third list of posts.
-      students: [
-        {
-          name: "Rraany1",
-          id: 1,
-          earned_points: 0,
-          chosen: false
-        },
-        {
-          name: "Rrany2",
-          id: 2,
-          earned_points: 1,
-          chosen: false
-        },
-        {
-          name: "Rani Rany Ran",
-          id: 3,
-          earned_points: 20,
-          chosen: false
-        },
-        {
-          name: "Raani4",
-          id: 4,
-          earned_points: 8,
-          chosen: false
-        },
-        {
-          name: "Raani4",
-          id: 4,
-          earned_points: 8,
-          chosen: false
-        },
-        {
-          name: "Raany5",
-          id: 5,
-          earned_points: 4,
-          chosen: false
-        },
-        {
-          name: "Raany5",
-          id: 5,
-          earned_points: 1,
-          chosen: false
-        },
-        {
-          name: "Raany5",
-          id: 5,
-          earned_points: 0,
-          chosen: false
-        },
-        {
-          name: "Ranni6",
-          id: 6,
-          earned_points: 0,
-          chosen: false
-        }
-      ],
-    };
+   };
   }
 
 
@@ -163,21 +117,7 @@ class Lesson extends React.Component {
 
   render() {
 
-    const onSlideChange = (val) =>{
-      console.log("this is val1", val[0]);
-      this.setState({reward_money : val[0]});
-    }
-
-
-    const onInputChange = (val) => {
-      console.log("this is val2", val.target.value);
-      this.setState({reward_money : val.target.value});
-    }
-
-    console.log("props for MyCourses is ", this.props.match.params.id);
-
-    const {students, smileys} = this.state;
-
+   const {messages, smileys} = this.state;
     return (
       <Container fluid className="main-content-container px-4">
         {/* Page Header */}
@@ -187,52 +127,45 @@ class Lesson extends React.Component {
         {/* First Row of Posts */}
         <Row>
           <Col lg="8" className="mb-4">
+          <Card small className="mb-4 p-0 px-3 pt-1">
+              <CardHeader >
+                <h5 className="m-0">Lesson's information</h5>
+                <div className="mt-1">
+                  <p style={{fontSize:"15px"}}>lesson number: 5</p>
+                  <p style={{fontSize:"15px"}}>lesson topic: something</p>
+                  <p style={{fontSize:"15px"}}>teacher name: name name </p>
+                  <p style={{fontSize:"15px"}}>lesson hpurs: 10:00-10:45 </p>
+                  <p style={{fontSize:"15px"}}>E-Money earned: {this.state.reward_money} </p>
+                </div>
+              </CardHeader>
+
+            </Card>
             <Card small className="mb-4">
               <CardHeader className="border-bottom">
-                <h5 className="m-0">Attending Students</h5>
-                <h7 style={{fontSize:"12px"}}>Pick the students you want to send E-Money too</h7>
+                <h5 className="m-0">Teacher's Messages</h5>
+                <h7 style={{fontSize:"12px"}}>Emojis and messages from the teacher will appear here</h7>
               </CardHeader>
 
               <ListGroup flush>
                 <ListGroupItem className="p-0 px-3 pt-3">
                   <Row>
 
-                      {students.map((student, idx) => (<Col xs="2" >
-                        {
-                          student.chosen &&
-                          <Button theme="primary" className="mb-2 mr-1"  onClick={()=>{
-                            let tmp = this.state.students;
-                            tmp[idx].chosen = false;
-                            this.setState({students : tmp});
-                          }}>
-                            {student.name} <br/><br/> {student.earned_points}
-                          </Button>
-                        }
-                        {
-                          !student.chosen &&
-                          <Button outline theme="primary" className="mb-2 mr-1" onClick={()=>{
-                            let tmp = this.state.students;
-                            tmp[idx].chosen = true;
-                            this.setState({students : tmp});
-                          }}>
-                            {student.name} <br/><br/> {student.earned_points}
-                          </Button>
-                        }
-                        </Col>
-                    ))}
-
                   </Row>
                 </ListGroupItem>
               </ListGroup>
             </Card>
-
+            <a href={"/course-summery/" + this.state.lesson_id}><Button style={{fontSize:"17px"}}  className="mb-4 mr-4" onClick={()=>{
+                      
+                    }}>
+                     Leave Lesson
+                    </Button></a>
           </Col>
 
           <Col lg="4" className="mb-4">
             {/* Sliders & Progress Bars */}
             <Card small className="mb-4">
               <CardHeader className="border-bottom">
-                <h6 className="m-0">Rewards & Emojis</h6>
+                <h6 className="m-0">Send To Teacher</h6>
               </CardHeader>
               <ListGroup flush>
               <div className="mb-2 pb-1" style={{margin:"10px"}}>
@@ -263,42 +196,37 @@ class Lesson extends React.Component {
 
                 </Col>))}
                 </Row>
-                <div className="mb-2 pb-1" style={{margin:"10px"}}>
-                  <h7 style={{fontSize:"12px"}}>Choose amount of E-Money to send</h7>
-                  </div>
-              <div className="mb-2 pb-1" style={{margin:"10px"}}>
+                  <div className="mb-2 pb-1" style={{margin:"10px"}}>
+                <h7 style={{fontSize:"12px"}}>Choose a message to send</h7>
+                </div>
+                <Row style={{margin:"2px"}}>
+                {messages.map((message, idx) => (
+                  <Col xs="8">
+                  {
+                    (this.state.chosen_message == message.id) &&
+                    <Button style={{fontSize:"13px"}} className="mb-2 mr-1" onClick={()=>{
+                      console.log("unchosing", message.id);
+                      this.setState({chosen_message : -1});
+                    }}>
+                      {message.message}
+                    </Button>
+                  }
+                  {
+                    (this.state.chosen_message != message.id) &&
+                    <Button outline style={{fontSize:"13px"}} className="mb-2 mr-1" onClick={()=>{
+                      console.log("chosing", message.id);
+                      console.log("current", this.state.chosen_message);
+                      this.setState({chosen_message : message.id});
+                    }}>
+                      {message.message}
+                    </Button>
+                  }
 
-                <Slider
-                  ref = {this.money_slide_ref}
-                  id="money_slider"
-                  theme="success"
-                  className="my-4"
-                  connect={[true, false]}
-                  start={[this.state.reward_money]}
-                  value={[this.state.reward_money]}
-                  step={1}
-                  range={{ min: 0, max: 10 }}
-                  tooltips
-                  onChange={onSlideChange}
-                />
-              </div>
-              <div className="mb-2 pb-1" style={{margin:"10px"}}>
-                  <FormInput
-                    id = "money_input"
-                    type="number"
-                    value={this.state.reward_money}
-                    ref = {this.money_input_ref}
-                    onChange={onInputChange}
-                  />
-                  </div>
-                    <div className="mb-2 pb-1" style={{margin:"10px"}}>
-                  <Button theme="success" className="mb-2 mr-1">
-                    Award!
-                  </Button>
-                  </div>
-
+                </Col>))}
+                </Row>
               </ListGroup>
             </Card>
+            
           </Col>
         </Row>
 
