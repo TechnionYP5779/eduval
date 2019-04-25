@@ -139,11 +139,12 @@ class CourseDetails extends React.Component {
 
           ],
         };
-        var headers = {
+        let headers = {
             'X-Api-Key': 'BXGK1t57pTgLKxmReo869MWY2qQey4U4n7fsHjii'
         }
+        let sub=new Buffer( localStorage.getItem('sub')).toString('base64');
 
-        axios.get('https://xycqr0g9ra.execute-api.eu-central-1.amazonaws.com/dev/student/byToken/'+localStorage.getItem('id_token'),
+        axios.get('https://xycqr0g9ra.execute-api.eu-central-1.amazonaws.com/dev/student/byToken/'+sub,
          {headers: headers})
           .then(response =>console.log(response))
 
