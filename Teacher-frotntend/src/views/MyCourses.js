@@ -17,6 +17,7 @@ import PageTitle from "../components/common/PageTitle";
 class MyCourses extends React.Component {
   constructor(props) {
     super(props);
+    
 
     this.state = {
 

@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import axios from 'axios';
 import SmallStats from "./../components/common/SmallStats";
 import {
   Card,
@@ -23,8 +24,11 @@ class CourseDetails extends React.Component {
     constructor(props) {
         super(props);
 
+
+
         this.state = {
           balance:555,
+          studentId:-1,
 
 
 
@@ -135,6 +139,14 @@ class CourseDetails extends React.Component {
 
           ],
         };
+        var headers = {
+            'X-Api-Key': 'BXGK1t57pTgLKxmReo869MWY2qQey4U4n7fsHjii'
+        }
+
+        axios.get('https://xycqr0g9ra.execute-api.eu-central-1.amazonaws.com/dev/student/byToken/'+localStorage.getItem('id_token'),
+         {headers: headers})
+          .then(response =>console.log(response))
+
       }
     render(){
         const{
