@@ -56,7 +56,7 @@ class Server {
           callbackError(error);
           return;
         }
-        console.log(profile);
+        //console.log(profile);
 
         axios.post(SERVER_CONFIG.domain + '/student', {authIdToken: new Buffer(sub).toString('base64'),
           name: profile.nickname,

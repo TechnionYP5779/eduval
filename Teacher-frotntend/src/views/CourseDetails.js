@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import axios from 'axios';
 import SmallStats from "./../components/common/SmallStats";
+import { SERVER_CONFIG } from '../Server/server-variables';
 import {
   Card,
   CardHeader,
@@ -139,14 +140,23 @@ class CourseDetails extends React.Component {
 
           ],
         };
-        let headers = {
-            'X-Api-Key': 'BXGK1t57pTgLKxmReo869MWY2qQey4U4n7fsHjii'
-        }
-        let sub=new Buffer( localStorage.getItem('sub')).toString('base64');
+        let config = {
+          headers: {'X-Api-Key': SERVER_CONFIG.xApiKey}
+        };
 
-        axios.get('https://xycqr0g9ra.execute-api.eu-central-1.amazonaws.com/dev/student/byToken/'+sub,
-         {headers: headers})
-          .then(response =>console.log(response))
+
+
+
+          // axios.get('https://xycqr0g9ra.execute-api.eu-central-1.amazonaws.com/dev/course/2',
+          //  {headers: headers})
+          //   .then(response =>console.log(response))
+          //   let Array = [7];
+          //
+          //   axios.post(SERVER_CONFIG.domain + '/course/2/registered',[7]
+          //     , config).then(response =>console.log(response))
+
+
+
 
       }
     render(){
@@ -162,7 +172,7 @@ class CourseDetails extends React.Component {
 
         <Row>
           {/* Editor */}
-  <Card style = {{height:"100%",width:"60%",marginLeft:"16px"}} className="mb-4">
+  <Card style = {{height:"100%",width:"50%",marginLeft:"16px"}} className="mb-3">
     <CardHeader className="border-bottom">
       <h6 className="m-0">Details</h6>
     </CardHeader>
