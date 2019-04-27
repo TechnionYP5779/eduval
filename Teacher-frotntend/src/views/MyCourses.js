@@ -12,6 +12,8 @@ import {
   Button
 } from "shards-react";
 
+import server from "../Server/Server";
+
 import PageTitle from "../components/common/PageTitle";
 
 class MyCourses extends React.Component {
@@ -19,6 +21,8 @@ class MyCourses extends React.Component {
     super(props);
 
     this.state = {
+
+      courses: [],
 
       // Third list of posts.
       PostsListThree: [
@@ -56,15 +60,20 @@ class MyCourses extends React.Component {
     };
   }
 
+  componentDidMount() {
+    var self = this;
+    server.getAllCourses(function(response){
+        console.log(response);
+        self.setState({courses: response.data});
+      }, function(error){
+    });
+  }
+
+
   render() {
     const {
-      PostsListOne,
-      PostsListTwo,
-      PostsListThree,
-      PostsListFour
+      courses
     } = this.state;
-
-    console.log("props for MyCourses is ", this.props.match.params.id);
 
     return (
       <Container fluid className="main-content-container px-4">
@@ -77,23 +86,39 @@ class MyCourses extends React.Component {
 
         {/* First Row of Posts */}
         <Row>
-          {PostsListThree.map((post, idx) => (
+          {
+            courses.length == 0 &&
+            <Card small className="card-post mb-4">
+              <CardBody>
+                <h4 className="card-title">No Courses?</h4>
+                <p className="card-text text-muted">Create a new course right now!</p>
+              </CardBody>
+              <CardFooter className="border-top d-flex">
+                <div className="card-post__author d-flex" style={{width:"100%"}}>
+                  <a href="/add-new-course" style={{width:"100%"}}><Button style={{width:"100%"}}>
+                    <i className="far fa-edit mr-1" /> Try here
+                  </Button></a>
+                </div>
+              </CardFooter>
+            </Card>
+          }
+          {courses.map((course, idx) => (
             <Col lg="4" key={idx}>
               <Card small className="card-post mb-4">
                 <CardBody>
-                  <h4 className="card-title">{post.title}</h4>
-                  <p className="card-text text-muted">{post.body}</p>
+                  <h4 className="card-title">{course.name}</h4>
+                  <p className="card-text text-muted">{course.description}</p>
                 </CardBody>
                 <CardFooter className="border-top d-flex">
                   <div className="card-post__author d-flex">
                     <div className="d-flex flex-column justify-content-center ml-3">
-                    <a href={"/course-details/" + post.id}><Button size="sm" theme="white">
+                    <a href={"/course-details/" + course.id}><Button size="sm" theme="white">
                       <i className="far fa-edit mr-1" /> View more
                     </Button></a>
                     </div>
                   </div>
                   <div className="my-auto ml-auto">
-                    <a href={"/lesson/" + post.id}><Button size="sm" theme="white">
+                    <a href={"/lesson/" + course.id}><Button size="sm" theme="white">
                       <i className="far fa-bookmark mr-1" /> Start lesson
                     </Button></a>
                   </div>

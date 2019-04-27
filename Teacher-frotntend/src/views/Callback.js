@@ -1,7 +1,17 @@
 import React, { Component } from 'react';
 import loading from './loading.svg';
 
+import server from "../Server/Server"
+
 class Callback extends Component {
+
+  componentDidMount() {
+    var self = this;
+    server.getTeacherProfile(function(response){
+      }, function(error){
+    });
+  }
+
   render() {
     const style = {
       position: 'absolute',
