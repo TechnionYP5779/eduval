@@ -14,6 +14,21 @@ tags:
     description: course stuff
   - name: log
     description: emon transaction stuffz
+  - name: lesson
+    description: |
+      What you use during an actual lesson.
+      
+      In addition to these functions, you will also subscribe to [MQTT topics](https://www.hivemq.com/blog/mqtt-essentials-part-5-mqtt-topics-best-practices/) to receive live updates.  
+      The clients should only *subscribe*. Sending messages is handled by the API calls below.  
+      The content of the notifications is the same as the corresponding API call.
+      
+      There are several topics groups, which are fairly similar to the API endpoints:
+      * ``lesson/{courseId}/status`` - A message will be published here when the lesson starts/ends.
+      * ``lesson/{courseId}/messages/{studentId}`` - Any messages sent to a student will be published here.
+      * ``lesson/{courseId}/students`` - Messages about students connecting will be sent here.
+      
+      IMPORTANT: Please note there is no leading slash (``/``) at the beginning of topic names.  
+      Also remember that you can use wildcards.
 paths:
   /teacher:
     put:
@@ -121,7 +136,7 @@ paths:
           content: {}
       security:
         - api_key: []
-        
+  
   '/teacher/byToken/{authToken}':
     get:
       tags:
@@ -147,7 +162,8 @@ paths:
           content: {}
       security:
         - api_key: []
-        
+
+  
   /student:
     put:
       tags:
@@ -255,7 +271,6 @@ paths:
       security:
         - api_key: []
   
-  
   '/student/byToken/{authToken}':
     get:
       tags:
@@ -320,6 +335,7 @@ paths:
           content: {}
       security:
         - api_key: []
+
   
   /course:
     put:
@@ -426,7 +442,6 @@ paths:
           content: {}
       security:
         - api_key: []
-        
   
   '/course/{courseId}/registered':
     get:
@@ -589,6 +604,7 @@ paths:
           content: {}
       security:
         - api_key: []
+
   
   '/log/ofStudent/{studentId}/byCourse/{courseId}':
     get:
@@ -629,6 +645,220 @@ paths:
       security:
         - api_key: []
   
+  
+  '/lesson/{courseId}/status':
+    get:
+      tags:
+        - lesson
+      summary: Get the status of a lesson
+      
+      parameters:
+        - name: courseId
+          in: path
+          description: The ID of the lesson's course
+          required: true
+          schema:
+            type: integer
+            format: int64
+        
+      responses:
+        '200':
+          description: All OK
+          content:
+            application/json:
+              schema:
+                type: string
+                enum:
+                  - LESSON_START
+                  - LESSON_END
+        '404':
+          description: Course not found
+          content: {}
+        '405':
+          description: Invalid ID
+          content: {}
+      security:
+        - api_key: []
+    post:
+      tags:
+        - lesson
+      summary: Start or end a lesson
+      
+      parameters:
+        - name: courseId
+          in: path
+          description: The ID of the lesson's course
+          required: true
+          schema:
+            type: integer
+            format: int64
+            
+      requestBody:
+        description: >-
+          A string describing the new status.
+        content:
+          application/json:
+            schema:
+              type: string
+              enum:
+                - LESSON_START
+                - LESSON_END
+        required: true
+        
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+        '405':
+          description: Invalid ID
+          content: {}
+      security:
+        - api_key: []
+        
+  '/lesson/{courseId}/messages/{studentId}':
+    get:
+      tags:
+        - lesson
+      summary: Get the student's messages
+      description: Returns all the messages a student got during this lesson
+      parameters:
+        - name: courseId
+          in: path
+          description: ID of the lesson's course
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: studentId
+          in: path
+          description: ID of the requested student
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+        '400':
+          description: Invalid ID supplied
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+      security:
+        - api_key: []
+    post:
+      tags:
+        - lesson
+      summary: Send a message to a student
+      parameters:
+        - name: courseId
+          in: path
+          description: The ID of the lesson's course
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: studentId
+          in: path
+          description: ID of the student
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The message to send.
+        content:
+          application/javascript:
+            schema:
+              $ref: '#/components/schemas/Message'
+        required: true
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+        '405':
+          description: Invalid ID
+          content: {}
+      security:
+        - api_key: []
+
+  '/lesson/{courseId}/present':
+    get:
+      tags:
+        - lesson
+      summary: Get a list of present students
+      parameters:
+        - name: courseId
+          in: path
+          description: The ID of the lesson's course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: All OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Student'
+        '404':
+          description: Course not found
+          content: {}
+        '405':
+          description: Invalid ID
+          content: {}
+      security:
+        - api_key: []
+    post:
+      tags:
+        - lesson
+      summary: Mark a student as present
+      parameters:
+        - name: courseId
+          in: path
+          description: The ID of the lesson's course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The student's ID.
+        content:
+          text/plain:
+            schema:
+              type: integer
+              format: int64
+        required: true
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+        '405':
+          description: Invalid ID
+          content: {}
+      security:
+        - api_key: []
+ 
+  
 components:
   schemas:
     Teacher:
@@ -649,6 +879,7 @@ components:
       required:
       - name
       additionalProperties: false
+    
     Student:
       type: object
       properties:
@@ -686,6 +917,30 @@ components:
         endDate:
           type: string
           format: date
+          
+    Message:
+      oneOf:
+        - type: object
+          properties:
+            messageType:
+              type: string
+              enum: ["EMON"]
+            messageReason:
+              type: string
+              description: unused currently. used to point out the reason for awarding money.
+            value:
+              type: integer
+              format: int64
+              description: The amount of emon given.
+        - type: object
+          properties:
+            messageType:
+              type: string
+              enum: ["EMOJI"]
+            emojiType:
+              type: string
+              description: what emoji was sent
+              enum: ["EMOJI_HAPPY", "EMOJI_THUMBS_UP", "EMOJI_ANGEL", "EMOJI_GRIN", "EMOJI_SHUSH", "EMOJI_ZZZ", "EMOJI_ANGRY", "EMOJI_THUMBS_DOWN"]
           
     Log:
       type: object
