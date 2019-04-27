@@ -1,123 +1,256 @@
-# Welcome to Serverless!
-#
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
-#
 # For full config options, check the docs:
 #    docs.serverless.com
-#
-# Happy Coding!
 
-service: dbFunctions
+service:        dbFunctions
 
+# contains the credentials needed to connect to the DB
 custom:
-  secrets: ${file(secrets.json)}
-
-# You can pin your service to only deploy with a specific Serverless version
-# Check out our docs for more details
-# frameworkVersion: "=X.X.X"
+    secrets:    ${file(secrets.json)}
 
 provider:
-  name: aws
-  runtime: nodejs8.10
+    name:       aws
+    runtime:    nodejs8.10
+    stage:      dev
+    region:     eu-central-1
+    apiKeys:
+        - myApiKey
 
-# you can overwrite defaults here
-  stage: dev
-  region: eu-central-1
+    # defines environment variables for connecting to DB
+    environment:
+        DB_NAME:        ${self:custom.secrets.DB_NAME}
+        DB_USER:        ${self:custom.secrets.DB_USER}
+        DB_PASSWORD:    ${self:custom.secrets.DB_PASSWORD}
+        DB_HOST:        ${self:custom.secrets.DB_HOST}
+        DB_PORT:        ${self:custom.secrets.DB_PORT}
 
-# you can add statements to the Lambda function's IAM Role here
-#  iamRoleStatements:
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:ListBucket"
-#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:PutObject"
-#      Resource:
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
-#            - "/*"
-
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
-  environment:
-#      NODE_ENV: ${self:custom.secrets.NODE_ENV}
-      DB_NAME: ${self:custom.secrets.DB_NAME}
-      DB_USER: ${self:custom.secrets.DB_USER}
-      DB_PASSWORD: ${self:custom.secrets.DB_PASSWORD}
-      DB_HOST: ${self:custom.secrets.DB_HOST}
-      DB_PORT: ${self:custom.secrets.DB_PORT}
-
-# you can add packaging information here
-#package:
-#  include:
-#    - include-me.js
-#    - include-me-dir/**
-#  exclude:
-#    - exclude-me.js
-#    - exclude-me-dir/**
-
+#TODO: Implement a more strict CORS policy
 functions:
-  hello:
-    handler: handler.hello
-  getTeacher:
-    handler: handler.getTeacher 
-  getCourse:
-    handler: handler.getCourse
-  getRegistredStudents:
-    handler: handler.getRegistredStudents   
-  getStudent:
-    handler: handler.getStudent  
+    #teacher
+    getTeacherByToken:
+        handler: teacher/get.byToken
+        description: Get information about a teacher by their Auth Token.
+        events:
+            - http:
+                path: teacher/byToken/{authToken}
+                method: get
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            authToken: true
+    getTeacherById:
+        handler: teacher/get.byId
+        description: Get information about a teacher by their ID.
+        events:
+            - http:
+                path: teacher/{teacherId}
+                method: get
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            teacherId: true
+    deleteTeacher:
+        handler: teacher/delete.handler
+        description: Delete teacher with a certain ID.
+        events:
+            - http:
+                path: teacher/{teacherId}
+                method: delete
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            teacherId: true
+    updateTeacher:
+        handler: teacher/update.handler
+        description: Update a teacher's information.
+        events:
+            - http:
+                path: teacher
+                method: put
+                private: true
+                cors: true
+    addTeacher:
+        handler: teacher/create.handler
+        description: Create a new teacher.
+        events:
+            - http:
+                path: teacher
+                method: post
+                private: true
+                cors: true
 
-#    The following are a few example events you can configure
-#    NOTE: Please make sure to change your handler code to work with those events
-#    Check the event documentation for details
-#    events:
-#      - http:
-#          path: users/create
-#          method: get
-#      - websocket: $connect
-#      - s3: ${env:BUCKET}
-#      - schedule: rate(10 minutes)
-#      - sns: greeter-topic
-#      - stream: arn:aws:dynamodb:region:XXXXXX:table/foo/stream/1970-01-01T00:00:00.000
-#      - alexaSkill: amzn1.ask.skill.xx-xx-xx-xx
-#      - alexaSmartHome: amzn1.ask.skill.xx-xx-xx-xx
-#      - iot:
-#          sql: "SELECT * FROM 'some_topic'"
-#      - cloudwatchEvent:
-#          event:
-#            source:
-#              - "aws.ec2"
-#            detail-type:
-#              - "EC2 Instance State-change Notification"
-#            detail:
-#              state:
-#                - pending
-#      - cloudwatchLog: '/aws/lambda/hello'
-#      - cognitoUserPool:
-#          pool: MyUserPool
-#          trigger: PreSignUp
+    #student
+    getStudentByToken:
+        handler: student/get.byToken
+        description: Get information about a student by their Auth Token.
+        events:
+            - http:
+                path: student/byToken/{authToken}
+                method: get
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            authToken: true
+    getStudentById:
+        handler: student/get.byId
+        description: Get information about a student by their ID.
+        events:
+            - http:
+                path: student/{studentId}
+                method: get
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            studentId: true
+    deleteStudent:
+        handler: student/delete.handler
+        description: Delete student with a certain ID.
+        events:
+            - http:
+                path: student/{studentId}
+                method: delete
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            studentId: true
+    updateStudent:
+        handler: student/update.handler
+        description: Update a student's information.
+        events:
+            - http:
+                path: student
+                method: put
+                private: true
+                cors: true
+    addStudent:
+        handler: student/create.handler
+        description: Create a new student.
+        events:
+            - http:
+                path: student
+                method: post
+                private: true
+                cors: true
 
-#    Define function environment variables here
-#    environment:
-#      variable2: value2
-
-# you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
+    #course
+    updateCourse:
+        handler: course/update.handler
+        description: Update a course's information.
+        events:
+            - http:
+                path: course
+                method: put
+                private: true
+                cors: true
+    addCourse:
+        handler: course/create.handler
+        description: Create a new course.
+        events:
+            - http:
+                path: course
+                method: post
+                private: true
+                cors: true
+    getCourseById:
+        handler: course/get.byId
+        description: Get information about a course by their ID.
+        events:
+            - http:
+                path: course/{courseId}
+                method: get
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    getCoursesByTeacher:
+        handler: course/get.byTeacherId
+        description: Get courses taught by a certain teacher.
+        events:
+            - http:
+                path: course/byTeacher/{teacherId}
+                method: get
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            teacherId: true
+    getCoursesByStudent:
+        handler: course/get.byStudent
+        description: Get courses a student is registered in.
+        events:
+            - http:
+                path: course/byStudent/{studentId}
+                method: get
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            studentId: true
+    deleteCourse:
+        handler: course/delete.handler
+        description: Delete course with a certain ID.
+        events:
+            - http:
+                path: course/{courseId}
+                method: delete
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    getCourseRegistered:
+        handler: course/registered/get.handler
+        description: Get students registered to course.
+        events:
+            - http:
+                path: course/{courseId}/registered
+                method: get
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    addCourseRegistered:
+        handler: course/registered/add.handler
+        description: Register students to a course.
+        events:
+            - http:
+                path: course/{courseId}/registered
+                method: post
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    removeCourseRegistered:
+        handler: course/registered/remove.handler
+        description: Register students to a course.
+        events:
+            - http:
+                path: course/{courseId}/registered/{studentId}
+                method: post
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+                            studentId: true

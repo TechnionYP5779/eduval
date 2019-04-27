@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "knex": "^0.16.5",
-    "mysql": "^2.16.0"
+    "mysql": "^2.16.0",
+    "jsonschema": "^1.2.4"
   }
 }
