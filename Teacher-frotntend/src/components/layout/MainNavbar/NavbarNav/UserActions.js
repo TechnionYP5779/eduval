@@ -19,7 +19,7 @@ export default class UserActions extends React.Component {
 
     this.state = {
       visible: false,
-      username: "[username]"
+      username: ""
     };
 
 
@@ -59,7 +59,7 @@ export default class UserActions extends React.Component {
             <img
               className="user-avatar rounded-circle mr-2"
               src={require("./../../../../images/avatars/owl.png")}
-              alt="User Avatar"
+              alt=""
             />{" "}
             <span className="d-none d-md-inline-block">{this.state.username}</span>
           </DropdownToggle>
