@@ -21,12 +21,17 @@ export default class UserActions extends React.Component {
       visible: false,
       username: "[username]"
     };
+
+
+    this.toggleUserActions = this.toggleUserActions.bind(this);
+  }
+
+  componentDidMount() {
     var self = this;
     server.getTeacherProfile(function(response){
         self.setState({username: response.data.name});
       }, function(error){
     });
-    this.toggleUserActions = this.toggleUserActions.bind(this);
   }
 
   toggleUserActions() {

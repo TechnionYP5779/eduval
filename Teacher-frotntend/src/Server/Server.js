@@ -9,6 +9,22 @@ class Server {
     headers: {'X-Api-Key': SERVER_CONFIG.xApiKey}
   };
 
+  async createNewCourse(callback, callbackError, courseDetails){
+    let teacher_id = localStorage.getItem('teacher_id');
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    courseDetails['id'] = 0;
+    courseDetails['teacherId'] = parseInt(teacher_id);
+    console.log(courseDetails);
+    axios.post(SERVER_CONFIG.domain + '/course', courseDetails, this.config)
+    .then(callback)
+    .catch(callbackError);
+  }
+
+
   /*
   =================== Get Teacher Profile ====================
   @params:
@@ -25,9 +41,9 @@ class Server {
     let config = this.config;
     let teacher_id = localStorage.getItem('teacher_id');
     let sub = localStorage.getItem('sub');
-    if (sub == null){
+    if (sub == null || !auth.isAuthenticated()){
       //TODO error????
-      let error = {response: {error: "not logged in"}};
+      let error = {response: {data: {error: "not logged in"}}};
       callbackError(error);
       return;
     }
