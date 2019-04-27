@@ -24,39 +24,6 @@ class MyCourses extends React.Component {
 
       courses: [],
 
-      // Third list of posts.
-      PostsListThree: [
-        {
-          title: "Math Course #1",
-          body:"Number of students: 5",
-          id: 1
-        },
-        {
-          title: "Math Course #1",
-          body:"Number of students: 6",
-          id: 2
-        },
-        {
-          title: "Math Course #1",
-          body:"Number of students: 8",
-          id: 3
-        },
-        {
-          title: "Math Course #1",
-          body:"Number of students: 10",
-          id: 4
-        },
-        {
-          title: "Math Course #1",
-          body:"Number of students: 10",
-          id: 5
-        },
-        {
-          title: "Math Course #1",
-          body:"Number of students: 10",
-          id: 6
-        }
-      ],
     };
   }
 

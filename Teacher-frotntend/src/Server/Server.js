@@ -9,6 +9,84 @@ class Server {
     headers: {'X-Api-Key': SERVER_CONFIG.xApiKey}
   };
 
+  /*
+  =================== Update Course ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - courseDetails: the course object
+  @use conditions:
+    - User should be logged in when called.
+  */
+  async updateCourse(callback, callbackError, courseDetails){
+    let teacher_id = localStorage.getItem('teacher_id');
+    console.log(teacher_id);
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    axios.put(SERVER_CONFIG.domain + "/course", courseDetails, this.config)
+    .then(callback)
+    .catch(callbackError);
+  }
+
+  /*
+  =================== Get Students ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+      + response is {data: [course objects]}
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - courseId: the course id
+  @use conditions:
+    - User should be logged in when called.
+  */
+  async getStudents(callback, callbackError, courseId){
+    console.log("getCourse");
+    let teacher_id = localStorage.getItem('teacher_id');
+    console.log(teacher_id);
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    console.log("got here?");
+    axios.get(SERVER_CONFIG.domain + "/course/" + courseId + "/registered", this.config)
+    .then(callback)
+    .catch(callbackError);
+  }
+
+  /*
+  =================== Get Course ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+      + response is {data: [course objects]}
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - courseId: the course id
+  @use conditions:
+    - User should be logged in when called.
+  */
+  async getCourse(callback, callbackError, courseId){
+    console.log("getCourse");
+    let teacher_id = localStorage.getItem('teacher_id');
+    console.log(teacher_id);
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    console.log("got here?");
+    axios.get(SERVER_CONFIG.domain + "/course/" + courseId, this.config)
+    .then(function(response){
+      response.data.startDate = response.data.startDate.substring(0,10);
+      response.data.endDate = response.data.endDate.substring(0,10);
+      callback(response);
+    })
+    .catch(callbackError);
+  }
 
   /*
   =================== Get All Courses ====================
