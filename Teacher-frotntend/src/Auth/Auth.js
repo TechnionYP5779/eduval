@@ -1,9 +1,10 @@
 import Auth0Lock from 'auth0-lock';
 import { AUTH_CONFIG } from './auth0-variables';
 import history from '../history';
+import { SERVER_CONFIG } from '../Server/server-variables';
+const axios = require('axios');
 
 class Auth {
-
 
   lock = new Auth0Lock(AUTH_CONFIG.clientId, AUTH_CONFIG.domain, {
     autoclose: true,
@@ -93,7 +94,7 @@ class Auth {
     });
   }
 
-  setSession(authResult) {
+  async setSession(authResult) {
     console.log("setSession");
     if (authResult && authResult.accessToken && authResult.idToken) {
       console.log("authResult");
@@ -105,8 +106,9 @@ class Auth {
       localStorage.setItem('id_token', authResult.idToken);
       localStorage.setItem('expires_at', expiresAt);
       localStorage.setItem('sub', authResult.idTokenPayload.sub);
+      this.registerTeacher();
       // navigate to the home route
-      history.replace('/');
+
     }
   }
 
@@ -135,6 +137,58 @@ class Auth {
     console.log("expire at ", expiresAt);
     return new Date().getTime() < expiresAt;
   }
+
+  registerTeacher(){
+    let config = {
+      headers: {'X-Api-Key': SERVER_CONFIG.xApiKey}
+    };
+    let teacher_id = localStorage.getItem('teacher_id');
+    if (teacher_id != null){
+      history.replace('/');
+      return;
+    }
+
+    let sub = localStorage.getItem('sub');
+    if(sub == null){
+      history.replace('/');
+      return;
+    }
+    axios.get(SERVER_CONFIG.domain + '/teacher/byToken/'+new Buffer(sub).toString('base64'), config)
+    .then(function(response){
+      console.log(response);
+      localStorage.setItem('teacher_id', response.data.id);
+      history.replace('/');
+    })
+    .catch(function(error){
+      if (error.response == null || error.response.status != 404){
+        console.log(error);
+        history.replace('/');
+        return;
+      }
+      // lazy registration to EMON DB
+      auth.getUserInfo(function(error, profile){
+        if (error) {
+          console.log(error);
+          history.replace('/');
+          return;
+        }
+        axios.post(SERVER_CONFIG.domain + '/teacher', {authIdToken: new Buffer(sub).toString('base64'),
+          name: profile.nickname,
+          email: profile.email,
+          phoneNum: profile[SERVER_CONFIG.phone_number]}, config)
+        .then(function(response){
+          localStorage.setItem('teacher_id', response.data);
+          console.log(response);
+          history.replace('/');
+        })
+        .catch(function(error) {
+          console.log(error.response);
+          history.replace('/');
+        });
+      });
+    });
+  }
+
 }
 
 
