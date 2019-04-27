@@ -11,16 +11,27 @@ import {
 } from "shards-react";
 
 import auth from "../../../../Auth/Auth"
+import server from "../../../../Server/Server"
 
 export default class UserActions extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      visible: false
+      visible: false,
+      username: "[username]"
     };
 
+
     this.toggleUserActions = this.toggleUserActions.bind(this);
+  }
+
+  componentDidMount() {
+    var self = this;
+    server.getTeacherProfile(function(response){
+        self.setState({username: response.data.name});
+      }, function(error){
+    });
   }
 
   toggleUserActions() {
@@ -50,7 +61,7 @@ export default class UserActions extends React.Component {
               src={require("./../../../../images/avatars/owl.png")}
               alt="User Avatar"
             />{" "}
-            <span className="d-none d-md-inline-block">[Username]</span>
+            <span className="d-none d-md-inline-block">{this.state.username}</span>
           </DropdownToggle>
           <Collapse tag={DropdownMenu} right small open={this.state.visible}>
             <DropdownItem tag={Link} to="user-profile-lite">

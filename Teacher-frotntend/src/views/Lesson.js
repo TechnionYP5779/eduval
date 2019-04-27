@@ -103,56 +103,65 @@ class Lesson extends React.Component {
         {
           name: "Rraany1",
           id: 1,
-          earned_points: 0,
-          chosen: false
+          desk: 1,
+          chosen: false,
+          emoney: 0
         },
         {
           name: "Rrany2",
           id: 2,
-          earned_points: 1,
-          chosen: false
+          desk: 2,
+          chosen: false,
+          emoney: 10
         },
         {
           name: "Rani Rany Ran",
           id: 3,
-          earned_points: 20,
-          chosen: false
+          desk: 5,
+          chosen: false,
+          emoney: 5
         },
         {
           name: "Raani4",
           id: 4,
-          earned_points: 8,
-          chosen: false
+          desk: 8,
+          chosen: false,
+          emoney: 0
         },
         {
           name: "Raani4",
           id: 4,
-          earned_points: 8,
-          chosen: false
+          desk: 9,
+          chosen: false,
+          emoney: 3
         },
         {
           name: "Raany5",
           id: 5,
-          earned_points: 4,
-          chosen: false
+          desk: 10,
+          chosen: false,
+          emoney: 3
         },
         {
           name: "Raany5",
           id: 5,
-          earned_points: 1,
-          chosen: false
+          desk: 11,
+          chosen: false,
+          emoney: 12
         },
         {
           name: "Raany5",
           id: 5,
-          earned_points: 0,
-          chosen: false
+          desk: 12,
+          chosen: false,
+          emoney: 2
         },
         {
           name: "Ranni6",
           id: 6,
-          earned_points: 0,
-          chosen: false
+          desk: 14,
+          chosen: false,
+          emoney: 10
         }
       ],
     };
@@ -200,22 +209,22 @@ class Lesson extends React.Component {
                       {students.map((student, idx) => (<Col xs="2" >
                         {
                           student.chosen &&
-                          <Button theme="primary" className="mb-2 mr-1"  onClick={()=>{
+                          <Button style={{margin:"6px"}} theme="primary" className="mb-2 mr-1 badge1" data-badge={"desk #" + student.desk} onClick={()=>{
                             let tmp = this.state.students;
                             tmp[idx].chosen = false;
                             this.setState({students : tmp});
                           }}>
-                            {student.name} <br/><br/> {student.earned_points}
+                            {student.name}
                           </Button>
                         }
                         {
                           !student.chosen &&
-                          <Button outline theme="primary" className="mb-2 mr-1" onClick={()=>{
+                          <Button outline style={{margin:"6px"}} theme="primary" className="mb-2 mr-1 badge1" data-badge={"desk #" + student.desk} onClick={()=>{
                             let tmp = this.state.students;
                             tmp[idx].chosen = true;
                             this.setState({students : tmp});
                           }}>
-                            {student.name} <br/><br/> {student.earned_points}
+                            {student.name}
                           </Button>
                         }
                         </Col>
@@ -263,6 +272,8 @@ class Lesson extends React.Component {
 
                 </Col>))}
                 </Row>
+                <hr style={{backgroundColor: "#a4a4a4", width: "95%"}} />
+
                 <div className="mb-2 pb-1" style={{margin:"10px"}}>
                   <h7 style={{fontSize:"12px"}}>Choose amount of E-Money to send</h7>
                   </div>
@@ -271,7 +282,7 @@ class Lesson extends React.Component {
                 <Slider
                   ref = {this.money_slide_ref}
                   id="money_slider"
-                  theme="success"
+                  theme="primary"
                   className="my-4"
                   connect={[true, false]}
                   start={[this.state.reward_money]}
@@ -292,8 +303,11 @@ class Lesson extends React.Component {
                   />
                   </div>
                     <div className="mb-2 pb-1" style={{margin:"10px"}}>
-                  <Button theme="success" className="mb-2 mr-1">
+                  <Button theme="primary" className="mb-2 mr-1">
                     Award!
+                  </Button>
+                  <Button theme="primary" style={{float:"right"}} className="mb-2 mr-1">
+                    End Class
                   </Button>
                   </div>
 
