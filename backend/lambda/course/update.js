@@ -7,7 +7,7 @@ const validate = require('jsonschema').validate;
 function objectToDdRow(obj) {
 	obj.courseId = obj.id;
 	delete obj.id;
-	if("courseName" in obj) {
+	if("name" in obj) {
 		obj.courseName = obj.name;
 		delete obj.name;
 	}
@@ -73,7 +73,7 @@ module.exports.handler = (event, context, callback) => {
 
     knex('Courses')
 	.where({
-		courseId: studentObj.courseId
+		courseId: courseObj.courseId
 	})
 	.update(courseObj)
 	.then((result) => {
