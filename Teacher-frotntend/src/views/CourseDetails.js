@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+
 import axios from 'axios';
 import SmallStats from "./../components/common/SmallStats";
 import { SERVER_CONFIG } from '../Server/server-variables';
@@ -141,19 +142,29 @@ class CourseDetails extends React.Component {
           ],
         };
         let config = {
-          headers: {'X-Api-Key': SERVER_CONFIG.xApiKey}
+          headers: {'X-Api-Key' : 'BXGK1t57pTgLKxmReo869MWY2qQey4U4n7fsHjii'}
         };
+        let headers = {
+            'X-Api-Key': 'BXGK1t57pTgLKxmReo869MWY2qQey4U4n7fsHjii'
+        }
 
-
-
-
-          // axios.get('https://xycqr0g9ra.execute-api.eu-central-1.amazonaws.com/dev/course/2',
-          //  {headers: headers})
-          //   .then(response =>console.log(response))
-          //   let Array = [7];
+        axios.get('https://xycqr0g9ra.execute-api.eu-central-1.amazonaws.com/dev/student/'+
+        localStorage.getItem('student_id')+
+        '/emonBalance/byCourse/'+this.props.match.params.id,
+       {headers: headers})
+       .then((response) => {
+       console.log(response.data);
+     });
           //
-          //   axios.post(SERVER_CONFIG.domain + '/course/2/registered',[7]
-          //     , config).then(response =>console.log(response))
+          // axios.get(SERVER_CONFIG.domain+'/log/ofStudent/'+
+          //   localStorage.getItem('student_id') +
+          // '/byCourse/'+this.props.match.params.id ,
+          //  config)
+          //   .then(response =>console.log(response));
+            // let Array = [7];
+            //
+            // axios.post(SERVER_CONFIG.domain + '/course/2/registered',[7]
+            //   , config).then(response =>console.log(response))
 
 
 
@@ -169,6 +180,7 @@ class CourseDetails extends React.Component {
         <Row noGutters className="page-header py-4">
           <PageTitle sm="4" title={"Physics " + this.props.match.params.id + " - 114051"} subtitle="Course Details" className="text-sm-left" />
         </Row>
+
 
         <Row>
           {/* Editor */}

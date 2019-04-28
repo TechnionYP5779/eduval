@@ -18,6 +18,7 @@ import {
   FormInput,
   FormCheckbox
 } from "shards-react";
+import axios from 'axios';
 
 import Colors from "../components/components-overview/Colors";
 import Checkboxes from "../components/components-overview/Checkboxes";
@@ -40,11 +41,66 @@ import CustomSelect from "../components/components-overview/CustomSelect";
 
 import PageTitle from "../components/common/PageTitle";
 
+
+import awsIot  from 'aws-iot-device-sdk';
+
+
+
+
+
 class Lesson extends React.Component {
 
 
   constructor(props) {
+
+    const getContent = function(url) {
+      return new Promise((resolve, reject) => {
+    	    const lib = url.startsWith('https') ? require('https') : require('http');
+    	    const request = lib.get(url, (response) => {
+    	      if (response.statusCode < 200 || response.statusCode > 299) {
+    	         reject(new Error('Failed to load page, status code: ' + response.statusCode));
+    	       }
+
+    	      const body = [];
+    	      response.on('data', (chunk) => body.push(chunk));
+    	      response.on('end', () => resolve(body.join('')));
+    	    });
+    	    request.on('error', (err) => reject(err))
+        })
+    };
+    let client;
+
+    let connect = async () => {
+    	return getContent('https://qh6vsuof2f.execute-api.eu-central-1.amazonaws.com/dev/iot/keys').then((res) => {
+    		res = JSON.parse(res)
+    		client = awsIot.device({
+                region: res.region,
+                protocol: 'wss',
+                accessKeyId: res.accessKey,
+                secretKey: res.secretKey,
+                sessionToken: res.sessionToken,
+                port: 443,
+                host: res.iotEndpoint
+            });
+    	})
+
+    }
+
+
+
+    let counter=0;
+    connect().then(() => {
+      client.subscribe('someTopic');
+      client.publish('someTopic', 'saying stuff ' + counter++);
+      client.on('message', (topic, message) => {
+        console.log("topic: " + topic)
+        console.log("message: " + message)
+        client.publish('bla', 'saying stuff ' + counter++);
+      })
+    });
     super(props);
+
+
 
     this.state = {
 
@@ -53,6 +109,13 @@ class Lesson extends React.Component {
       student_id : 6,
       chosen_smile : -1,
       chosen_message : -1,
+
+    name: "string",
+    teacherId: 0,
+    location: "string",
+    description: "string",
+    startDate: "2019-04-27",
+    endDate: "2019-04-27",
 
       messages: [{
           message: "I have a question",
@@ -110,7 +173,23 @@ class Lesson extends React.Component {
       ],
 
    };
-  }
+   let headers = {
+       'X-Api-Key': 'BXGK1t57pTgLKxmReo869MWY2qQey4U4n7fsHjii'
+   };
+   axios.get('https://xycqr0g9ra.execute-api.eu-central-1.amazonaws.com/dev/course/'+this.props.match.params.id,
+    {headers: headers})
+    .then((response) => {
+    this.setState(
+      {name: response.data.name ,description : response.data.description,location: response.data.location});
+
+    console.log(this.state.name);
+  })
+  .catch((error)=>{
+    console.log(error);
+  });
+
+
+}
 
 
 
@@ -122,20 +201,18 @@ class Lesson extends React.Component {
       <Container fluid className="main-content-container px-4">
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title="Physics 101" subtitle="Lesson View" className="text-sm-left" />
+          <PageTitle sm="4" title={this.state.name} subtitle="Lesson View" className="text-sm-left" />
         </Row>
         {/* First Row of Posts */}
         <Row>
           <Col lg="8" className="mb-4">
           <Card small className="mb-4 p-0 px-3 pt-1">
               <CardHeader >
-                <h5 className="m-0">Lesson's information</h5>
-                <div className="mt-1">
-                  <p style={{fontSize:"15px"}}>lesson number: 5</p>
-                  <p style={{fontSize:"15px"}}>lesson topic: something</p>
-                  <p style={{fontSize:"15px"}}>teacher name: name name </p>
-                  <p style={{fontSize:"15px"}}>lesson hpurs: 10:00-10:45 </p>
-                  <p style={{fontSize:"15px"}}>E-Money earned: {this.state.reward_money} </p>
+                <h5 className="m-0">Information </h5>
+
+                <div className="mt-2">
+                <p></p>
+                  <p style={{fontSize:"20px" ,textAlign:"center"}}> Current E-Money Earned: {this.state.reward_money} </p>
                 </div>
               </CardHeader>
 
@@ -155,7 +232,7 @@ class Lesson extends React.Component {
               </ListGroup>
             </Card>
             <a href={"/course-summery/" + this.state.lesson_id}><Button style={{fontSize:"17px"}}  className="mb-4 mr-4" onClick={()=>{
-                      
+
                     }}>
                      Leave Lesson
                     </Button></a>
@@ -226,7 +303,7 @@ class Lesson extends React.Component {
                 </Row>
               </ListGroup>
             </Card>
-            
+
           </Col>
         </Row>
 
