@@ -264,4 +264,5 @@ class CourseDetails extends React.Component {
   }
 
 
+
   export default CourseDetails;
