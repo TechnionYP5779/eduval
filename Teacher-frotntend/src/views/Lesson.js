@@ -95,9 +95,12 @@ class Lesson extends React.Component {
       client.on('message', (topic, message) => {
         console.log("topic: " + topic)
         console.log("message: " + message)
-        client.publish('bla', 'saying stuff ' + counter++);
+        client.publish('someTopic', 'saying stuff ' + counter++);
       })
     });
+
+
+
     super(props);
 
 
