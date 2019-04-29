@@ -53,6 +53,9 @@ class Lesson extends React.Component {
 
   constructor(props) {
 
+
+        super(props);
+
     const getContent = function(url) {
       return new Promise((resolve, reject) => {
     	    const lib = url.startsWith('https') ? require('https') : require('http');
@@ -85,23 +88,26 @@ class Lesson extends React.Component {
     	})
 
     }
-
-
+    var url='lesson/'+this.props.match.params.id+'/messages/'+localStorage.getItem('student_id');
 
     let counter=0;
     connect().then(() => {
-      client.subscribe('someTopic');
-      client.publish('someTopic', 'saying stuff ' + counter++);
+
+      client.subscribe(url);
+
+      client.publish(url,JSON.stringify( {
+        value: 0,
+        messageReason: "blabla",
+        messageType: "EMON"
+      }));
       client.on('message', (topic, message) => {
-        console.log("topic: " + topic)
-        console.log("message: " + message)
-        client.publish('someTopic', 'saying stuff ' + counter++);
+        console.log("topic: " + topic);
+        var res=JSON.parse(message);
+        console.log("message: " + res.value)
       })
     });
 
 
-
-    super(props);
 
 
 
