@@ -44,6 +44,7 @@ import PageTitle from "../components/common/PageTitle";
 
 import awsIot  from 'aws-iot-device-sdk';
 
+import "./Lesson.css"
 
 
 
@@ -52,6 +53,16 @@ class Lesson extends React.Component {
 
 
   constructor(props) {
+    var EmojiEnum = {
+      "EMOJI_HAPPY": "🙂",
+      "EMOJI_THUMBS_UP" : "👍",
+      "EMOJI_ANGEL": "👼",
+      "EMOJI_GRIN":"😄",
+      "EMOJI_SHUSH":"🤐",
+      "EMOJI_ZZZ":"😴",
+      "EMOJI_ANGRY":"😠",
+      "EMOJI_THUMBS_DOWN":"👎"
+    };
 
 
         super(props);
@@ -179,7 +190,11 @@ class Lesson extends React.Component {
           type: "danger",
           id: 8
         }
-      ],
+      ],currentEmojis: [
+           "🙂",
+           "👍",
+      ]
+      ,
 
    };
    let headers = {
@@ -229,7 +244,10 @@ class Lesson extends React.Component {
             <Card small className="mb-4">
               <CardHeader className="border-bottom">
                 <h5 className="m-0">Teacher's Messages</h5>
-                <h7 style={{fontSize:"12px"}}>Emojis and messages from the teacher will appear here</h7>
+                <h7 style={{fontSize:"17px"}}>Emojis from Teacher:</h7><br /><br />
+                <ul className='rows'>
+                {this.state.currentEmojis.map((smile) => (<li className='row'>{smile}</li>))}
+                </ul>
               </CardHeader>
 
               <ListGroup flush>
