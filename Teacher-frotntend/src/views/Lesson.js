@@ -40,6 +40,8 @@ import DropdownInputGroups from "../components/components-overview/DropdownInput
 import CustomSelect from "../components/components-overview/CustomSelect";
 
 import PageTitle from "../components/common/PageTitle";
+import iot from "../iotClient/iotClient";
+
 
 class Lesson extends React.Component {
 
@@ -167,7 +169,12 @@ class Lesson extends React.Component {
     };
   }
 
-
+  componentDidMount() {
+    let courseId = this.props.match.params.id;
+    iot.getKeys(function(response){
+      iot.connect(courseId)
+    }, (error)=>{});
+  }
 
 
   render() {
@@ -303,7 +310,7 @@ class Lesson extends React.Component {
                   />
                   </div>
                     <div className="mb-2 pb-1" style={{margin:"10px"}}>
-                  <Button theme="primary" className="mb-2 mr-1">
+                  <Button theme="primary" className="mb-2 mr-1" onClick={iot.sendTest}>
                     Award!
                   </Button>
                   <Button theme="primary" style={{float:"right"}} className="mb-2 mr-1">
