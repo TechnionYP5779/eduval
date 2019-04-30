@@ -15,7 +15,7 @@ import MyCourses from "./views/MyCourses";
 import Callback from "./views/Callback";
 import CourseDetails from "./views/CourseDetails";
 import Lesson from "./views/Lesson";
-import CourseSummery from "./views/CourseSummery";
+import CourseSummery from "./views/CourseSummary";
 
 
 export default [

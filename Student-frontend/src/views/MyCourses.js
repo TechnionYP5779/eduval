@@ -22,42 +22,11 @@ class MyCourses extends React.Component {
 
 
     this.state = {
-      id:res,
+      id: res,
 
       // Third list of posts.
-      PostsListThree: [
-        // {
-        //   title: "Math Course #1",
-        //   body:"Number of students: 5",
-        //   id: 1
-        // },
-        // {
-        //   title: "Math Course #1",
-        //   body:"Number of students: 6",
-        //   id: 2
-        // },
-        // {
-        //   title: "Math Course #1",
-        //   body:"Number of students: 8",
-        //   id: 3
-        // },
-        // {
-        //   title: "Math Course #1",
-        //   body:"Number of students: 10",
-        //   id: 4
-        // },
-        // {
-        //   title: "Math Course #1",
-        //   body:"Number of students: 10",
-        //   id: 5
-        // },
-        // {
-        //   title: "Math Course #1",
-        //   body:"Number of students: 10",
-        //   id: 6
-        // }
-      ],
-
+      PostsListThree: [],
+      lessons_status: []
     };
     console.log("props for MyCourses is ", this.props.match.params.id);
     let headers = {
@@ -73,16 +42,36 @@ class MyCourses extends React.Component {
      {headers: headers})
      .then((response) => {
      this.setState({PostsListThree: response.data});
-
      console.log(this.state.PostsListThree);
+     
+  
+     var i;
+    for (i = 0; i < this.state.PostsListThree.length; i++) { 
+      console.log("number" + i);
+        axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/lesson/'+ this.state.PostsListThree[i].id +'/status',
+          {headers: headers})
+          .then((response) => {
+          this.setState({state: response.data});
+          if(response.data == "LESSON_START"){
+            this.setState({lessons_status: [...this.state.lessons_status,false]});
+          }else{
+             this.setState({lessons_status: [...this.state.lessons_status,true]});
+          }
+          console.log(this.state.lessons_status);
+        }) .catch((error)=>{
+          console.log(error);
+        });
+  }
+
    })
   .catch((error)=>{
      console.log(error);
   });
-
-
-
+  
   }
+  
+
+  
 
   render() {
     const {
@@ -126,7 +115,7 @@ class MyCourses extends React.Component {
                     </div>
                   </div>
                   <div className="my-auto ml-auto">
-                    <a href={"/lesson/" + post.id}><Button size="sm" theme="white">
+                    <a href={"/lesson/" + post.id}><Button disabled = {this.state.lessons_status[idx]} size="sm" theme="white">
                       <i className="far fa-bookmark mr-1" /> Start lesson
                     </Button></a>
                   </div>

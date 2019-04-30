@@ -18,7 +18,7 @@ import {
   CardBody
 } from "shards-react";
 import PageTitle from "../components/common/PageTitle";
-import "./CourseSummery.css"
+import "./CourseSummary.css"
 class CourseSummery extends React.Component {
     constructor(props) {
       super(props);

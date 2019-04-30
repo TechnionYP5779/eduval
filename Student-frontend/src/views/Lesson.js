@@ -304,11 +304,6 @@ const EmojiEnum = {
                 </ListGroupItem>
               </ListGroup>
             </Card>
-            <a href={"/course-summery/" + this.state.lesson_id}><Button style={{fontSize:"17px"}}  className="mb-4 mr-4" onClick={()=>{
-
-                    }}>
-                     Leave Lesson
-                    </Button></a>
           </Col>
 
           <Col lg="4" className="mb-4">
