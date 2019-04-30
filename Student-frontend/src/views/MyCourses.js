@@ -129,10 +129,11 @@ class MyCourses extends React.Component {
                     </div>
                   </div>
                   <div className="my-auto ml-auto">
+                    <a href={"/lesson/" + post.id}>
                     <Button disabled = {this.state.lessons_status[idx]} size="sm" theme="white" onClick={() => {this.insertDeskNumber(post.id)}}>
                       <i className="far fa-bookmark mr-1" /> Start lesson
                     </Button>            
-                  
+                  </a>
                   </div>
                 </CardFooter>
               </Card>
