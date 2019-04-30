@@ -1,5 +1,5 @@
 export const SERVER_CONFIG = {
-  domain: "https://xycqr0g9ra.execute-api.eu-central-1.amazonaws.com/dev",
+  domain: "https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev",
   xApiKey: "ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6",
   first_name: "https://e-mon:eu:auth0:com/firstname",
   last_name: "https://e-mon:eu:auth0:com/lastname",
