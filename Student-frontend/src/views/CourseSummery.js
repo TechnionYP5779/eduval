@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import axios from 'axios';
 import {
   Card,
   CardHeader,
@@ -33,30 +34,51 @@ class CourseSummery extends React.Component {
     };
 
         
-  console.log(this.props.match.params.currentEmojis);
-        this.state = {
 
-          total_reward_money : this.props.match.params.total_money,
-          lesson_id : this.props.match.params.id,
+        var res=JSON.parse(this.props.match.params.id);
+        this.state = {
+          
+          total_reward_money : 0,
+          lesson_id : -1,
+          course_name: "", 
+          course_location: "", 
+          course_start_date: "", 
+          course_end_date: "", 
+          course_description: "", 
           student_id : localStorage.getItem('student_id'),
           chosen_smile : -1,
           chosen_message : -1,
           
-          PostsListThree: [...this.props.match.params.currentEmojis]
+          Emojis: []
           
 
         };
+          this.state.total_reward_money = res.reward_money;
+          this.state.lesson_id = res.id;
+          this.state.Emojis = [...res.emojis];
 
+
+          let headers = {
+            'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
+            };
+            axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/course/'+this.state.lesson_id,
+              {headers: headers})
+              .then((response) => {
+              this.setState(
+                {course_name: response.data.name ,course_description : response.data.description,course_location: response.data.location, course_start_date: response.data.startDate.split('T')[1].split('.')[0], course_end_date: response.data.endDate.split('T')[1].split('.')[0]});
+
+              console.log(this.state.name);
+            })
+            .catch((error)=>{
+              console.log(error);
+            });
       }
     render(){
-        const{
-        PostsListThree
-        } = this.state;
         return(
             <Container fluid className="main-content-container px-4 pb-4">
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title={"Physics " + this.props.match.params.id + " - 114051"} subtitle="Course Summery" className="text-sm-left" />
+          <PageTitle sm="4" title={this.state.course_name + this.state.lesson_id} subtitle="Course Summery" className="text-sm-left" />
         </Row>
 
         <Row>
@@ -73,35 +95,40 @@ class CourseSummery extends React.Component {
               <Row form>
                 {/* Course Name */}
                 <Col md="6" className="form-group">
-                  <p>Class Name: name</p>
+                  <p>Class Name: {this.state.course_name}</p>
                 </Col>
                 </Row>
 
                 <Row form>
-                {/* Topic Name */}
+                {/* Lesson description */}
                 <Col md="6" className="form-group">
-                  <p>Lesson's Topic: topic</p>
+                  <p>Lesson's description: {this.state.course_description}</p>
                 </Col>
                 </Row>
 
                 <Row form>
-                {/* Date */}
+                {/* Start date */}
                 <Col md="6" className="form-group">
-                  <p>Date: date</p>
+                  <p>Start date: {this.state.course_start_date}</p>
                 </Col>
                 </Row>
-
+                <Row form>
+                {/* End date */}
+                <Col md="6" className="form-group">
+                  <p>End date: {this.state.course_end_date}</p>
+                </Col>
+                </Row>
                <Row form>
                  {/* Course Location */}
                 <Col md="6" className="form-group">
-                  <p>Location: location</p>
+                  <p>Location: {this.state.course_location}</p>
                 </Col>
                 </Row>
 
                 <Row form>
                  {/* E-Mony earned */}
                 <Col md="6" className="form-group">
-                  <p>Total E-Mony: 200</p>
+                  <p>Total E-Mony: {this.state.total_reward_money}</p>
                 </Col>
                 </Row>
                 
@@ -116,34 +143,19 @@ class CourseSummery extends React.Component {
   </Card>
 
       <Col>
-        <Card small className="mb-4">
-          <CardHeader className="border-bottom">
-            <h6 className="m-0">Lesson Summery</h6>
-          </CardHeader>
-          <CardBody className="p-0 pb-3">
-            <table className="table mb-0">
-              <thead className="bg-light">
+         <Card small className="mb-4">
+           <ListGroup flush>
+                <ListGroupItem className="p-0 px-3 pt-3">
+              <CardHeader className="border-bottom">
+                <h5 className="m-0">All the Emojis from this lesson</h5><br/>
+                <ul className='rows'>
+                {this.state.Emojis.map((emoji) => (<li className='row'>{emoji}</li>))}
+                </ul>
 
-                <tr>
-                  <th scope="col" className="border-0">
-                    Emon Earned
-                  </th>
-                  <th scope="col" className="border-0">
-                    Emojis Earned
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-              {PostsListThree.map((post, idx) => (
-                <tr>
-                  <td>{post.Sum}</td>
-                  <td><ul >{post.Smileys.map((smile,type ,id) => (<li>{smile}</li>))}</ul></td>
-
-                </tr>))}
-              </tbody>
-            </table>
-          </CardBody>
-        </Card>
+              </CardHeader>
+            </ListGroupItem>
+         </ListGroup>
+       </Card>
       </Col>
     </Row>
       </Container>

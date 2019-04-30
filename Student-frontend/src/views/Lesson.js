@@ -68,8 +68,6 @@ class Lesson extends React.Component {
     teacherId: 0,
     location: "string",
     description: "string",
-    startDate: "2019-04-27",
-    endDate: "2019-04-27",
 
       messages: [{
           message: "I have a question",
@@ -218,7 +216,7 @@ const EmojiEnum = {
               console.log("value: " + res.value)
               let updated_reward_money = +this.state.reward_money + +res.value
               this.setState(prevState => ({
-              reward_money : [updated_reward_money]
+              reward_money : updated_reward_money
               })); 
             }
 
@@ -227,9 +225,12 @@ const EmojiEnum = {
             var res=JSON.parse(message);
             if(res.Enum == "LESSON_END"){
               console.log("end lesson")
-              var dist = document.getElementById('id').id;
-
-              window.location.href = "/course-summery/" + this.state.lesson_id; 
+              
+              window.location.href = "/course-summery/" + JSON.stringify( {
+                  id: this.state.lesson_id,
+                  reward_money: this.state.reward_money, 
+                  emojis: this.state.currentEmojis
+                })
               } 
             }
          
