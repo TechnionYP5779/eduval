@@ -12,7 +12,9 @@ import {
   FormInput,
   FormSelect,
   FormTextarea,
-  Button
+  Container,
+  Button,
+  Alert
 } from "shards-react";
 
 import server from "../../Server/Server";
@@ -61,7 +63,11 @@ update(){
     email: this.state.details.email,
     phoneNum: this.state.details.phoneNum
   }, config)
-  .then((response) => {alert('Successfully Updated')}).catch((response) => {alert('Faild :'+ response)});
+  .then((response) => {console.log("worked", response);
+      self.setState({error: false, success: true, disabled: false});
+      window.scrollTo(0, 0);}).catch((error) => {console.log("failed", error);
+      self.setState({error: "An error has occured", success: false, disabled: false});
+      window.scrollTo(0, 0);});
 }
 
 updateEmail(evnt){
@@ -90,6 +96,24 @@ render()
  {
    return(
      <div>
+
+   {this.state.error &&
+    <Container fluid className="px-0">
+      <Alert className="mb-0" theme="danger">
+        <i className="fa fa-info mx-2"></i> {this.state.error}
+      </Alert>
+    </Container>
+    }
+    {this.state.success &&
+    <Container fluid className="px-0">
+      <Alert className="mb-0" theme="success">
+        <i className="fa fa-info mx-2"></i> Success! Your course has been updated!
+      </Alert>
+    </Container>
+    }
+
+
+
    <Card small className="mb-4">
      <CardHeader className="border-bottom">
        <h6 className="m-0">Change Details</h6>

@@ -189,20 +189,24 @@ const EmojiEnum = {
                 this.setState(prevState => ({
                 currentEmojis : [...this.state.currentEmojis, EmojiEnum[res.emojiType]]
               })); 
+              this.setState({message: "You got an Emoji from your teacher: "+EmojiEnum[res.emojiType], success: true});
+              window.scrollTo(0, 0);
             }else{
               console.log("value: " + res.value)
               let updated_reward_money = +this.state.reward_money + +res.value
               this.setState(prevState => ({
               reward_money : updated_reward_money
-              })); 
+            })); 
+            this.setState({message: "You got "+ res.value+" Emons from your teacher!", success: true});
+              window.scrollTo(0, 0);
             }
 
         }else{
           console.log("topic: " + topic);
 
             if(message == "LESSON_END"){
-              console.log("end lesson")
-              
+              this.setState({message: "The lesson ended", success: false});
+              window.scrollTo(0, 0);
               window.location.href = "/course-summery/" + JSON.stringify( {
                   id: this.state.lesson_id,
                   reward_money: this.state.reward_money, 
@@ -244,8 +248,26 @@ const EmojiEnum = {
   render() {
 
    const {messages, smileys} = this.state;
+
+
     return (
       <Container fluid className="main-content-container px-4">
+
+            {this.state.error && 
+    <Container fluid className="px-0" >
+      <Alert className="mb-0" theme="danger">
+        <i className="fa fa-info mx-2"></i> {this.state.message}
+      </Alert>
+    </Container>
+    }
+
+           {this.state.success && 
+    <Container fluid className="px-0">
+      <Alert className="mb-0" theme="success" >
+        <i className="fa fa-info mx-2"></i> {this.state.message}
+      </Alert>
+    </Container>
+    }
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
           <PageTitle sm="4" title={this.state.name} subtitle="Lesson View" className="text-sm-left" />
