@@ -14,13 +14,26 @@ import auth from "../../../../Auth/Auth"
 import server from "../../../../Server/Server"
 
 export default class UserActions extends React.Component {
+
+  _isMounted = false;
+
   constructor(props) {
     super(props);
 
     this.state = {
       visible: false,
-      username: "[username]"
+      username: ""
     };
+
+    this.toggleUserActions = this.toggleUserActions.bind(this);
+  }
+
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  componentDidMount() {
     var self = this;
     server.getStudentProfile(function(response){
         self.setState({username: response.data.name});
