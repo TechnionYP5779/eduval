@@ -14,24 +14,38 @@ import auth from "../../../../Auth/Auth"
 import server from "../../../../Server/Server"
 
 export default class UserActions extends React.Component {
+
+  _isMounted = false;
+
   constructor(props) {
     super(props);
 
     this.state = {
       visible: false,
-      username: "[username]"
+      username: ""
     };
-
 
     this.toggleUserActions = this.toggleUserActions.bind(this);
   }
 
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
   componentDidMount() {
     var self = this;
+    console.log("====================================mount?");
+    this._isMounted = true;
     server.getTeacherProfile(function(response){
-        self.setState({username: response.data.name});
+        if (self._isMounted){
+          self.setState({username: response.data.name});
+          // console.log(response);
+        }
       }, function(error){
     });
+
+
   }
 
   toggleUserActions() {
@@ -59,7 +73,7 @@ export default class UserActions extends React.Component {
             <img
               className="user-avatar rounded-circle mr-2"
               src={require("./../../../../images/avatars/owl.png")}
-              alt="User Avatar"
+              alt=""
             />{" "}
             <span className="d-none d-md-inline-block">{this.state.username}</span>
           </DropdownToggle>

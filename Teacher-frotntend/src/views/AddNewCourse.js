@@ -24,9 +24,11 @@ export default class AddNewCourse extends React.Component {
   handler(errorMsg){
     if (errorMsg){
       this.setState({success: false, error: errorMsg});
+      window.scrollTo(0, 0);
     }
     else{
       this.setState({success: true, error: false});
+      window.scrollTo(0, 0);
     }
   }
 
