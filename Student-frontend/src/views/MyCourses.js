@@ -23,7 +23,6 @@ class MyCourses extends React.Component {
 
     this.state = {
       id: res,
-
       // Third list of posts.
       PostsListThree: [],
       lessons_status: []
@@ -71,7 +70,22 @@ class MyCourses extends React.Component {
   }
   
 
-  
+  insertDeskNumber(id) {
+    console.log("id" + id);
+    console.log(localStorage.getItem('student_id'));
+      let config = {
+          headers: {'X-Api-Key' : 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'}
+      };
+      var txt;
+      var deskNumber = prompt("Please enter your desk number:", "");
+      if (deskNumber == null || deskNumber == "") {
+        txt = "User cancelled the prompt.";
+      } else {
+        axios.post('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/lesson/'+ id +'/present',{
+          id:  parseInt(localStorage.getItem('student_id')),
+          desk: deskNumber}, config)
+      }
+     }
 
   render() {
     const {
@@ -115,9 +129,10 @@ class MyCourses extends React.Component {
                     </div>
                   </div>
                   <div className="my-auto ml-auto">
-                    <a href={"/lesson/" + post.id}><Button disabled = {this.state.lessons_status[idx]} size="sm" theme="white">
+                    <Button disabled = {this.state.lessons_status[idx]} size="sm" theme="white" onClick={() => {this.insertDeskNumber(post.id)}}>
                       <i className="far fa-bookmark mr-1" /> Start lesson
-                    </Button></a>
+                    </Button>            
+                  
                   </div>
                 </CardFooter>
               </Card>
@@ -126,8 +141,12 @@ class MyCourses extends React.Component {
         </Row>
 
       </Container>
+
+
     );
+    
   }
+    
 }
 
 export default MyCourses;

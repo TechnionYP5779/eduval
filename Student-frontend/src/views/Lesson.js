@@ -200,9 +200,9 @@ const EmojiEnum = {
         value: 15
       }));
 
-      client.publish(LessonsStatusURL,JSON.stringify( {
+      /*client.publish(LessonsStatusURL,JSON.stringify( {
         Enum: "LESSON_END"
-      }));
+      }));*/
       client.on('message', (topic, message) => {
         if(topic == LessonsMessageURL){
             console.log("topic: " + topic);
