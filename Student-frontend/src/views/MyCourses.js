@@ -22,67 +22,70 @@ class MyCourses extends React.Component {
 
 
     this.state = {
-      id:res,
-
+      id: res,
       // Third list of posts.
-      PostsListThree: [
-        // {
-        //   title: "Math Course #1",
-        //   body:"Number of students: 5",
-        //   id: 1
-        // },
-        // {
-        //   title: "Math Course #1",
-        //   body:"Number of students: 6",
-        //   id: 2
-        // },
-        // {
-        //   title: "Math Course #1",
-        //   body:"Number of students: 8",
-        //   id: 3
-        // },
-        // {
-        //   title: "Math Course #1",
-        //   body:"Number of students: 10",
-        //   id: 4
-        // },
-        // {
-        //   title: "Math Course #1",
-        //   body:"Number of students: 10",
-        //   id: 5
-        // },
-        // {
-        //   title: "Math Course #1",
-        //   body:"Number of students: 10",
-        //   id: 6
-        // }
-      ],
-
+      PostsListThree: [],
+      lessons_status: []
     };
     console.log("props for MyCourses is ", this.props.match.params.id);
     let headers = {
-        'X-Api-Key': 'BXGK1t57pTgLKxmReo869MWY2qQey4U4n7fsHjii'
+        'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
     }
     let sub=new Buffer( localStorage.getItem('sub')).toString('base64');
-    axios.get('https://xycqr0g9ra.execute-api.eu-central-1.amazonaws.com/dev/student/byToken/'+sub,
+    axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/student/byToken/'+sub,
      {headers: headers})
       .then(response =>localStorage.setItem('student_id', response.data.id) );
       let res=[];
 
-      axios.get('https://xycqr0g9ra.execute-api.eu-central-1.amazonaws.com/dev/course/byStudent/'+localStorage.getItem('student_id'),
+      axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/course/byStudent/'+localStorage.getItem('student_id'),
      {headers: headers})
      .then((response) => {
      this.setState({PostsListThree: response.data});
-
      console.log(this.state.PostsListThree);
+     
+  
+     var i;
+    for (i = 0; i < this.state.PostsListThree.length; i++) { 
+      console.log("number" + i);
+        axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/lesson/'+ this.state.PostsListThree[i].id +'/status',
+          {headers: headers})
+          .then((response) => {
+          this.setState({state: response.data});
+          if(response.data == "LESSON_START"){
+            this.setState({lessons_status: [...this.state.lessons_status,false]});
+          }else{
+             this.setState({lessons_status: [...this.state.lessons_status,true]});
+          }
+          console.log(this.state.lessons_status);
+        }) .catch((error)=>{
+          console.log(error);
+        });
+  }
+
    })
   .catch((error)=>{
      console.log(error);
   });
-
-
-
+  
   }
+  
+
+  insertDeskNumber(id) {
+    console.log("id" + id);
+    console.log(localStorage.getItem('student_id'));
+      let config = {
+          headers: {'X-Api-Key' : 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'}
+      };
+      var txt;
+      var deskNumber = prompt("Please enter your desk number:", "");
+      if (deskNumber == null || deskNumber == "") {
+        txt = "User cancelled the prompt.";
+      } else {
+        axios.post('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/lesson/'+ id +'/present',{
+          id:  parseInt(localStorage.getItem('student_id')),
+          desk: deskNumber}, config)
+      }
+     }
 
   render() {
     const {
@@ -126,9 +129,11 @@ class MyCourses extends React.Component {
                     </div>
                   </div>
                   <div className="my-auto ml-auto">
-                    <a href={"/lesson/" + post.id}><Button size="sm" theme="white">
+                    <a href={"/lesson/" + post.id}>
+                    <Button disabled = {this.state.lessons_status[idx]} size="sm" theme="white" onClick={() => {this.insertDeskNumber(post.id)}}>
                       <i className="far fa-bookmark mr-1" /> Start lesson
-                    </Button></a>
+                    </Button>            
+                  </a>
                   </div>
                 </CardFooter>
               </Card>
@@ -137,8 +142,12 @@ class MyCourses extends React.Component {
         </Row>
 
       </Container>
+
+
     );
+    
   }
+    
 }
 
 export default MyCourses;
