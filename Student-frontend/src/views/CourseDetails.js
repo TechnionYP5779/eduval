@@ -146,9 +146,9 @@ class CourseDetails extends React.Component {
               {PostsListThree.map((post, idx) => (
 
                 <tr>
-                  <td>{post.time.split('T')[0]}</td>
-                  <td>{post.time.split('T')[1].split('.')[0]}</td>
-                  <td>{post.messageType=="EMON" ? post.value : EmojiEnum[post.emojiType]}</td>
+                  <td>{new Date(post.time).getDate().toString().padStart(2,'0') + '/' + new Date(post.time).getMonth().toString().padStart(2,'0') + '/' + new Date(post.time).getFullYear() }</td>
+                  <td>{new Date(post.time).getHours().toString().padStart(2,'0') + ':' + new Date(post.time).getMinutes()}</td>
+                  <td>{post.messageType=="EMON" ? post.value + ' Emons' : EmojiEnum[post.emojiType]}</td>
                 </tr>))}
               </tbody>
             </table>
