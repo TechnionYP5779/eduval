@@ -39,7 +39,7 @@ class iotClient {
     this.client.publish(this.iotTopic, "testing testing");
   }
 
-  connect(courseId){
+  connect(courseId, connectCallback, messageCallback, offlineCallback){
     this.iotTopic = IOT_CONFIG.iotTopic(courseId);
     console.log("=========connect========");
     console.log(this.iotTopic);
@@ -55,16 +55,27 @@ class iotClient {
     const onConnect = () => {
         this.client.subscribe(this.iotTopic);
         console.log('Connected to ', this.iotTopic);
+        connectCallback();
     };
 
     const onMessage = (topic, message) => {
         message = new TextDecoder("utf-8").decode(message);
         console.log("recieved on topic", topic, "message", message);
+        messageCallback();
     };
 
-    const onError = (error) => {console.log("onError", error);};
-    const onReconnect = () => {};
-    const onOffline = () => {};
+    const onError = (error) => {
+      console.log("onError", error);
+      offlineCallback();
+    };
+    const onReconnect = () => {
+      console.log("reconnecting");
+      connectCallback();
+    };
+    const onOffline = () => {
+      console.log("offline now");
+      offlineCallback();
+    };
 
     const onClose = () => {
         console.log('Connection failed');
