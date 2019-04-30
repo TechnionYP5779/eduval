@@ -180,29 +180,6 @@ const EmojiEnum = {
       client.subscribe(LessonsMessageURL);
       client.subscribe(LessonsStatusURL);
 
-      client.publish(LessonsMessageURL,JSON.stringify( {
-        messageType: "EMOJI",
-        emojiType: "EMOJI_HAPPY"
-      }));
-      client.publish(LessonsMessageURL,JSON.stringify( {
-        messageType: "EMON",
-        messageReason: "Because you are cool!",
-        value: 10
-      }));
-
-      client.publish(LessonsMessageURL,JSON.stringify( {
-        messageType: "EMOJI",
-        emojiType: "EMOJI_THUMBS_UP"
-      }));
-      client.publish(LessonsMessageURL,JSON.stringify( {
-        messageType: "EMON",
-        messageReason: "Because you are cool!",
-        value: 15
-      }));
-
-      client.publish(LessonsStatusURL,JSON.stringify( {
-        Enum: "LESSON_END"
-      }));
       client.on('message', (topic, message) => {
         if(topic == LessonsMessageURL){
             console.log("topic: " + topic);
@@ -222,8 +199,8 @@ const EmojiEnum = {
 
         }else{
           console.log("topic: " + topic);
-            var res=JSON.parse(message);
-            if(res.Enum == "LESSON_END"){
+
+            if(message == "LESSON_END"){
               console.log("end lesson")
               
               window.location.href = "/course-summery/" + JSON.stringify( {

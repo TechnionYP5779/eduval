@@ -25,7 +25,7 @@ class MyCourses extends React.Component {
       id: res,
       // Third list of posts.
       PostsListThree: [],
-      lessons_status: []
+      lessons_status: {}
     };
     console.log("props for MyCourses is ", this.props.match.params.id);
     let headers = {
@@ -41,21 +41,27 @@ class MyCourses extends React.Component {
      {headers: headers})
      .then((response) => {
      this.setState({PostsListThree: response.data});
-     console.log(this.state.PostsListThree);
      
   
      var i;
     for (i = 0; i < this.state.PostsListThree.length; i++) { 
       console.log("number" + i);
+      console.log(this.state.PostsListThree[i].id);
         axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/lesson/'+ this.state.PostsListThree[i].id +'/status',
           {headers: headers})
           .then((response) => {
-          this.setState({state: response.data});
+            console.log((response));
+            var current_id = ((response.request.responseURL).split('lesson')[1]).split('/')[1];
           if(response.data == "LESSON_START"){
-            this.setState({lessons_status: [...this.state.lessons_status,false]});
+            var insert = this.state.lessons_status;
+            insert[current_id] = false; 
+            this.setState({lessons_status: insert});
           }else{
-             this.setState({lessons_status: [...this.state.lessons_status,true]});
+            var insert = this.state.lessons_status;
+              insert[current_id] = true; 
+             this.setState({lessons_status: insert});
           }
+          console.log("123123123213");
           console.log(this.state.lessons_status);
         }) .catch((error)=>{
           console.log(error);
@@ -83,7 +89,9 @@ class MyCourses extends React.Component {
       } else {
         axios.post('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/lesson/'+ id +'/present',{
           id:  parseInt(localStorage.getItem('student_id')),
-          desk: deskNumber}, config)
+          desk: deskNumber}, config).then(function(response){
+            history.push("/lesson/" + id);
+          });
       }
      }
 
@@ -129,11 +137,11 @@ class MyCourses extends React.Component {
                     </div>
                   </div>
                   <div className="my-auto ml-auto">
-                    <a href={"/lesson/" + post.id}>
-                    <Button disabled = {this.state.lessons_status[idx]} size="sm" theme="white" onClick={() => {this.insertDeskNumber(post.id)}}>
-                      <i className="far fa-bookmark mr-1" /> Start lesson
+                    
+                    <Button disabled = {this.state.lessons_status[post.id]} size="sm" theme="white" onClick={() => {this.insertDeskNumber(post.id)}}>
+                      <i className="far fa-bookmark mr-1" /> Join lesson
                     </Button>            
-                  </a>
+                  
                   </div>
                 </CardFooter>
               </Card>

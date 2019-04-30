@@ -55,8 +55,8 @@ class CourseDetails extends React.Component {
         let headers = {
             'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
         }
-        var student=8;        //localStorage.getItem('student_id');
-        var course =13;        //this.props.match.params.id;
+        var student=localStorage.getItem('student_id');
+        var course =this.props.match.params.id;
 
 
         axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/student/'+
