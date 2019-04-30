@@ -116,6 +116,8 @@ class Lesson extends React.Component {
       chosen_students: [],
 
       students: [],
+
+      course_name: ""
     };
 
     this.unchooseStudent = this.unchooseStudent.bind(this);
@@ -152,6 +154,10 @@ class Lesson extends React.Component {
     iot.getKeys(function(response){
       iot.connect(courseId, onConnect, onConnect, onOffline);
     }, (error)=>{});
+
+    server.getCourse(function(response){
+      self.setState({course_name: response.data.name});
+    }, (error)=>{}, courseId);
 
   }
 
@@ -203,7 +209,7 @@ class Lesson extends React.Component {
       <Container fluid className="main-content-container px-4">
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title="Physics 101" subtitle="Lesson View" className="text-sm-left" />
+          <PageTitle sm="4" title={this.state.course_name} subtitle="Lesson View" className="text-sm-left" />
         </Row>
         {/* First Row of Posts */}
         <Row>
