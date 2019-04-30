@@ -254,3 +254,129 @@ functions:
                         paths:
                             courseId: true
                             studentId: true
+
+    #lesson
+    getLessonStatus:
+        handler: lesson/status.get
+        description: Get the current status of a lesson.
+        events:
+            - http:
+                path: lesson/{courseId}/status
+                method: get
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    updateLessonStatus:
+        handler: lesson/status.post
+        description: Update the status of a lesson.
+        events:
+            - http:
+                path: lesson/{courseId}/status
+                method: post
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+
+    getPresentStudents:
+        handler: lesson/present.get
+        description: Get the list of present students.
+        events:
+            - http:
+                path: lesson/{courseId}/present
+                method: get
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    updatePresentStudents:
+        handler: lesson/present.post
+        description: Add a student to the list of present students.
+        events:
+            - http:
+                path: lesson/{courseId}/present
+                method: post
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    getStudentMessages:
+        handler: lesson/messages.get
+        description: Get the list of present students.
+        events:
+            - http:
+                path: lesson/{courseId}/messages/{studentId}
+                method: get
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+                            studentId: true
+    postStudentMessage:
+        handler: lesson/messages.post
+        description: Add a student to the list of present students.
+        events:
+            - http:
+                path: lesson/{courseId}/messages/{studentId}
+                method: post
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+                            studentId: true
+    clearStudentMessages:
+        handler: lesson/messages.delete
+        description: Add a student to the list of present students.
+        events:
+            - http:
+                path: lesson/{courseId}/messages/{studentId}
+                method: delete
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+                            studentId: true
+
+    getStudentLog:
+        handler: log/get.handler
+        description: Get blaaaaaaaaaaaaaaa
+        events:
+            - http:
+                path: log/ofStudent/{studentId}/byCourse/{courseId}/
+                method: get
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+                            studentId: true
+    getEmons:
+        handler: student/get.emons
+        description: Get blaaaaaaaaaaaaaaa
+        events:
+            - http:
+                path: student/{studentId}/emonBalance/byCourse/{courseId}
+                method: get
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+                            studentId: true
