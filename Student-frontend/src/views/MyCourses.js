@@ -61,15 +61,15 @@ class MyCourses extends React.Component {
     };
     console.log("props for MyCourses is ", this.props.match.params.id);
     let headers = {
-        'X-Api-Key': 'BXGK1t57pTgLKxmReo869MWY2qQey4U4n7fsHjii'
+        'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
     }
     let sub=new Buffer( localStorage.getItem('sub')).toString('base64');
-    axios.get('https://xycqr0g9ra.execute-api.eu-central-1.amazonaws.com/dev/student/byToken/'+sub,
+    axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/student/byToken/'+sub,
      {headers: headers})
       .then(response =>localStorage.setItem('student_id', response.data.id) );
       let res=[];
 
-      axios.get('https://xycqr0g9ra.execute-api.eu-central-1.amazonaws.com/dev/course/byStudent/'+localStorage.getItem('student_id'),
+      axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/course/byStudent/'+localStorage.getItem('student_id'),
      {headers: headers})
      .then((response) => {
      this.setState({PostsListThree: response.data});

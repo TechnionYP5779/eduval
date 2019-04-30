@@ -142,13 +142,13 @@ class CourseDetails extends React.Component {
           ],
         };
         let config = {
-          headers: {'X-Api-Key' : 'BXGK1t57pTgLKxmReo869MWY2qQey4U4n7fsHjii'}
+          headers: {'X-Api-Key' : 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'}
         };
         let headers = {
-            'X-Api-Key': 'BXGK1t57pTgLKxmReo869MWY2qQey4U4n7fsHjii'
+            'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
         }
 
-        axios.get('https://xycqr0g9ra.execute-api.eu-central-1.amazonaws.com/dev/student/'+
+        axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/student/'+
         localStorage.getItem('student_id')+
         '/emonBalance/byCourse/'+this.props.match.params.id,
        {headers: headers})

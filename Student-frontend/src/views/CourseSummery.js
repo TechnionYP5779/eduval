@@ -20,149 +20,33 @@ import PageTitle from "../components/common/PageTitle";
 import "./CourseSummery.css"
 class CourseSummery extends React.Component {
     constructor(props) {
-        super(props);
+      super(props);
+        const EmojiEnum = {
+              "EMOJI_HAPPY": "🙂",
+              "EMOJI_THUMBS_UP" : "👍",
+              "EMOJI_ANGEL": "👼",
+              "EMOJI_GRIN":"😄",
+              "EMOJI_SHUSH":"🤐",
+              "EMOJI_ZZZ":"😴",
+              "EMOJI_ANGRY":"😠",
+              "EMOJI_THUMBS_DOWN":"👎"
+    };
 
+        
+  console.log(this.props.match.params.currentEmojis);
         this.state = {
 
-          smileys: [{
-              smile: "🙂",
-              type: "success",
-              id: 1
-            },
-            {
-              smile: "👍",
-              type: "success",
-              id: 2
-            },
-            {
-              smile: "😇",
-              type: "success",
-              id: 3
-            },
-            {
-              smile: "😁",
-              type: "success",
-              id: 4
-            },
-            {
-              smile: "🤐",
-              type: "warning",
-              id: 5
-            },
-            {
-              smile: "😴",
-              type: "warning",
-              id: 6
-            },
-            {
-              smile: "😠",
-              type: "danger",
-              id: 7
-            },
-            {
-              smile: "👎",
-              type: "danger",
-              id: 8
-            }
-          ],
+          total_reward_money : this.props.match.params.total_money,
+          lesson_id : this.props.match.params.id,
+          student_id : localStorage.getItem('student_id'),
+          chosen_smile : -1,
+          chosen_message : -1,
+          
+          PostsListThree: [...this.props.match.params.currentEmojis]
+          
 
-          // Third list of posts.
-          PostsListThree: [
-            {
-              id:"1",
-              LastName:"Sixth grade",
-              Sum:"2",
-              Smileys: [
-                   "🙂",
-                   "👍",
-              ]
-            },
-            {
-                id:"2",
-                LastName:"Sixth grade",
-                Sum:"5",
-                Smileys: [
-                     "🙂",
-                     "👍",
-                ]
-            },
-            {
-                id:"3",
-                LastName:"Sixth grade",
-                Sum:"7",
-                Smileys: [
-                     "🙂",
-                     "👍",
-                ]
-            },
-            {
-                id:"4",
-                LastName:"Sixth grade",
-                Sum:"0",
-                Smileys: [
-                     "🙂",
-                     "👍",
-                ]
-            },
-            {
-                id:"5",
-                LastName:"Sixth grade",
-                Sum:"7",
-                Smileys: [
-                     "🙂",
-                     "👍",
-                ]
-
-            },
-            {
-                id:"6",
-                LastName:"Sixth grade",
-                Sum:"6",
-                Smileys: [
-                     "🙂",
-                     "👍",
-                ]
-            },
-            {
-                id:"1",
-                LastName:"Sixth grade",
-                Sum:"4",
-                Smileys: [
-                     "🙂",
-                     "👍",
-                ]
-              },
-              {
-                  id:"2",
-                  LastName:"Sixth grade",
-                  Sum:"5",
-                  Smileys: [
-                       "🙂",
-                       "👍",
-                  ]
-
-              },
-              {
-                  id:"3",
-                  LastName:"Sixth grade",
-                  Sum:"0",
-                  Smileys: [
-                       "🙂",
-                       "👍",
-                  ]
-              },
-              {
-                  id:"4",
-                  LastName:"Sixth grade",
-                  Sum:"5",
-                  Smileys: [
-                       "🙂",
-                       "👍",
-                  ]
-              }
-
-          ],
         };
+
       }
     render(){
         const{
