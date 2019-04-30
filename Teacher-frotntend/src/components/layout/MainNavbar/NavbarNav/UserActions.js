@@ -38,10 +38,14 @@ export default class UserActions extends React.Component {
     console.log("====================================mount?");
     this._isMounted = true;
     server.getTeacherProfile(function(response){
-        if (self._isMounted)
+        if (self._isMounted){
           self.setState({username: response.data.name});
+          // console.log(response);
+        }
       }, function(error){
     });
+
+
   }
 
   toggleUserActions() {

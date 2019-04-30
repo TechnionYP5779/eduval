@@ -9,6 +9,31 @@ class Server {
     headers: {'X-Api-Key': SERVER_CONFIG.xApiKey}
   };
 
+
+  /*
+  =================== Update Teacher ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - courseDetails: the course object
+  @use conditions:
+    - User should be logged in when called.
+  */
+  async updateTeacher(callback, callbackError, teacherDetails){
+    let teacher_id = localStorage.getItem('teacher_id');
+    console.log(teacher_id);
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    axios.put(SERVER_CONFIG.domain + '/teacher', teacherDetails ,this.config)
+    .then(callback)
+    .catch(callbackError);
+  }
+
+
   /*
   =================== Send E-Money ====================
   @params:
