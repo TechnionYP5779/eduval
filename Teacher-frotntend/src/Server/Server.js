@@ -28,7 +28,7 @@ class Server {
       callbackError(error);
       return;
     }
-    axios.put(SERVER_CONFIG.domain + '/teacher/' + teacher_id, teacherDetails ,this.config)
+    axios.put(SERVER_CONFIG.domain + '/teacher', teacherDetails ,this.config)
     .then(callback)
     .catch(callbackError);
   }
