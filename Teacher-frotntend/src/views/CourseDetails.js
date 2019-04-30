@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import history from '../history';
 import {
   Card,
   CardHeader,
@@ -210,9 +211,15 @@ class CourseDetails extends React.Component {
                       </Col>
                     </Row>
                     <Button outline disabled={this.state.disabled} onClick={this.update} theme="accent">Update Course</Button>
-                    <a href={"/lesson/" + this.props.match.params.id}>
-                      <Button theme="success" onClick={()=>{}} style={{float:"right"}}>Start lesson</Button>
-                    </a>
+                    <Button theme="success" disabled={this.state.disabled} onClick={()=>{
+                      this.setState({disabled: true});
+                      let self = this;
+                      server.changeLessonStatus(function(response){
+                        history.push("/lesson/" + self.props.match.params.id);
+                      }, function(error){
+                        self.setState({disabled: false, error: "An error has occured"});
+                      }, this.props.match.params.id, "LESSON_END");
+                    }} style={{float:"right"}}>Start lesson</Button>
                   </Form>
                 </Col>
               </Row>

@@ -10,6 +10,93 @@ class Server {
   };
 
   /*
+  =================== Send E-Money ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - emoji_type: the emoji to send
+    - student_id: the student to send the id
+    - course_id: the course in session
+  @use conditions:
+    - User should be logged in when called.
+    - Lesson should be in session
+  */
+  async sendEMoney(callback, callbackError, amount, reason, students_id, course_id){
+    let teacher_id = localStorage.getItem('teacher_id');
+    console.log(teacher_id);
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    for (var student_id in students_id){
+      axios.post(
+        SERVER_CONFIG.domain + "/lesson/" + course_id + "/messages/" + students_id[student_id],
+        {messageType: "EMON", messageReason: reason, value: amount},
+        this.config)
+      .then(callback)
+      .catch(callbackError);
+    }
+  }
+
+  /*
+  =================== Change lesson status ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - course_id: the course in session
+    - status: "LESSON_START" or "LESSON_END"
+  @use conditions:
+    - User should be logged in when called.
+  */
+  async changeLessonStatus(callback, callbackError, course_id, status){
+    let teacher_id = localStorage.getItem('teacher_id');
+    console.log(teacher_id);
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    axios.post(SERVER_CONFIG.domain + "/lesson/" + course_id + "/status", status, this.config)
+    .then(callback)
+    .catch(callbackError);
+  }
+
+  /*
+  =================== Send emoji ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - emoji_type: the emoji to send
+    - student_id: the student to send the id
+    - course_id: the course in session
+  @use conditions:
+    - User should be logged in when called.
+    - Lesson should be in session
+  */
+  async sendEmoji(callback, callbackError, emoji_type, students_id, course_id){
+    let teacher_id = localStorage.getItem('teacher_id');
+    console.log(teacher_id);
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    for (var student_id in students_id){
+      axios.post(
+        SERVER_CONFIG.domain + "/lesson/" + course_id + "/messages/" + students_id[student_id],
+        {messageType: "EMOJI", emojiType: emoji_type},
+        this.config)
+      .then(callback)
+      .catch(callbackError);
+    }
+  }
+
+
+  /*
   =================== Update Course ====================
   @params:
     - callback: function to do in case of success that has one paramater - the response
@@ -28,6 +115,30 @@ class Server {
       return;
     }
     axios.put(SERVER_CONFIG.domain + "/course", courseDetails, this.config)
+    .then(callback)
+    .catch(callbackError);
+  }
+
+  /*
+  =================== Get Attending Students ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+      + response is {data: [course objects]}
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - courseId: the course id
+  @use conditions:
+    - User should be logged in when called.
+  */
+  async getAttendingStudents(callback, callbackError, courseId){
+    let teacher_id = localStorage.getItem('teacher_id');
+    console.log(teacher_id);
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    axios.get(SERVER_CONFIG.domain + "/lesson/" + courseId + "/present", this.config)
     .then(callback)
     .catch(callbackError);
   }

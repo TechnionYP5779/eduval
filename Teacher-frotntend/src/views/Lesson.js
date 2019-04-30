@@ -16,7 +16,8 @@ import {
   Form,
   Slider,
   FormInput,
-  FormCheckbox
+  FormCheckbox,
+  Alert
 } from "shards-react";
 
 import Colors from "../components/components-overview/Colors";
@@ -41,6 +42,7 @@ import CustomSelect from "../components/components-overview/CustomSelect";
 
 import PageTitle from "../components/common/PageTitle";
 import iot from "../iotClient/iotClient";
+import server from "../Server/Server";
 
 
 class Lesson extends React.Component {
@@ -54,126 +56,109 @@ class Lesson extends React.Component {
 
     this.state = {
 
+      disabled: false,
+
+      connected: false,
+
       reward_money : 5,
 
-      chosen_smile : -1,
-
-      smileys: [{
+      smileys: [
+        {
           smile: "🙂",
           type: "success",
-          id: 1
+          id: 1,
+          name: "EMOJI_HAPPY"
         },
         {
           smile: "👍",
           type: "success",
-          id: 2
+          id: 2,
+          name: "EMOJI_THUMBS_UP"
         },
         {
           smile: "😇",
           type: "success",
-          id: 3
+          id: 3,
+          name: "EMOJI_ANGEL"
         },
         {
           smile: "😁",
           type: "success",
-          id: 4
+          id: 4,
+          name: "EMOJI_GRIN"
         },
         {
           smile: "🤐",
           type: "warning",
-          id: 5
+          id: 5,
+          name: "EMOJI_SHUSH"
         },
         {
           smile: "😴",
           type: "warning",
-          id: 6
+          id: 6,
+          name: "EMOJI_ZZZ"
         },
         {
           smile: "😠",
           type: "danger",
-          id: 7
+          id: 7,
+          name: "EMOJI_ANGRY"
         },
         {
           smile: "👎",
           type: "danger",
-          id: 8
+          id: 8,
+          name: "EMOJI_THUMBS_DOWN"
         }
       ],
 
-      // Third list of posts.
-      students: [
-        {
-          name: "Rraany1",
-          id: 1,
-          desk: 1,
-          chosen: false,
-          emoney: 0
-        },
-        {
-          name: "Rrany2",
-          id: 2,
-          desk: 2,
-          chosen: false,
-          emoney: 10
-        },
-        {
-          name: "Rani Rany Ran",
-          id: 3,
-          desk: 5,
-          chosen: false,
-          emoney: 5
-        },
-        {
-          name: "Raani4",
-          id: 4,
-          desk: 8,
-          chosen: false,
-          emoney: 0
-        },
-        {
-          name: "Raani4",
-          id: 4,
-          desk: 9,
-          chosen: false,
-          emoney: 3
-        },
-        {
-          name: "Raany5",
-          id: 5,
-          desk: 10,
-          chosen: false,
-          emoney: 3
-        },
-        {
-          name: "Raany5",
-          id: 5,
-          desk: 11,
-          chosen: false,
-          emoney: 12
-        },
-        {
-          name: "Raany5",
-          id: 5,
-          desk: 12,
-          chosen: false,
-          emoney: 2
-        },
-        {
-          name: "Ranni6",
-          id: 6,
-          desk: 14,
-          chosen: false,
-          emoney: 10
-        }
-      ],
+      chosen_students: [],
+
+      students: [],
+
+      course_name: ""
     };
+
+    this.unchooseStudent = this.unchooseStudent.bind(this);
+  }
+
+  unchooseStudent(id){
+    let tmp_chosen = this.state.chosen_students;
+    tmp_chosen.splice(tmp_chosen.indexOf(id), 1);
+    this.setState({chosen_students : tmp_chosen});
   }
 
   componentDidMount() {
+
+    let self = this;
+    let onConnect = ()=>{
+      server.getAttendingStudents(function(response){
+        response.data.sort(function(a,b){
+          return parseInt(a.desk)-parseInt(b.desk);
+        });
+        self.setState({students: response.data});
+        console.log("============Attending============");
+        console.log(response);
+      }, (error)=>{}, courseId);
+      if (!self.state.connected)
+        self.setState({connected: true});
+    }
+
+    let onOffline = ()=>{
+      if (self.state.connected)
+        self.setState({connected: false});
+    }
+
     let courseId = this.props.match.params.id;
     iot.getKeys(function(response){
-      iot.connect(courseId)
+      iot.connect(courseId, onConnect, onConnect, onOffline);
     }, (error)=>{});
+
+    server.getCourse(function(response){
+      self.setState({course_name: response.data.name});
+    }, (error)=>{}, courseId);
+
   }
 
 
@@ -194,11 +179,37 @@ class Lesson extends React.Component {
 
     const {students, smileys} = this.state;
 
+
+// TODO: add offline indicator (this works meh~)
+    // {!this.state.connected &&
+    // <Container fluid className="px-0">
+    //   <Alert className="mb-0" theme="warning">
+    //     <i className="fa fa-info mx-2"></i> You might be offline!
+    //   </Alert>
+    // </Container>
+    // }
+    let unchooseStudent = this.unchooseStudent;
+
     return (
+      <div>
+      {this.state.error &&
+      <Container fluid className="px-0">
+        <Alert className="mb-0" theme="danger">
+          <i className="fa fa-info mx-2"></i> An error has occured!
+        </Alert>
+      </Container>
+      }
+      {this.state.success &&
+      <Container fluid className="px-0">
+        <Alert className="mb-0" theme="success">
+          <i className="fa fa-info mx-2"></i> Messages sent successfully
+        </Alert>
+      </Container>
+      }
       <Container fluid className="main-content-container px-4">
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title="Physics 101" subtitle="Lesson View" className="text-sm-left" />
+          <PageTitle sm="4" title={this.state.course_name} subtitle="Lesson View" className="text-sm-left" />
         </Row>
         {/* First Row of Posts */}
         <Row>
@@ -206,7 +217,7 @@ class Lesson extends React.Component {
             <Card small className="mb-4">
               <CardHeader className="border-bottom">
                 <h5 className="m-0">Attending Students</h5>
-                <h7 style={{fontSize:"12px"}}>Pick the students you want to send E-Money too</h7>
+                <h6 style={{fontSize:"12px"}}>Pick the students you want to send E-Money too</h6>
               </CardHeader>
 
               <ListGroup flush>
@@ -215,21 +226,19 @@ class Lesson extends React.Component {
 
                       {students.map((student, idx) => (<Col xs="2" >
                         {
-                          student.chosen &&
-                          <Button style={{margin:"6px"}} theme="primary" className="mb-2 mr-1 badge1" data-badge={"desk #" + student.desk} onClick={()=>{
-                            let tmp = this.state.students;
-                            tmp[idx].chosen = false;
-                            this.setState({students : tmp});
+                          this.state.chosen_students.indexOf(student.id) >= 0 &&
+                          <Button disabled={this.state.disabled} style={{margin:"6px"}} theme="primary" className="mb-2 mr-1 badge1" data-badge={"desk #" + student.desk} onClick={()=>{
+                            unchooseStudent(student.id);
                           }}>
                             {student.name}
                           </Button>
                         }
                         {
-                          !student.chosen &&
-                          <Button outline style={{margin:"6px"}} theme="primary" className="mb-2 mr-1 badge1" data-badge={"desk #" + student.desk} onClick={()=>{
-                            let tmp = this.state.students;
-                            tmp[idx].chosen = true;
-                            this.setState({students : tmp});
+                          this.state.chosen_students.indexOf(student.id) < 0 &&
+                          <Button outline disabled={this.state.disabled} style={{margin:"6px"}} theme="primary" className="mb-2 mr-1 badge1" data-badge={"desk #" + student.desk} onClick={()=>{
+                            let tmp_chosen = this.state.chosen_students;
+                            tmp_chosen.push(student.id);
+                            this.setState({chosen_students : tmp_chosen, success: false, error: false});
                           }}>
                             {student.name}
                           </Button>
@@ -257,32 +266,44 @@ class Lesson extends React.Component {
                 <Row style={{margin:"2px"}}>
                 {smileys.map((smile, idx) => (
                   <Col xs="3">
-                  {
-                    (this.state.chosen_smile == smile.id) &&
-                    <Button style={{fontSize:"20px"}} theme={smile.type} className="mb-2 mr-1" onClick={()=>{
-                      console.log("unchosing", smile.id);
-                      this.setState({chosen_smile : -1});
-                    }}>
-                      {smile.smile}
-                    </Button>
-                  }
-                  {
-                    (this.state.chosen_smile != smile.id) &&
-                    <Button outline style={{fontSize:"20px"}} theme={smile.type} className="mb-2 mr-1" onClick={()=>{
+                    <Button outline disabled={this.state.disabled} style={{fontSize:"20px"}} theme={smile.type} className="mb-2 mr-1" onClick={()=>{
+                      if (this.state.chosen_students.length == 0)
+                        return;
+                      this.setState({disabled: true});
                       console.log("chosing", smile.id);
-                      console.log("current", this.state.chosen_smile);
-                      this.setState({chosen_smile : smile.id});
+                      console.log(smile.name);
+                      let counter = 0;
+                      let success = true;
+                      let error = false;
+                      let self = this;
+                      server.sendEmoji(function(response){
+                        console.log("sent");
+                        counter ++;
+                        if (counter == self.state.chosen_students.length){
+                          self.setState({chosen_students: [], success: success, error: error, disabled: false});
+                          window.scrollTo(0, 0);
+                        }
+                      }, function(error){
+                        success = false;
+                        error = true;
+                        counter ++;
+                        if (counter == self.state.chosen_students.length){
+                          self.setState({chosen_students: [], success: success, error: error, disabled: false});
+                          window.scrollTo(0, 0);
+                        }
+                        console.log("error", error);
+                      }, smile.name, this.state.chosen_students, this.props.match.params.id);
+                      console.log(this.state.chosen_students);
                     }}>
                       {smile.smile}
                     </Button>
-                  }
 
                 </Col>))}
                 </Row>
                 <hr style={{backgroundColor: "#a4a4a4", width: "95%"}} />
 
                 <div className="mb-2 pb-1" style={{margin:"10px"}}>
-                  <h7 style={{fontSize:"12px"}}>Choose amount of E-Money to send</h7>
+                  <h7 style={{fontSize:"12px"}}>Or choose amount of E-Money to send</h7>
                   </div>
               <div className="mb-2 pb-1" style={{margin:"10px"}}>
 
@@ -310,10 +331,46 @@ class Lesson extends React.Component {
                   />
                   </div>
                     <div className="mb-2 pb-1" style={{margin:"10px"}}>
-                  <Button theme="primary" className="mb-2 mr-1" onClick={iot.sendTest}>
+                  <Button theme="primary" disabled={this.state.disabled} className="mb-2 mr-1" onClick={()=>{
+                    if (this.state.chosen_students.length == 0)
+                      return;
+                    this.setState({disabled: true});
+                    console.log("AWARD!");
+                    console.log(this.state.reward_money);
+                    let counter = 0;
+                    let success = true;
+                    let error = false;
+                    let self = this;
+                    server.sendEMoney(function(response){
+                      console.log("sent");
+                      counter ++;
+                      if (counter == self.state.chosen_students.length){
+                        self.setState({chosen_students: [], success: success, error: error, disabled: false});
+                        window.scrollTo(0, 0);
+                      }
+                    }, function(error){
+                      success = false;
+                      error = true;
+                      counter ++;
+                      if (counter == self.state.chosen_students.length){
+                        self.setState({chosen_students: [], success: success, error: error, disabled: false});
+                        window.scrollTo(0, 0);
+                      }
+                      console.log("error", error);
+                    }, parseInt(this.state.reward_money), "participation", this.state.chosen_students, this.props.match.params.id);
+                    console.log(this.state.chosen_students);
+                  }}>
                     Award!
                   </Button>
-                  <Button theme="primary" style={{float:"right"}} className="mb-2 mr-1">
+                  <Button theme="primary" disabled={this.state.disabled} style={{float:"right"}} className="mb-2 mr-1" onClick={()=>{
+                    this.setState({disabled: true});
+                    let self = this;
+                    server.changeLessonStatus(function(response){
+                      history.replace('/');
+                    }, function(error){
+                      self.setState({disabled: false, error: true});
+                    }, this.props.match.params.id, "LESSON_END");
+                  }}>
                     End Class
                   </Button>
                   </div>
@@ -324,6 +381,7 @@ class Lesson extends React.Component {
         </Row>
 
       </Container>
+      </div>
     );
   }
 }
