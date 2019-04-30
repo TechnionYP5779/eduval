@@ -38,7 +38,7 @@ const onConnect = () => {
 };
 
 const onMessage = (topic, message) => {
-    addLog(message);
+    addLog('Topic: ' + topic + '. Message: ' + message);
 };
 
 const onError = () => {};
@@ -55,8 +55,15 @@ $(document).ready(() => {
     $('#btn-keys').prop('disabled', false);
     $('#btn-connect').prop('disabled', true);
     $('#btn-send').prop('disabled', true);
+    $('#btn-topic').prop('disabled', true);
 
     let iotKeys;
+
+	$('#btn-topic').on('click', () => {
+		client.unsubscribe(iotTopic);
+		iotTopic = $('#topic').val();
+		client.subscribe(iotTopic);
+	});
 
     $('#btn-keys').on('click', () => {
         $.ajax({
@@ -88,6 +95,8 @@ $(document).ready(() => {
 
         $('#btn-connect').prop('disabled', true);
         $('#btn-send').prop('disabled', false);
+        $('#btn-topic').prop('disabled', false);
+		$('#topic').val(iotTopic);
     });
 
     $('#btn-send').on('click', () => {
