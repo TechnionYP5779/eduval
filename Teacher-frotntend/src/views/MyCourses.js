@@ -104,7 +104,7 @@ class MyCourses extends React.Component {
                         }, function(error){
                           console.log("error" ,error);
                           self.setState({disabled: false, error: "An error has occured"});
-                        }, course.id, "LESSON_END");
+                        }, course.id, "LESSON_START");
                       }}>
                       <i className="far fa-bookmark mr-1" /> Start lesson
                     </Button>

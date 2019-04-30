@@ -214,11 +214,12 @@ class CourseDetails extends React.Component {
                     <Button theme="success" disabled={this.state.disabled} onClick={()=>{
                       this.setState({disabled: true});
                       let self = this;
+                      console.log("======starting lesson?======");
                       server.changeLessonStatus(function(response){
                         history.push("/lesson/" + self.props.match.params.id);
                       }, function(error){
                         self.setState({disabled: false, error: "An error has occured"});
-                      }, this.props.match.params.id, "LESSON_END");
+                      }, this.props.match.params.id, "LESSON_START");
                     }} style={{float:"right"}}>Start lesson</Button>
                   </Form>
                 </Col>
