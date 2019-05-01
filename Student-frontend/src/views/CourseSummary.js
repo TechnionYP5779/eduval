@@ -33,24 +33,24 @@ class CourseSummery extends React.Component {
               "EMOJI_THUMBS_DOWN":"👎"
     };
 
-        
+
 
         var res=JSON.parse(this.props.match.params.id);
         this.state = {
-          
+
           total_reward_money : 0,
           lesson_id : -1,
-          course_name: "", 
-          course_location: "", 
-          course_start_date: "", 
-          course_end_date: "", 
-          course_description: "", 
+          course_name: "",
+          course_location: "",
+          course_start_date: "",
+          course_end_date: "",
+          course_description: "",
           student_id : localStorage.getItem('student_id'),
           chosen_smile : -1,
           chosen_message : -1,
-          
+
           Emojis: []
-          
+
 
         };
           this.state.total_reward_money = res.reward_money;
@@ -65,7 +65,7 @@ class CourseSummery extends React.Component {
               {headers: headers})
               .then((response) => {
               this.setState(
-                {course_name: response.data.name ,course_description : response.data.description,course_location: response.data.location, course_start_date: response.data.startDate.split('T')[1].split('.')[0], course_end_date: response.data.endDate.split('T')[1].split('.')[0]});
+                {course_name: response.data.name ,course_description : response.data.description,course_location: response.data.location, course_start_date: response.data.startDate.substring(0,10), course_end_date: response.data.endDate.substring(0,10)});
 
               console.log(this.state.name);
             })
@@ -78,7 +78,7 @@ class CourseSummery extends React.Component {
             <Container fluid className="main-content-container px-4 pb-4">
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title={this.state.course_name + this.state.lesson_id} subtitle="Course Summery" className="text-sm-left" />
+          <PageTitle sm="4" title={this.state.course_name} subtitle="Course Summery" className="text-sm-left" />
         </Row>
 
         <Row>
@@ -131,7 +131,7 @@ class CourseSummery extends React.Component {
                   <p>Total E-Mony: {this.state.total_reward_money}</p>
                 </Col>
                 </Row>
-                
+
               <a href={"/Overview"}>
               <Button theme="success" onClick={()=>{}} style={{float:"left"}}>Finish</Button>
               </a>
