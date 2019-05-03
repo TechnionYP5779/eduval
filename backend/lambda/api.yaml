@@ -495,9 +495,14 @@ paths:
         content:
           application/json:
             schema:
-              type: array
-              items:
-                type: integer
+              oneOf:
+              - type: array
+                items:
+                  type: integer
+              - type: array
+                items:
+                  type: string
+                  format: email
         required: true
       responses:
         '200':
