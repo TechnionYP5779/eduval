@@ -33,6 +33,30 @@ class Server {
     .catch(callbackError);
   }
 
+  /*
+  =================== Add Students to Course ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - students: students to register
+    - courseId: the course id
+  @use conditions:
+    - User should be logged in when called.
+  */
+  async addStudentsToCourse(callback, callbackError, students, courseId){
+    let teacher_id = localStorage.getItem('teacher_id');
+    console.log(teacher_id);
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    axios.post(SERVER_CONFIG.domain + '/course/' + courseId + "/registered", students ,this.config)
+    .then(callback)
+    .catch(callbackError);
+  }
+
 
   /*
   =================== Send E-Money ====================
