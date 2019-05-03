@@ -127,8 +127,7 @@ class UserAccountDetails extends React.Component {
                 <FormGroup>
                   <label htmlFor="feUsername">Username</label>
                   <FormInput
-                    type="tel
-                    "
+                    type="tel"
                     id="feUsername"
                     placeholder="Username"
                     value = {this.state.details.name}
@@ -164,21 +163,20 @@ class UserAccountDetails extends React.Component {
                 <FormGroup>
                   <label htmlFor="fePhoneNumber">Phone Number</label>
                   <FormInput
-                    type="tel
-                    "
+                    type="tel"
                     id="fePhoneNumber"
                     placeholder="Phone Number"
                     value = {this.state.details.phoneNum}
                     onChange={this.updatePhoneNumber}
                   />
                 </FormGroup>
-                <Row form>
-                  {/* Description */}
+                {/*<Row form>
+                  // Description 
                   <Col md="12" className="form-group">
                     <label htmlFor="feDescription">Description</label>
                     <FormTextarea id="feDescription" rows="5" />
                   </Col>
-                </Row>
+                </Row>*/}
                 <Button outline disabled={this.state.disabled} onClick={this.update} theme="accent">Update Account</Button>
               </Form>
             </Col>
