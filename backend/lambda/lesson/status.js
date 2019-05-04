@@ -140,18 +140,14 @@ module.exports.post = (event, context, callback) => {
 
     // Connect
     const knex = require('knex')(dbConfig);
-console.log('aaaaaa');
     knex('Courses').where({
             courseId: event.pathParameters.courseId
         })
 		.update({status: newStatus})
 		.then(async (result) => {
-console.log('bbbbbbb');
 			if(result === 1) {
-console.log('ccccccc');
 				new Promise((resolve, reject) => {
 					if(newStatus === 'LESSON_END') {
-						console.log('ddddddd');
 						//then we need to clear out the present students
 						var promise = knex('PresentStudents').where({
 								courseId: event.pathParameters.courseId
@@ -160,11 +156,9 @@ console.log('ccccccc');
 					}
 					resolve();
 				}).then(() => {
-					console.log('eeeeeee');
 					knex.client.destroy();
 
 					iot.connect().then(() => {
-						console.log('fffffff');
 						iot.client.publish('lesson/' + event.pathParameters.courseId + '/status', newStatus, {}, (uneededResult) => {
 							iot.client.end(false)
 							callback(null, {
