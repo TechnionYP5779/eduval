@@ -85,6 +85,13 @@ class CourseDetails extends React.Component {
       return;
     }
 
+    let course = this.state.course;
+
+    delete course.status;
+
+    console.log("===========course============");
+    console.log(this.state.course);
+
     server.updateCourse(function(response){
       console.log("worked", response);
       self.setState({error: false, success: true, disabled: false});
@@ -177,7 +184,7 @@ class CourseDetails extends React.Component {
           <Row>
           <Col lg="6">
           {/* Editor */}
-          <Card style = {{height:"100%",width:"100%",marginLeft:"16px"}} className="mb-4">
+          <Card style = {{height:"auto",width:"100%",marginLeft:"16px"}} className="mb-4">
             <CardHeader className="border-bottom">
             <h6 className="m-0">Details</h6>
             </CardHeader>
@@ -298,7 +305,7 @@ class CourseDetails extends React.Component {
                 </Col>
                 </Row>
                 <TagsInput onlyUnique
-                inputProps={{placeholder: "Add student"}}
+                inputProps={{placeholder: "Add students by Email"}}
                 addKeys={[9, 13, 32, 186, 188]}
                 value={this.state.new_students}
                 onChange={this.handleStudentsChange} />
