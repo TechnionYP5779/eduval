@@ -16,3 +16,66 @@
    line-height:16px;
    border-radius: 0.375rem;
 }
+
+
+
+.react-tagsinput {
+  background-color: #fff;
+  border: 1px solid #e1e5eb;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  padding-left: 12px;
+  padding-top: 12px;
+  margin: 10px;
+}
+
+.react-tagsinput--focused {
+  color: #495057;
+  background-color: #fff;
+  border-color: #007bff;
+  box-shadow: 0 0.313rem 0.719rem rgba(0, 123, 255, 0.1), 0 0.156rem 0.125rem rgba(0, 0, 0, 0.06);
+}
+
+
+.react-tagsinput:hover {
+  border-color: #b3bdcc;
+}
+
+.react-tagsinput--focused:hover {
+  border-color: #007bff;
+}
+
+.react-tagsinput-tag {
+  background-color: #fff;
+  border-radius: 0.375rem;
+  border: 1px solid #007bff;
+  color: #007bff;
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 400;
+  margin-bottom: 12px;
+  margin-right: 12px;
+  padding: 5px;
+}
+
+.react-tagsinput-remove {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.react-tagsinput-tag a::before {
+  content: " ×";
+}
+
+.react-tagsinput-input {
+  background: transparent;
+  border: 0;
+  color: #5B6067;
+  font-size: 13px;
+  font-weight: 400;
+  margin-bottom: 6px;
+  margin-top: 1px;
+  outline: none;
+  padding: 5px;
+  width: 80px;
+}
