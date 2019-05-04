@@ -4,6 +4,7 @@ const dbConfig = require('../db')
 const models = require('../models')
 const validate = require('jsonschema').validate;
 const iot = require('./Notifications')
+const axios = require('axios')
 
 function dbRowToProperObject(obj) {
 	obj.id = obj.studentId;
@@ -161,21 +162,36 @@ module.exports.post = (event, context, callback) => {
     knex('PresentStudents')
 		.insert(objToInsert)
 		.then(async (result) => {
-            knex.client.destroy();
-			iot.connect().then(() => {
-				iot.client.publish('lesson/' + event.pathParameters.courseId + '/present', JSON.stringify(deskAndId), {}, (uneededResult) => {
-					iot.client.end(false)
-					callback(null, {
-						statusCode: 200,
-						headers: {
-							'Access-Control-Allow-Origin': '*',
-							'Access-Control-Allow-Credentials': true
-						},
-						body: ""
-					});
-					return;
+			knex.client.destroy();
+			axios.post(
+				process.env.LAMBDA_ENDPOINT + "/lesson/" + event.pathParameters.courseId + "/messages/" + deskAndId.id,
+				{messageType: "EMON", messageReason: '1', value: 5},
+				{
+					headers: {'X-Api-Key': process.env.LAMBDA_APIKEY}
 				})
-			});
+			.then(() => {
+				iot.connect().then(() => {
+					iot.client.publish('lesson/' + event.pathParameters.courseId + '/present', JSON.stringify(deskAndId), {}, (uneededResult) => {
+						iot.client.end(false)
+						callback(null, {
+							statusCode: 200,
+							headers: {
+								'Access-Control-Allow-Origin': '*',
+								'Access-Control-Allow-Credentials': true
+							},
+							body: ""
+						});
+						return;
+					})
+				});
+			})
+			.catch((err) => {
+	            console.log('error occurred: ', err);
+	            // Disconnect
+	            knex.client.destroy();
+	            callback(err);
+	        });
+
         })
         .catch((err) => {
             console.log('error occurred: ', err);

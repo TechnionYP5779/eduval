@@ -22,6 +22,8 @@ provider:
         DB_PASSWORD:    ${self:custom.secrets.DB_PASSWORD}
         DB_HOST:        ${self:custom.secrets.DB_HOST}
         DB_PORT:        ${self:custom.secrets.DB_PORT}
+        LAMBDA_ENDPOINT:        ${self:custom.secrets.LAMBDA_ENDPOINT}
+        LAMBDA_APIKEY:        ${self:custom.secrets.LAMBDA_APIKEY}
 
 #TODO: Implement a more strict CORS policy
 functions:

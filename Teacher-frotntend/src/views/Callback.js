@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import loading from './loading.svg';
 
+import server from "../Server/Server"
+
 class Callback extends Component {
+
   render() {
     const style = {
       position: 'absolute',
