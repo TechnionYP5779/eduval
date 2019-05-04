@@ -47,9 +47,9 @@ module.exports.handler = (event, context, callback) => {
         return;
     }
 
-	var studentsArray;
+	var requestArray;
 	try {
-		studentsArray = JSON.parse(event.body);
+		requestArray = JSON.parse(event.body);
 	} catch (e) {
 		callback(null, {
             statusCode: 405,
@@ -65,12 +65,21 @@ module.exports.handler = (event, context, callback) => {
 	}
 
 	var schema = {
-		type: 'array',
-		items: {
-			type: 'integer'
-		}
+		oneOf: [{
+			type: 'array',
+			items: {
+				type: 'integer'
+			}
+		},
+		{
+			type: 'array',
+			items: {
+				type: 'string',
+				format: 'email'
+			}
+		}]
 	}
-	var validateRes = validate(studentsArray, schema);
+	var validateRes = validate(requestArray, schema);
 	if(!validateRes.valid) {
 		callback(null, {
             statusCode: 405,
@@ -85,27 +94,54 @@ module.exports.handler = (event, context, callback) => {
         return;
 	}
 
-	var pairsArray = studentsArray.map((x) => {return {studentId:x, courseId:event.pathParameters.courseId}})
+	var studentIdsArray;
 
-    // Connect
-    const knex = require('knex')(dbConfig);
+	if(requestArray.length == 0)
+	{
+		callback(null, {
+			statusCode: 200,
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Credentials': true
+			},
+			body: ""
+		});
+		return;
+	}
 
-    knex('Registered').insert(pairsArray)
-	.then((result) => {
-            knex.client.destroy();
-			callback(null, {
-				statusCode: 200,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true
-				},
-				body: ""
-			});
-        })
-        .catch((err) => {
-            console.log('error occurred: ', err);
-            // Disconnect
-            knex.client.destroy();
-            callback(err);
-        });
+	const knex = require('knex')(dbConfig);
+	new Promise(function(resolve, reject) {
+		if(typeof requestArray[0] === 'string') {
+			//then we need to get the IDs
+			resolve(knex('Students')
+			.select('studentId')
+			.where('email', 'in', requestArray)
+			.then((result) => {
+				return result.map((x) => {return x.studentId})
+			}))
+		} else {
+			//they're already IDs
+			resolve(requestArray);
+		}
+	}).then((studentIds) => {
+		var pairsArray = studentIds.map((x) => {return {studentId:x, courseId:event.pathParameters.courseId}})
+
+		return knex('Registered').insert(pairsArray);
+	}).then((result) => {
+        knex.client.destroy();
+		callback(null, {
+			statusCode: 200,
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Credentials': true
+			},
+			body: ""
+		});
+    })
+    .catch((err) => {
+        console.log('error occurred: ', err);
+        // Disconnect
+        knex.client.destroy();
+        callback(err);
+    });
 };
