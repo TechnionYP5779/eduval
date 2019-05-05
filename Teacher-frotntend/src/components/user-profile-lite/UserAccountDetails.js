@@ -110,7 +110,7 @@ class UserAccountDetails extends React.Component {
     {this.state.success &&
     <Container fluid className="px-0">
       <Alert className="mb-0" theme="success">
-        <i className="fa fa-info mx-2"></i> Success! Your course has been updated!
+        <i className="fa fa-info mx-2"></i> Success! Your details have been updated!
       </Alert>
     </Container>
     }
@@ -127,39 +127,24 @@ class UserAccountDetails extends React.Component {
                 <FormGroup>
                   <label htmlFor="feUsername">Username</label>
                   <FormInput
-                    type="tel"
+                    type="username  "
                     id="feUsername"
                     placeholder="Username"
                     value = {this.state.details.name}
-                    onChange={this.updateName}
+                    onChange={()=>{}}
                   />
                 </FormGroup>
 
-                <Row form>
-                  {/* Email */}
-                  <Col md="6" className="form-group">
-                    <label htmlFor="feEmail">Email</label>
-                    <FormInput
-                      type="email"
-                      id="feEmail"
-                      placeholder="Email Address"
-                      value = {this.state.details.email}
-                      onChange={this.updateEmail}
-                      autoComplete="email"
-                    />
-                  </Col>
-                  {/* Password */}
-                  <Col md="6" className="form-group">
-                    <label htmlFor="fePassword">Password</label>
-                    <FormInput
-                      type="password"
-                      id="fePassword"
-                      placeholder="Password"
-                      onChange={() => {}}
-                      autoComplete="current-password"
-                    />
-                  </Col>
-                </Row>
+                <FormGroup>
+                  <label htmlFor="feEmail">Email</label>
+                  <FormInput
+                    type="email"
+                    id="feEmail"
+                    placeholder="Email"
+                    value = {this.state.details.email}
+                    onChange={this.updateEmail}
+                  />
+                </FormGroup>
                 <FormGroup>
                   <label htmlFor="fePhoneNumber">Phone Number</label>
                   <FormInput
@@ -170,13 +155,6 @@ class UserAccountDetails extends React.Component {
                     onChange={this.updatePhoneNumber}
                   />
                 </FormGroup>
-                {/*<Row form>
-                  // Description 
-                  <Col md="12" className="form-group">
-                    <label htmlFor="feDescription">Description</label>
-                    <FormTextarea id="feDescription" rows="5" />
-                  </Col>
-                </Row>*/}
                 <Button outline disabled={this.state.disabled} onClick={this.update} theme="accent">Update Account</Button>
               </Form>
             </Col>
@@ -199,4 +177,13 @@ class UserAccountDetails extends React.Component {
 //     title: "Account Details"
 //   };
 // }
+//
+// <Row form>
+//   {/* Description */}
+//   <Col md="12" className="form-group">
+//     <label htmlFor="feDescription">Description</label>
+//     <FormTextarea id="feDescription" rows="5" />
+//   </Col>
+// </Row>
+
 export default UserAccountDetails;

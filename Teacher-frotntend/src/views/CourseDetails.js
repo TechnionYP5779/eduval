@@ -321,4 +321,4 @@ class CourseDetails extends React.Component {
 
 
 
-  export default CourseDetails;
+export default CourseDetails;
