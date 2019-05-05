@@ -20,7 +20,7 @@ const Overview = ({ smallStats }) => (
       <PageTitle title="EMon Overview" subtitle="Your home page" className="text-sm-left mb-3" />
     </Row>
 
-    {/* Small Stats Blocks */}
+    {/* Small Stats Blocks 
 
     {auth.isAuthenticated() &&
       <Row>
@@ -38,7 +38,7 @@ const Overview = ({ smallStats }) => (
         ))}
       </Row>
     }
-
+    */}
 
       {/* Users Overview */}
 
