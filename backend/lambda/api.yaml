@@ -495,9 +495,14 @@ paths:
         content:
           application/json:
             schema:
-              type: array
-              items:
-                type: integer
+              oneOf:
+              - type: array
+                items:
+                  type: integer
+              - type: array
+                items:
+                  type: string
+                  format: email
         required: true
       responses:
         '200':
@@ -665,7 +670,7 @@ paths:
         '200':
           description: All OK
           content:
-            application/json:
+            text/plain:
               schema:
                 type: string
                 enum:
@@ -794,6 +799,38 @@ paths:
           content: {}
       security:
         - api_key: []
+    delete:
+      tags:
+        - lesson
+      summary: Clear a student's messages
+      description: At the end of the lesson, clear all messages from the student's table. This is so next lesson they can have a clear slate.
+      parameters:
+        - name: courseId
+          in: path
+          description: The ID of the lesson's course
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: studentId
+          in: path
+          description: ID of the student
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+        '405':
+          description: Invalid ID
+          content: {}
+      security:
+        - api_key: []
 
   '/lesson/{courseId}/present':
     get:
@@ -816,7 +853,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Student'
+                  $ref: '#/components/schemas/StudentWithDesk'
         '404':
           description: Course not found
           content: {}
@@ -838,12 +875,18 @@ paths:
             type: integer
             format: int64
       requestBody:
-        description: The student's ID.
+        description: The student's ID and desk.
         content:
-          text/plain:
+          application/json:
             schema:
-              type: integer
-              format: int64
+              type: object
+              properties:
+                id:
+                  type: integer
+                  format: int64
+                  description: The ID of the student
+                desk:
+                  type: string
         required: true
       responses:
         '200':
@@ -896,6 +939,24 @@ components:
         phoneNum:
           type: string
           
+    StudentWithDesk:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        authIdToken:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phoneNum:
+          type: string
+        desk:
+          type: string
+          
     Course:
       type: object
       properties:
@@ -943,27 +1004,52 @@ components:
               enum: ["EMOJI_HAPPY", "EMOJI_THUMBS_UP", "EMOJI_ANGEL", "EMOJI_GRIN", "EMOJI_SHUSH", "EMOJI_ZZZ", "EMOJI_ANGRY", "EMOJI_THUMBS_DOWN"]
           
     Log:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        studentId:
-          type: integer
-          format: int64
-        courseId:
-          type: integer
-          format: int64
-        time:
-          type: string
-          format: date-time
-        messageType:
-          type: string
-        messageReason:
-          type: string
-        value:
-          type: integer
-          format: int64
+      oneOf:
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            studentId:
+              type: integer
+              format: int64
+            courseId:
+              type: integer
+              format: int64
+            messageType:
+              type: string
+              enum: ["EMON"]
+            time:
+              type: string
+              format: date-time
+            messageReason:
+              type: string
+              description: unused currently. used to point out the reason for awarding money.
+            value:
+              type: integer
+              format: int64
+              description: The amount of emon given.
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            studentId:
+              type: integer
+              format: int64
+            courseId:
+              type: integer
+              format: int64
+            messageType:
+              type: string
+              enum: ["EMOJI"]
+            time:
+              type: string
+              format: date-time
+            emojiType:
+              type: string
+              description: what emoji was sent
+              enum: ["EMOJI_HAPPY", "EMOJI_THUMBS_UP", "EMOJI_ANGEL", "EMOJI_GRIN", "EMOJI_SHUSH", "EMOJI_ZZZ", "EMOJI_ANGRY", "EMOJI_THUMBS_DOWN"]
  
   securitySchemes:
     api_key:

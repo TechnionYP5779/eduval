@@ -9,8 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "aws-iot-device-sdk": "^2.2.1",
+    "axios": "^0.18.0",
+    "jsonschema": "^1.2.4",
     "knex": "^0.16.5",
-    "mysql": "^2.16.0",
-    "jsonschema": "^1.2.4"
+    "mysql": "^2.16.0"
   }
 }

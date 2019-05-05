@@ -18,7 +18,9 @@
      "DB_USER": "root",
      "DB_PASSWORD": "password",
      "DB_HOST": "someserver.amazonaws.com",
-     "DB_PORT": 12345
+     "DB_PORT": 12345,
+	 "LAMBDA_ENDPOINT": "something.amazonaws.com",
+	 "LAMBDA_API_KEY": "key"
    }
    ```
    This will contain the credentials needed to connect to the database.

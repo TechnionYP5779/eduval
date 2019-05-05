@@ -96,7 +96,7 @@ export default class NewCourseForm extends React.Component {
                 <FormGroup>
                   <label htmlFor="feInputAddress">Course Name</label>
                   {console.log("==============", this, "=================")}
-                  <FormInput id="feInputAddress" placeholder="A name that you're students will recognize" value={this.state.name} onChange={this.updateName} />
+                  <FormInput id="feInputAddress" placeholder="A name that your students will recognize" value={this.state.name} onChange={this.updateName} />
                 </FormGroup>
 
                 <FormGroup>
@@ -127,7 +127,7 @@ export default class NewCourseForm extends React.Component {
                   <label htmlFor="feInputAddress2">Class Room</label>
                   <FormInput
                     id="feInputAddress2"
-                    placeholder="Help you're students find the class room"
+                    placeholder="Help your students find the class room"
                     value={this.state.location} onChange={this.updateLocation}
                   />
                 </FormGroup>

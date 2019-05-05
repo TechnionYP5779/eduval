@@ -14,75 +14,141 @@ import {
 } from "shards-react";
 
 import PageTitle from "../components/common/PageTitle";
+import awsIot  from 'aws-iot-device-sdk';
 
 class MyCourses extends React.Component {
   constructor(props) {
     super(props);
 
-
-
     this.state = {
-      id:res,
-
+      id: res,
       // Third list of posts.
-      PostsListThree: [
-        // {
-        //   title: "Math Course #1",
-        //   body:"Number of students: 5",
-        //   id: 1
-        // },
-        // {
-        //   title: "Math Course #1",
-        //   body:"Number of students: 6",
-        //   id: 2
-        // },
-        // {
-        //   title: "Math Course #1",
-        //   body:"Number of students: 8",
-        //   id: 3
-        // },
-        // {
-        //   title: "Math Course #1",
-        //   body:"Number of students: 10",
-        //   id: 4
-        // },
-        // {
-        //   title: "Math Course #1",
-        //   body:"Number of students: 10",
-        //   id: 5
-        // },
-        // {
-        //   title: "Math Course #1",
-        //   body:"Number of students: 10",
-        //   id: 6
-        // }
-      ],
-
+      PostsListThree: [],
+      lessons_status: {}
     };
     console.log("props for MyCourses is ", this.props.match.params.id);
     let headers = {
-        'X-Api-Key': 'BXGK1t57pTgLKxmReo869MWY2qQey4U4n7fsHjii'
+        'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
     }
     let sub=new Buffer( localStorage.getItem('sub')).toString('base64');
-    axios.get('https://xycqr0g9ra.execute-api.eu-central-1.amazonaws.com/dev/student/byToken/'+sub,
+    axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/student/byToken/'+sub,
      {headers: headers})
       .then(response =>localStorage.setItem('student_id', response.data.id) );
       let res=[];
 
-      axios.get('https://xycqr0g9ra.execute-api.eu-central-1.amazonaws.com/dev/course/byStudent/'+localStorage.getItem('student_id'),
+      axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/course/byStudent/'+localStorage.getItem('student_id'),
      {headers: headers})
      .then((response) => {
      this.setState({PostsListThree: response.data});
+     
+  
+           const getContent = function(url) {
+      return new Promise((resolve, reject) => {
+    	    const lib = url.startsWith('https') ? require('https') : require('http');
+    	    const request = lib.get(url, (response) => {
+    	      if (response.statusCode < 200 || response.statusCode > 299) {
+    	         reject(new Error('Failed to load page, status code: ' + response.statusCode));
+    	       }
 
-     console.log(this.state.PostsListThree);
+    	      const body = [];
+    	      response.on('data', (chunk) => body.push(chunk));
+    	      response.on('end', () => resolve(body.join('')));
+    	    });
+    	    request.on('error', (err) => reject(err))
+        })
+    };
+    let client;
+
+      let connect = async () => {
+    	return getContent('https://qh6vsuof2f.execute-api.eu-central-1.amazonaws.com/dev/iot/keys').then((res) => {
+    		res = JSON.parse(res)
+    		client = awsIot.device({
+                region: res.region,
+                protocol: 'wss',
+                accessKeyId: res.accessKey,
+                secretKey: res.secretKey,
+                sessionToken: res.sessionToken,
+                port: 443,
+                host: res.iotEndpoint
+            });
+    	})
+
+    }
+
+    var j;
+    for (j = 0; j < this.state.PostsListThree.length; j++) { 
+      axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/lesson/'+ this.state.PostsListThree[j].id +'/status',
+          {headers: headers})
+          .then((response) => {
+            console.log((response));
+            var current_id = ((response.request.responseURL).split('lesson')[1]).split('/')[1];
+          if(response.data == "LESSON_START"){
+            var insert = this.state.lessons_status;
+            insert[current_id] = false; 
+            this.setState({lessons_status: insert});
+          }else{
+            var insert = this.state.lessons_status;
+              insert[current_id] = true; 
+             this.setState({lessons_status: insert});
+          }
+          console.log("123123123213");
+          console.log(this.state.lessons_status);
+        }) .catch((error)=>{
+          console.log(error);
+        });
+    }
+    
+     var i;
+    for (i = 0; i < this.state.PostsListThree.length; i++) { 
+      console.log("number" + i);
+      console.log(this.state.PostsListThree[i].id);
+      let LessonsStatusURL = 'lesson/'+ this.state.PostsListThree[i].id +'/status';  
+      connect().then(() => {
+        client.subscribe(LessonsStatusURL);
+        client.on('message', (topic, message) => {
+          console.log("dsfsdfsdfsdfsdfsdfsdfsdsdfsdf");
+        console.log("message" + message);
+        var current_id = ((topic).split('lesson')[1]).split('/')[1];
+         if(message == "LESSON_START"){
+            var insert = this.state.lessons_status;
+            insert[current_id] = false; 
+            this.setState({lessons_status: insert});
+          }else{
+            var insert = this.state.lessons_status;
+              insert[current_id] = true; 
+             this.setState({lessons_status: insert});
+          }
+        })
+      });
+
+  }
+
    })
   .catch((error)=>{
      console.log(error);
   });
-
-
-
+  
   }
+  
+
+  insertDeskNumber(id) {
+    console.log("id" + id);
+    console.log(localStorage.getItem('student_id'));
+      let config = {
+          headers: {'X-Api-Key' : 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'}
+      };
+      var txt;
+      var deskNumber = prompt("Please enter your desk number:", "");
+      if (deskNumber == null || deskNumber == "") {
+        txt = "User cancelled the prompt.";
+      } else {
+        axios.post('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/lesson/'+ id +'/present',{
+          id:  parseInt(localStorage.getItem('student_id')),
+          desk: deskNumber}, config).then(function(response){
+            history.push("/lesson/" + id);
+          });
+      }
+     }
 
   render() {
     const {
@@ -126,9 +192,11 @@ class MyCourses extends React.Component {
                     </div>
                   </div>
                   <div className="my-auto ml-auto">
-                    <a href={"/lesson/" + post.id}><Button size="sm" theme="white">
-                      <i className="far fa-bookmark mr-1" /> Start lesson
-                    </Button></a>
+                    
+                    <Button disabled = {this.state.lessons_status[post.id]} size="sm" theme="white" onClick={() => {this.insertDeskNumber(post.id)}}>
+                      <i className="far fa-bookmark mr-1" /> Join lesson
+                    </Button>            
+                  
                   </div>
                 </CardFooter>
               </Card>
@@ -137,8 +205,12 @@ class MyCourses extends React.Component {
         </Row>
 
       </Container>
+
+
     );
+    
   }
+    
 }
 
 export default MyCourses;

@@ -7,7 +7,7 @@ const validate = require('jsonschema').validate;
 function objectToDdRow(obj) {
 	obj.teacherId = obj.id;
 	delete obj.id;
-	if("authToken" in obj) {
+	if("authIdToken" in obj) {
 		obj.idToken = obj.authIdToken;
 		delete obj.authIdToken;
 	}

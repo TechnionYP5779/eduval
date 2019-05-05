@@ -9,7 +9,8 @@ import {
   CardBody,
   CardFooter,
   Badge,
-  Button
+  Button,
+  Alert
 } from "shards-react";
 
 import server from "../Server/Server";
@@ -43,6 +44,14 @@ class MyCourses extends React.Component {
     } = this.state;
 
     return (
+      <div>
+      {this.state.error &&
+      <Container fluid className="px-0">
+        <Alert className="mb-0" theme="danger">
+          <i className="fa fa-info mx-2"></i> {this.state.error}
+        </Alert>
+      </Container>
+      }
       <Container fluid className="main-content-container px-4">
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
@@ -79,15 +88,26 @@ class MyCourses extends React.Component {
                 <CardFooter className="border-top d-flex">
                   <div className="card-post__author d-flex">
                     <div className="d-flex flex-column justify-content-center ml-3">
-                    <a href={"/course-details/" + course.id}><Button size="sm" theme="white">
+                    <a href={"/course-details/" + course.id}><Button disabled={this.state.disabled} size="sm" theme="white">
                       <i className="far fa-edit mr-1" /> View more
                     </Button></a>
                     </div>
                   </div>
                   <div className="my-auto ml-auto">
-                    <a href={"/lesson/" + course.id}><Button size="sm" theme="white">
+                    <Button disabled={this.state.disabled} size="sm" theme="white"
+                      onClick={()=>{
+                        console.log("click!");
+                        this.setState({disabled: true});
+                        let self = this;
+                        server.changeLessonStatus(function(response){
+                          history.push("/lesson/" + course.id);
+                        }, function(error){
+                          console.log("error" ,error);
+                          self.setState({disabled: false, error: "An error has occured"});
+                        }, course.id, "LESSON_START");
+                      }}>
                       <i className="far fa-bookmark mr-1" /> Start lesson
-                    </Button></a>
+                    </Button>
                   </div>
                 </CardFooter>
               </Card>
@@ -96,6 +116,7 @@ class MyCourses extends React.Component {
         </Row>
 
       </Container>
+      </div>
     );
   }
 }

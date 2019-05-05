@@ -14,7 +14,7 @@ function App() {
 		notifications.client.on('message', (topic, message) => {
 			console.log("topic: " + topic)
 			console.log("message: " + message)
-			notifications.client.publish('bla', 'saying stuff ' + counter++);
+			notifications.client.publish('someTopic', 'saying stuff ' + counter++);
 		})
 	})
   return (

@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import history from '../history';
 import {
   Card,
   CardHeader,
@@ -15,10 +16,12 @@ import {
   Button,
   Container,
   CardBody,
+  Badge,
   Alert
 } from "shards-react";
 import PageTitle from "../components/common/PageTitle";
 import server from "../Server/Server";
+import TagsInput from 'react-tagsinput';
 class CourseDetails extends React.Component {
   constructor(props) {
     super(props);
@@ -26,6 +29,8 @@ class CourseDetails extends React.Component {
     this.state = {
 
       students: [],
+
+      new_students: [],
 
       course: {id: "", name: "", location: "", description: "", startDate: "", endDate: ""},
 
@@ -46,6 +51,25 @@ class CourseDetails extends React.Component {
     this.updateStartDate = this.updateStartDate.bind(this);
     this.updateEndDate = this.updateEndDate.bind(this);
     this.update = this.update.bind(this);
+
+    this.handleStudentsChange = this.handleStudentsChange.bind(this);
+    this.updateStudents = this.updateStudents.bind(this);
+  }
+
+  updateStudents(){
+    let self = this;
+    let students = this.state.new_students;
+    if (students.length == 0)
+      return;
+    this.setState({disabled: true});
+    server.addStudentsToCourse(function(response){
+      console.log("added students");
+      window.location.reload();
+    }, function(error){
+      console.log("failed", error);
+      self.setState({error: "An error has occured", success: false, disabled: false});
+      window.scrollTo(0, 0);
+    }, students, this.props.match.params.id);
   }
 
   update(){
@@ -61,6 +85,13 @@ class CourseDetails extends React.Component {
       return;
     }
 
+    let course = this.state.course;
+
+    delete course.status;
+
+    console.log("===========course============");
+    console.log(this.state.course);
+
     server.updateCourse(function(response){
       console.log("worked", response);
       self.setState({error: false, success: true, disabled: false});
@@ -70,6 +101,10 @@ class CourseDetails extends React.Component {
       self.setState({error: "An error has occured", success: false, disabled: false});
       window.scrollTo(0, 0);
     }, this.state.course);
+  }
+
+  handleStudentsChange(new_students) {
+    this.setState({new_students: new_students})
   }
 
 
@@ -149,7 +184,7 @@ class CourseDetails extends React.Component {
           <Row>
           <Col lg="6">
           {/* Editor */}
-          <Card style = {{height:"100%",width:"100%",marginLeft:"16px"}} className="mb-4">
+          <Card style = {{height:"auto",width:"100%",marginLeft:"16px"}} className="mb-4">
             <CardHeader className="border-bottom">
             <h6 className="m-0">Details</h6>
             </CardHeader>
@@ -210,9 +245,16 @@ class CourseDetails extends React.Component {
                       </Col>
                     </Row>
                     <Button outline disabled={this.state.disabled} onClick={this.update} theme="accent">Update Course</Button>
-                    <a href={"/lesson/" + this.props.match.params.id}>
-                      <Button theme="success" onClick={()=>{}} style={{float:"right"}}>Start lesson</Button>
-                    </a>
+                    <Button theme="success" disabled={this.state.disabled} onClick={()=>{
+                      this.setState({disabled: true});
+                      let self = this;
+                      console.log("======starting lesson?======");
+                      server.changeLessonStatus(function(response){
+                        history.push("/lesson/" + self.props.match.params.id);
+                      }, function(error){
+                        self.setState({disabled: false, error: "An error has occured"});
+                      }, this.props.match.params.id, "LESSON_START");
+                    }} style={{float:"right"}}>Start lesson</Button>
                   </Form>
                 </Col>
               </Row>
@@ -253,6 +295,20 @@ class CourseDetails extends React.Component {
                     </tr>))}
                   </tbody>
                 </table>
+                <hr style={{backgroundColor: "#a4a4a4", width: "95%"}} />
+                <Row>
+                <Col>
+                <label style={{marginLeft: "20px", fontSize: "16px"}}>Add students to course</label>
+                </Col>
+                <Col>
+                <Button theme="primary" disabled={this.state.disabled} style={{marginRight: "20px", float: "right"}} onClick={this.updateStudents}>Add</Button>
+                </Col>
+                </Row>
+                <TagsInput onlyUnique
+                inputProps={{placeholder: "Add students by Email"}}
+                addKeys={[9, 13, 32, 186, 188]}
+                value={this.state.new_students}
+                onChange={this.handleStudentsChange} />
                 </CardBody>
               </Card>
             </Col>

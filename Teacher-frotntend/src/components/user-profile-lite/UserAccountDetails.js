@@ -148,8 +148,7 @@ class UserAccountDetails extends React.Component {
                 <FormGroup>
                   <label htmlFor="fePhoneNumber">Phone Number</label>
                   <FormInput
-                    type="tel
-                    "
+                    type="tel"
                     id="fePhoneNumber"
                     placeholder="Phone Number"
                     value = {this.state.details.phoneNum}

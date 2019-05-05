@@ -22,6 +22,16 @@ import {
 } from "shards-react";
 import PageTitle from "../components/common/PageTitle";
 import "./CourseDetails.css"
+const EmojiEnum = {
+      "EMOJI_HAPPY": "🙂",
+      "EMOJI_THUMBS_UP" : "👍",
+      "EMOJI_ANGEL": "👼",
+      "EMOJI_GRIN":"😄",
+      "EMOJI_SHUSH":"🤐",
+      "EMOJI_ZZZ":"😴",
+      "EMOJI_ANGRY":"😠",
+      "EMOJI_THUMBS_DOWN":"👎"
+    };
 class CourseDetails extends React.Component {
     constructor(props) {
         super(props);
@@ -30,142 +40,47 @@ class CourseDetails extends React.Component {
 
         this.state = {
           balance:555,
-          studentId:-1,
+          courseName:'',
 
 
 
           // Third list of posts.
           PostsListThree: [
-            {
-              id:"1",
-              Date: "1/1/2019",
-              LastName:"Sixth grade",
-              Sum:"123456789",
-              Smileys: [
-                   "🙂",
-                   "👍",
-              ]
-            },
-            {
-                id:"2",
-                Date: "1/1/2019",
-                LastName:"Sixth grade",
-                Sum:"123456789",
-                Smileys: [
-                     "🙂",
-                     "👍",
-                ]
-            },
-            {
-                id:"3",
-                Date: "1/1/2019",
-                LastName:"Sixth grade",
-                Sum:"123456789",
-                Smileys: [
-                     "🙂",
-                     "👍",
-                ]
-            },
-            {
-                id:"4",
-                Date: "1/1/2019",
-                LastName:"Sixth grade",
-                Sum:"123456789",
-                Smileys: [
-                     "🙂",
-                     "👍",
-                ]
-            },
-            {
-                id:"5",
-                Date: "1/1/2019",
-                LastName:"Sixth grade",
-                Sum:"123456789",
-                Smileys: [
-                     "🙂",
-                     "👍",
-                ]
-
-            },
-            {
-                id:"6",
-                Date: "1/1/2019",
-                LastName:"Sixth grade",
-                Sum:"123456789",
-                Smileys: [
-                     "🙂",
-                     "👍",
-                ]
-            },
-            {
-                id:"1",
-                Date: "1/1/2019",
-                LastName:"Sixth grade",
-                Sum:"123456789",
-                Smileys: [
-                     "🙂",
-                     "👍",
-                ]
-              },
-              {
-                  id:"2",
-                  Date: "1/1/2019",
-                  LastName:"Sixth grade",
-                  Sum:"123456789",
-                  Smileys: [
-                       "🙂",
-                       "👍",
-                  ]
-
-              },
-              {
-                  id:"3",
-                  Date: "1/1/2019",
-                  LastName:"Sixth grade",
-                  Sum:"123456789",
-                  Smileys: [
-                       "🙂",
-                       "👍",
-                  ]
-              },
-              {
-                  id:"4",
-                  Date: "1/1/2019",
-                  LastName:"Sixth grade",
-                  Sum:"123456789",
-                  Smileys: [
-                       "🙂",
-                       "👍",
-                  ]
-              }
 
           ],
         };
         let config = {
-          headers: {'X-Api-Key' : 'BXGK1t57pTgLKxmReo869MWY2qQey4U4n7fsHjii'}
+          headers: {'X-Api-Key' : 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'}
         };
         let headers = {
-            'X-Api-Key': 'BXGK1t57pTgLKxmReo869MWY2qQey4U4n7fsHjii'
+            'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
         }
+        var student=localStorage.getItem('student_id');
+        var course =this.props.match.params.id;
 
-        axios.get('https://xycqr0g9ra.execute-api.eu-central-1.amazonaws.com/dev/student/'+
-        localStorage.getItem('student_id')+
-        '/emonBalance/byCourse/'+this.props.match.params.id,
+
+        axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/student/'+
+        student+
+        '/emonBalance/byCourse/'+course,
        {headers: headers})
        .then((response) => {
-       console.log(response.data);
+       this.setState({balance: response.data ? response.data : 0});
      });
-          //
-          // axios.get(SERVER_CONFIG.domain+'/log/ofStudent/'+
-          //   localStorage.getItem('student_id') +
-          // '/byCourse/'+this.props.match.params.id ,
-          //  config)
-          //   .then(response =>console.log(response));
-            // let Array = [7];
-            //
-            // axios.post(SERVER_CONFIG.domain + '/course/2/registered',[7]
-            //   , config).then(response =>console.log(response))
 
+        axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/course/'+
+             course,
+            {headers: headers})
+            .then((response) => {
+            this.setState({courseName: response.data.name});
+          });
+
+          axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/log/ofStudent/'
+          + student+'/byCourse/'+course,
+              {headers: headers})
+              .then((response) => {
+                this.setState({PostsListThree: response.data});
+              console.log(response);
+            });
 
 
 
@@ -178,7 +93,7 @@ class CourseDetails extends React.Component {
             <Container fluid className="main-content-container px-4 pb-4">
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title={"Physics " + this.props.match.params.id + " - 114051"} subtitle="Course Details" className="text-sm-left" />
+          <PageTitle sm="4" title={this.state.courseName} subtitle="Course Details" className="text-sm-left" />
         </Row>
 
 
@@ -193,7 +108,7 @@ class CourseDetails extends React.Component {
         <Row>
             <Col >
             <div style={{fontWeight: 600}}>
-            You have a Balance of {this.state.balance} Emons in this course.<br /><br />
+            You have a Balance of <span style={{fontWeight: 800}}>{this.state.balance} Emons</span> in this course.<br /><br />
             Keep up the good work!
             </div>
             </Col>
@@ -207,35 +122,33 @@ class CourseDetails extends React.Component {
       <Col>
         <Card small className="mb-4">
           <CardHeader className="border-bottom">
-            <h6 className="m-0">Recent Lessons</h6>
+            <h6 className="m-0">Recent Activity</h6>
           </CardHeader>
           <CardBody className="p-0 pb-3">
             <table className="table mb-0">
               <thead className="bg-light">
 
                 <tr>
+
                   <th scope="col" className="border-0">
-                    #
+                    Day
                   </th>
                   <th scope="col" className="border-0">
-                    Date
+                    Hour
                   </th>
                   <th scope="col" className="border-0">
-                    Emon Earned
+                    Got
                   </th>
-                  <th scope="col" className="border-0">
-                    Emojis Earned
-                  </th>
+
                 </tr>
               </thead>
               <tbody>
               {PostsListThree.map((post, idx) => (
-                <tr>
-                  <td>{post.id}</td>
-                  <td>{post.Date}</td>
-                  <td>{post.Sum}</td>
-                  <td><ul >{post.Smileys.map((smile,type ,id) => (<li>{smile}</li>))}</ul></td>
 
+                <tr>
+                  <td>{new Date(post.time).getDate().toString().padStart(2,'0') + '/' + new Date(post.time).getMonth().toString().padStart(2,'0') + '/' + new Date(post.time).getFullYear() }</td>
+                  <td>{new Date(post.time).getHours().toString().padStart(2,'0') + ':' + new Date(post.time).getMinutes().toString().padStart(2,'0')}</td>
+                  <td>{post.messageType=="EMON" ? post.value + ' Emons' : EmojiEnum[post.emojiType]}</td>
                 </tr>))}
               </tbody>
             </table>

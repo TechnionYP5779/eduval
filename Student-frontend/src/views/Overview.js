@@ -17,7 +17,7 @@ const Overview = ({ smallStats }) => (
   <Container fluid className="main-content-container px-4">
     {/* Page Header */}
     <Row noGutters className="page-header py-4">
-      <PageTitle title="EMon Overview" subtitle="Your home page" className="text-sm-left mb-3" />
+      <PageTitle title="Student App" subtitle="Your home page" className="text-sm-left mb-3" />
     </Row>
 
     {/* Small Stats Blocks */}
