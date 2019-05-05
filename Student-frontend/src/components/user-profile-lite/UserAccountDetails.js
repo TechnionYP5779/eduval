@@ -130,6 +130,7 @@ render()
                    <FormInput
                      id="Name"
                      placeholder="Name"
+                     disabled={true}
                      value = {this.state.details.name}
                      onChange={this.updateName}
                    />

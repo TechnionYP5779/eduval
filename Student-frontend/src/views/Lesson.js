@@ -122,7 +122,7 @@ class Lesson extends React.Component {
           type: "danger",
           id: 8
         }
-      ],currentEmojis: [ 
+      ],currentEmojis: [
       ]
       ,
 
@@ -139,7 +139,7 @@ const EmojiEnum = {
       "EMOJI_THUMBS_DOWN":"👎"
     };
 
-      
+
     const getContent = function(url) {
       return new Promise((resolve, reject) => {
     	    const lib = url.startsWith('https') ? require('https') : require('http');
@@ -188,7 +188,7 @@ const EmojiEnum = {
             if(res.messageType == "EMOJI"){
                 this.setState(prevState => ({
                 currentEmojis : [...this.state.currentEmojis, EmojiEnum[res.emojiType]]
-              })); 
+              }));
               this.setState({message: "You got an Emoji from your teacher: "+EmojiEnum[res.emojiType], success: true});
               window.scrollTo(0, 0);
             }else{
@@ -196,7 +196,7 @@ const EmojiEnum = {
               let updated_reward_money = +this.state.reward_money + +res.value
               this.setState(prevState => ({
               reward_money : updated_reward_money
-            })); 
+            }));
             this.setState({message: "You got "+ res.value+" Emons from your teacher!", success: true});
               window.scrollTo(0, 0);
             }
@@ -209,13 +209,13 @@ const EmojiEnum = {
               window.scrollTo(0, 0);
               window.location.href = "/course-summery/" + JSON.stringify( {
                   id: this.state.lesson_id,
-                  reward_money: this.state.reward_money, 
+                  reward_money: this.state.reward_money,
                   emojis: this.state.currentEmojis
                 })
-              } 
+              }
             }
-         
-        
+
+
       })
     });
 
@@ -253,7 +253,7 @@ const EmojiEnum = {
     return (
       <Container fluid className="main-content-container px-4">
 
-            {this.state.error && 
+            {this.state.error &&
     <Container fluid className="px-0" >
       <Alert className="mb-0" theme="danger">
         <i className="fa fa-info mx-2"></i> {this.state.message}
@@ -261,7 +261,7 @@ const EmojiEnum = {
     </Container>
     }
 
-           {this.state.success && 
+           {this.state.success &&
     <Container fluid className="px-0">
       <Alert className="mb-0" theme="success" >
         <i className="fa fa-info mx-2"></i> {this.state.message}
@@ -305,70 +305,71 @@ const EmojiEnum = {
             </Card>
           </Col>
 
-          <Col lg="4" className="mb-4">
+          <Col lg="4" className="mb-4" >
             {/* Sliders & Progress Bars */}
-            <Card small className="mb-4">
-              <CardHeader className="border-bottom">
-                <h6 className="m-0">Send To Teacher</h6>
-              </CardHeader>
-              <ListGroup flush>
-              <div className="mb-2 pb-1" style={{margin:"10px"}}>
-                <h7 style={{fontSize:"12px"}}>Choose an emoji to send</h7>
-                </div>
-                <Row style={{margin:"2px"}}>
-                {smileys.map((smile, idx) => (
-                  <Col xs="3">
-                  {
-                    (this.state.chosen_smile == smile.id) &&
-                    <Button style={{fontSize:"20px"}} theme={smile.type} className="mb-2 mr-1" onClick={()=>{
-                      console.log("unchosing", smile.id);
-                      this.setState({chosen_smile : -1});
-                    }}>
-                      {smile.smile}
-                    </Button>
-                  }
-                  {
-                    (this.state.chosen_smile != smile.id) &&
-                    <Button outline style={{fontSize:"20px"}} theme={smile.type} className="mb-2 mr-1" onClick={()=>{
-                      console.log("chosing", smile.id);
-                      console.log("current", this.state.chosen_smile);
-                      this.setState({chosen_smile : smile.id});
-                    }}>
-                      {smile.smile}
-                    </Button>
-                  }
-
-                </Col>))}
-                </Row>
-                  <div className="mb-2 pb-1" style={{margin:"10px"}}>
-                <h7 style={{fontSize:"12px"}}>Choose a message to send</h7>
-                </div>
-                <Row style={{margin:"2px"}}>
-                {messages.map((message, idx) => (
-                  <Col xs="8">
-                  {
-                    (this.state.chosen_message == message.id) &&
-                    <Button style={{fontSize:"13px"}} className="mb-2 mr-1" onClick={()=>{
-                      console.log("unchosing", message.id);
-                      this.setState({chosen_message : -1});
-                    }}>
-                      {message.message}
-                    </Button>
-                  }
-                  {
-                    (this.state.chosen_message != message.id) &&
-                    <Button outline style={{fontSize:"13px"}} className="mb-2 mr-1" onClick={()=>{
-                      console.log("chosing", message.id);
-                      console.log("current", this.state.chosen_message);
-                      this.setState({chosen_message : message.id});
-                    }}>
-                      {message.message}
-                    </Button>
-                  }
-
-                </Col>))}
-                </Row>
-              </ListGroup>
+            <Card small className="mb-4" >{
+              // <CardHeader className="border-bottom">
+              //   <h6 className="m-0">Send To Teacher</h6>
+              // </CardHeader>
+              // <ListGroup flush>
+              // <div className="mb-2 pb-1" style={{margin:"10px"}}>
+              //   <h7 style={{fontSize:"12px"}}>Choose an emoji to send</h7>
+              //   </div>
+              //   <Row style={{margin:"2px"}}>
+              //   {smileys.map((smile, idx) => (
+              //     <Col xs="3">
+              //     {
+              //       (this.state.chosen_smile == smile.id) &&
+              //       <Button style={{fontSize:"20px"}} theme={smile.type} className="mb-2 mr-1" onClick={()=>{
+              //         console.log("unchosing", smile.id);
+              //         this.setState({chosen_smile : -1});
+              //       }}>
+              //         {smile.smile}
+              //       </Button>
+              //     }
+              //     {
+              //       (this.state.chosen_smile != smile.id) &&
+              //       <Button outline style={{fontSize:"20px"}} theme={smile.type} className="mb-2 mr-1" onClick={()=>{
+              //         console.log("chosing", smile.id);
+              //         console.log("current", this.state.chosen_smile);
+              //         this.setState({chosen_smile : smile.id});
+              //       }}>
+              //         {smile.smile}
+              //       </Button>
+              //     }
+              //
+              //   </Col>))}
+              //   </Row>
+              //     <div className="mb-2 pb-1" style={{margin:"10px"}}>
+              //   <h7 style={{fontSize:"12px"}}>Choose a message to send</h7>
+              //   </div>
+              //   <Row style={{margin:"2px"}}>
+              //   {messages.map((message, idx) => (
+              //     <Col xs="8">
+              //     {
+              //       (this.state.chosen_message == message.id) &&
+              //       <Button style={{fontSize:"13px"}} className="mb-2 mr-1" onClick={()=>{
+              //         console.log("unchosing", message.id);
+              //         this.setState({chosen_message : -1});
+              //       }}>
+              //         {message.message}
+              //       </Button>
+              //     }
+              //     {
+              //       (this.state.chosen_message != message.id) &&
+              //       <Button outline style={{fontSize:"13px"}} className="mb-2 mr-1" onClick={()=>{
+              //         console.log("chosing", message.id);
+              //         console.log("current", this.state.chosen_message);
+              //         this.setState({chosen_message : message.id});
+              //       }}>
+              //         {message.message}
+              //       </Button>
+              //     }
+              //
+              //   </Col>))}
+              //   </Row>
+              // </ListGroup>
+            }
             </Card>
 
           </Col>
