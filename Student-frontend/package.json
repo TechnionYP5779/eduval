@@ -25,11 +25,11 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build:prod": "cross-env REACT_APP_BASENAME=/demo/shards-dashboard-lite-react REACT_APP_GAID=UA-115105611-1 npm run build",
-    "build": "cross-env REACT_APP_BASENAME=/demo/shards-dashboard-lite-react react-scripts build",
+    "build:prod": "cross-env REACT_APP_BASENAME=/student npm run build",
+    "build": "cross-env REACT_APP_BASENAME=/student react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-	"deploy": "aws s3 sync build/ s3://emon-teach.com/student"
+	"deploy": "aws s3 sync build/ s3://emon-student"
   },
   "eslintConfig": {
     "extends": "react-app"
