@@ -143,6 +143,7 @@ render()
                    <label htmlFor="feEmail">Email</label>
                    <FormInput
                      type="email"
+                     disabled={true}
                      id="feEmail"
                      placeholder="Email Address"
                      value = {this.state.details.email}
