@@ -132,6 +132,7 @@ class UserAccountDetails extends React.Component {
                     placeholder="Username"
                     value = {this.state.details.name}
                     onChange={()=>{}}
+                    disabled={true}
                   />
                 </FormGroup>
 
@@ -143,6 +144,7 @@ class UserAccountDetails extends React.Component {
                     placeholder="Email"
                     value = {this.state.details.email}
                     onChange={this.updateEmail}
+                    disabled={true}
                   />
                 </FormGroup>
                 <FormGroup>
