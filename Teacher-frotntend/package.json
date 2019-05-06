@@ -2,7 +2,7 @@
   "name": "shards-dashboard-lite-react",
   "version": "1.0.0",
   "private": true,
-  "homepage": "./",
+  "homepage": "/",
   "dependencies": {
     "auth0-lock": "^11.14.1",
     "aws-iot-device-sdk": "^1.0.13",
@@ -26,8 +26,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
-	"build:prod": "cross-env REACT_APP_BASENAME=/teacher npm run build",
-    "build": "cross-env REACT_APP_BASENAME=/teacher react-scripts build",
+    "build:prod": "cross-env REACT_APP_BASENAME=/ npm run build",
+    "build": "cross-env REACT_APP_BASENAME=/ react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "deploy": "aws s3 sync build/ s3://emon-teacher"
