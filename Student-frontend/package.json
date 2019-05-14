@@ -29,7 +29,11 @@
     "build": "cross-env REACT_APP_BASENAME=/ react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "aws s3 sync build/ s3://emon-student"
+
+
+		"predeploy": "npm run build",
+	    "deploy": "aws s3 sync build/ s3://emon-student --cache-control max-age=31536000,public && aws s3 cp s3://emon-student/service-worker.js s3:/emon-student/service-worker.js --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type application/javascript && aws s3 cp s3://emon-student/index.html s3://emon-student/index.html --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type text/html",
+		"postdeploy": "aws cloudfront create-invalidation --distribution-id E3P0RLYDB4DMJZ --paths /index.html && aws cloudfront create-invalidation --distribution-id E3P0RLYDB4DMJZ --paths /service-worker.js"
   },
   "eslintConfig": {
     "extends": "react-app"
