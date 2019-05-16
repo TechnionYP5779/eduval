@@ -1,157 +1,158 @@
-'use strict';
+const { validate } = require('jsonschema');
+const dbConfig = require('../db');
+const models = require('../models');
+const iot = require('./Notifications');
 
-const dbConfig = require('../db')
-const models = require('../models')
-const validate = require('jsonschema').validate;
-const iot = require('./Notifications')
+function isAnInteger(obj) {
+	return !Number.isNaN(Number(obj)) && Number.isInteger(Number(obj));
+}
 
 // GET lesson/{courseId}/status
 module.exports.get = (event, context, callback) => {
-	if (!("pathParameters" in event) || !(event.pathParameters) || !(event.pathParameters.courseId)) {
-        callback(null, {
-            statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true
-			},
-            body: JSON.stringify({
-                message: "Invalid Input, please send us the course's ID!",
-            })
-        });
-        return;
-    }
-	else if (isNaN(event.pathParameters.courseId)) {
-		//then the ID is invalid
+	if (!('pathParameters' in event) || !(event.pathParameters) || !(event.pathParameters.courseId)) {
 		callback(null, {
-            statusCode: 400,
+			statusCode: 400,
 			headers: {
 				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true
+				'Access-Control-Allow-Credentials': true,
 			},
-            body: JSON.stringify({
-                message: "Invalid ID! It should be an integer.",
-            })
-        });
-        return;
+			body: JSON.stringify({
+				message: "Invalid Input, please send us the course's ID!",
+			}),
+		});
+		return;
+	}
+	if (!isAnInteger(event.pathParameters.courseId)) {
+		// then the ID is invalid
+		callback(null, {
+			statusCode: 400,
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Credentials': true,
+			},
+			body: JSON.stringify({
+				message: 'Invalid ID! It should be an integer.',
+			}),
+		});
+		return;
 	}
 
-    // Connect
-    const knex = require('knex')(dbConfig);
+	// Connect
+	const knex = require('knex')(dbConfig);
 
-    knex('Courses').where({
-            courseId: event.pathParameters.courseId
-        }).select().then((result) => {
-            knex.client.destroy();
+	knex('Courses').where({
+		courseId: event.pathParameters.courseId,
+	}).select().then((result) => {
+		knex.client.destroy();
 
-            if (result.length == 1) {
-                callback(null, {
-                    statusCode: 200,
-					headers: {
-						'Access-Control-Allow-Origin': '*',
-						'Access-Control-Allow-Credentials': true
-					},
-                    body: result[0].status
-                });
-            } else if (result.length == 0) {
-                callback(null, {
-                    statusCode: 404,
-					headers: {
-						'Access-Control-Allow-Origin': '*',
-						'Access-Control-Allow-Credentials': true
-					},
-                    body: JSON.stringify({
-                        message: 'Course not found.'
-                    }),
-                });
-            } else {
-                callback(null, {
-                    statusCode: 400,
-					headers: {
-						'Access-Control-Allow-Origin': '*',
-						'Access-Control-Allow-Credentials': true
-					},
-                    body: JSON.stringify({
-                        message: "There's more than one course with this ID?!",
-                        data: result
-                    }),
-                });
-            }
-
-        })
-        .catch((err) => {
-            console.log('error occurred: ', err);
-            // Disconnect
-            knex.client.destroy();
-            callback(err);
-        });
+		if (result.length === 1) {
+			callback(null, {
+				statusCode: 200,
+				headers: {
+					'Access-Control-Allow-Origin': '*',
+					'Access-Control-Allow-Credentials': true,
+				},
+				body: result[0].status,
+			});
+		} else if (result.length === 0) {
+			callback(null, {
+				statusCode: 404,
+				headers: {
+					'Access-Control-Allow-Origin': '*',
+					'Access-Control-Allow-Credentials': true,
+				},
+				body: JSON.stringify({
+					message: 'Course not found.',
+				}),
+			});
+		} else {
+			callback(null, {
+				statusCode: 400,
+				headers: {
+					'Access-Control-Allow-Origin': '*',
+					'Access-Control-Allow-Credentials': true,
+				},
+				body: JSON.stringify({
+					message: "There's more than one course with this ID?!",
+					data: result,
+				}),
+			});
+		}
+	})
+		.catch((err) => {
+			console.log('error occurred: ', err);
+			// Disconnect
+			knex.client.destroy();
+			callback(err);
+		});
 };
 
 
 // POST lesson/{courseId}/status
 module.exports.post = (event, context, callback) => {
-	//context.callbackWaitsForEmptyEventLoop = false
-	if (!("pathParameters" in event) || !(event.pathParameters) || !(event.pathParameters.courseId)) {
-        callback(null, {
-            statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true
-			},
-            body: JSON.stringify({
-                message: "Invalid Input, please send us the course's ID!",
-            })
-        });
-        return;
-    }
-	else if (isNaN(event.pathParameters.courseId)) {
-		//then the ID is invalid
+	// context.callbackWaitsForEmptyEventLoop = false
+	if (!('pathParameters' in event) || !(event.pathParameters) || !(event.pathParameters.courseId)) {
 		callback(null, {
-            statusCode: 400,
+			statusCode: 400,
 			headers: {
 				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true
+				'Access-Control-Allow-Credentials': true,
 			},
-            body: JSON.stringify({
-                message: "Invalid ID! It should be an integer.",
-            })
-        });
-        return;
+			body: JSON.stringify({
+				message: "Invalid Input, please send us the course's ID!",
+			}),
+		});
+		return;
+	}
+	if (!isAnInteger(event.pathParameters.courseId)) {
+		// then the ID is invalid
+		callback(null, {
+			statusCode: 400,
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Credentials': true,
+			},
+			body: JSON.stringify({
+				message: 'Invalid ID! It should be an integer.',
+			}),
+		});
+		return;
 	}
 
-	var newStatus = event.body;
-	var schema = {
+	const newStatus = event.body;
+	const schema = {
 		type: 'string',
-		enum: ['LESSON_START', 'LESSON_END']
-	}
-	var validateRes = validate(newStatus, schema);
-	if(!validateRes.valid) {
+		enum: ['LESSON_START', 'LESSON_END'],
+	};
+	const validateRes = validate(newStatus, schema);
+	if (!validateRes.valid) {
 		callback(null, {
-            statusCode: 405,
+			statusCode: 405,
 			headers: {
 				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true
+				'Access-Control-Allow-Credentials': true,
 			},
-            body: JSON.stringify({
-                message: "Invalid status. Errors: " + JSON.stringify(validateRes.errors),
-            })
-        });
-        return;
+			body: JSON.stringify({
+				message: `Invalid status. Errors: ${JSON.stringify(validateRes.errors)}`,
+			}),
+		});
+		return;
 	}
 
-    // Connect
-    const knex = require('knex')(dbConfig);
-    knex('Courses').where({
-            courseId: event.pathParameters.courseId
-        })
-		.update({status: newStatus})
+	// Connect
+	const knex = require('knex')(dbConfig);
+	knex('Courses').where({
+		courseId: event.pathParameters.courseId,
+	})
+		.update({ status: newStatus })
 		.then(async (result) => {
-			if(result === 1) {
+			if (result === 1) {
 				new Promise((resolve, reject) => {
-					if(newStatus === 'LESSON_END') {
-						//then we need to clear out the present students
-						var promise = knex('PresentStudents').where({
-								courseId: event.pathParameters.courseId
-							}).del();
+					if (newStatus === 'LESSON_END') {
+						// then we need to clear out the present students
+						const promise = knex('PresentStudents').where({
+							courseId: event.pathParameters.courseId,
+						}).del();
 						resolve(promise);
 					}
 					resolve();
@@ -159,37 +160,34 @@ module.exports.post = (event, context, callback) => {
 					knex.client.destroy();
 
 					iot.connect().then(() => {
-						iot.client.publish('lesson/' + event.pathParameters.courseId + '/status', newStatus, {}, (uneededResult) => {
-							iot.client.end(false)
+						iot.client.publish(`lesson/${event.pathParameters.courseId}/status`, newStatus, {}, (uneededResult) => {
+							iot.client.end(false);
 							callback(null, {
 								statusCode: 200,
 								headers: {
 									'Access-Control-Allow-Origin': '*',
-									'Access-Control-Allow-Credentials': true
+									'Access-Control-Allow-Credentials': true,
 								},
-								body: ""
+								body: '',
 							});
-							return;
-						})
-					})
+						});
+					});
 				});
-			}
-			else {
+			} else {
 				callback(null, {
 					statusCode: 404,
 					headers: {
 						'Access-Control-Allow-Origin': '*',
-						'Access-Control-Allow-Credentials': true
+						'Access-Control-Allow-Credentials': true,
 					},
-					body: ""
+					body: '',
 				});
 			}
-
-        })
-        .catch((err) => {
-            console.log('error occurred: ', err);
-            // Disconnect
-            knex.client.destroy();
-            callback(err);
-        });
+		})
+		.catch((err) => {
+			console.log('error occurred: ', err);
+			// Disconnect
+			knex.client.destroy();
+			callback(err);
+		});
 };
