@@ -14,5 +14,8 @@
     "jsonschema": "^1.2.4",
     "knex": "^0.16.5",
     "mysql": "^2.16.0"
+  },
+  "devDependencies": {
+    "serverless-plugin-optimize": "^4.0.2-rc.1"
   }
 }
