@@ -40,8 +40,8 @@ class MyCourses extends React.Component {
      {headers: headers})
      .then((response) => {
      this.setState({PostsListThree: response.data});
-     
-  
+
+
            const getContent = function(url) {
       return new Promise((resolve, reject) => {
     	    const lib = url.startsWith('https') ? require('https') : require('http');
@@ -76,46 +76,46 @@ class MyCourses extends React.Component {
     }
 
     var j;
-    for (j = 0; j < this.state.PostsListThree.length; j++) { 
+    for (j = 0; j < this.state.PostsListThree.length; j++) {
       axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/lesson/'+ this.state.PostsListThree[j].id +'/status',
           {headers: headers})
           .then((response) => {
             console.log((response));
             var current_id = ((response.request.responseURL).split('lesson')[1]).split('/')[1];
-          if(response.data == "LESSON_START"){
+          if(response.data === "LESSON_START"){
             var insert = this.state.lessons_status;
-            insert[current_id] = false; 
+            insert[current_id] = false;
             this.setState({lessons_status: insert});
           }else{
             var insert = this.state.lessons_status;
-              insert[current_id] = true; 
+              insert[current_id] = true;
              this.setState({lessons_status: insert});
           }
           console.log("123123123213");
           console.log(this.state.lessons_status);
-        }) .catch((error)=>{
+        }).catch((error)=>{
           console.log(error);
         });
     }
-    
+
      var i;
-    for (i = 0; i < this.state.PostsListThree.length; i++) { 
+    for (i = 0; i < this.state.PostsListThree.length; i++) {
       console.log("number" + i);
       console.log(this.state.PostsListThree[i].id);
-      let LessonsStatusURL = 'lesson/'+ this.state.PostsListThree[i].id +'/status';  
+      let LessonsStatusURL = 'lesson/'+ this.state.PostsListThree[i].id +'/status';
       connect().then(() => {
         client.subscribe(LessonsStatusURL);
         client.on('message', (topic, message) => {
           console.log("dsfsdfsdfsdfsdfsdfsdfsdsdfsdf");
         console.log("message" + message);
         var current_id = ((topic).split('lesson')[1]).split('/')[1];
-         if(message == "LESSON_START"){
+         if(message === "LESSON_START"){
             var insert = this.state.lessons_status;
-            insert[current_id] = false; 
+            insert[current_id] = false;
             this.setState({lessons_status: insert});
           }else{
             var insert = this.state.lessons_status;
-              insert[current_id] = true; 
+              insert[current_id] = true;
              this.setState({lessons_status: insert});
           }
         })
@@ -127,9 +127,9 @@ class MyCourses extends React.Component {
   .catch((error)=>{
      console.log(error);
   });
-  
+
   }
-  
+
 
   insertDeskNumber(id) {
     console.log("id" + id);
@@ -139,7 +139,7 @@ class MyCourses extends React.Component {
       };
       var txt;
       var deskNumber = prompt("Please enter your desk number:", "");
-      if (deskNumber == null || deskNumber == "") {
+      if (deskNumber === null || deskNumber === "") {
         txt = "User cancelled the prompt.";
       } else {
         axios.post('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/lesson/'+ id +'/present',{
@@ -192,11 +192,11 @@ class MyCourses extends React.Component {
                     </div>
                   </div>
                   <div className="my-auto ml-auto">
-                    
+
                     <Button disabled = {this.state.lessons_status[post.id]} size="sm" theme="white" onClick={() => {this.insertDeskNumber(post.id)}}>
                       <i className="far fa-bookmark mr-1" /> Join lesson
-                    </Button>            
-                  
+                    </Button>
+
                   </div>
                 </CardFooter>
               </Card>
@@ -208,9 +208,9 @@ class MyCourses extends React.Component {
 
 
     );
-    
+
   }
-    
+
 }
 
 export default MyCourses;

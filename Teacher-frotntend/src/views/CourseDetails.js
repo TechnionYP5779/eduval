@@ -59,7 +59,7 @@ class CourseDetails extends React.Component {
   updateStudents(){
     let self = this;
     let students = this.state.new_students;
-    if (students.length == 0)
+    if (students.length === 0)
       return;
     this.setState({disabled: true});
     server.addStudentsToCourse(function(response){
