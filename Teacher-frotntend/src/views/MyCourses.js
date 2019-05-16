@@ -63,7 +63,7 @@ class MyCourses extends React.Component {
         {/* First Row of Posts */}
         <Row>
           {
-            courses.length == 0 &&
+            courses.length === 0 &&
             <Card small className="card-post mb-4">
               <CardBody>
                 <h4 className="card-title">No Courses?</h4>

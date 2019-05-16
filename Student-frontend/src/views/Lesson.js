@@ -181,11 +181,11 @@ const EmojiEnum = {
       client.subscribe(LessonsStatusURL);
 
       client.on('message', (topic, message) => {
-        if(topic == LessonsMessageURL){
+        if(topic === LessonsMessageURL){
             console.log("topic: " + topic);
             var res=JSON.parse(message);
             console.log("message: " + res.messageType)
-            if(res.messageType == "EMOJI"){
+            if(res.messageType === "EMOJI"){
                 this.setState(prevState => ({
                 currentEmojis : [...this.state.currentEmojis, EmojiEnum[res.emojiType]]
               }));
@@ -204,7 +204,7 @@ const EmojiEnum = {
         }else{
           console.log("topic: " + topic);
 
-            if(message == "LESSON_END"){
+            if(message === "LESSON_END"){
               this.setState({message: "The lesson ended", success: false});
               window.scrollTo(0, 0);
               window.location.href = "/course-summery/" + JSON.stringify( {

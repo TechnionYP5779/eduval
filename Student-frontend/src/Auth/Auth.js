@@ -59,7 +59,7 @@ class Auth {
     // prefill: "street 123",
     validator: function(phone_number) {
       return {
-         valid: phone_number.length == 10 || phone_number.length == 0,
+         valid: phone_number.length === 10 || phone_number.length === 0,
          hint: "Must have 10 digits" // optional
         };
       }

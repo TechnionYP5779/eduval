@@ -148,7 +148,7 @@ class CourseDetails extends React.Component {
                 <tr>
                   <td>{new Date(post.time).getDate().toString().padStart(2,'0') + '/' + new Date(post.time).getMonth().toString().padStart(2,'0') + '/' + new Date(post.time).getFullYear() }</td>
                   <td>{new Date(post.time).getHours().toString().padStart(2,'0') + ':' + new Date(post.time).getMinutes().toString().padStart(2,'0')}</td>
-                  <td>{post.messageType=="EMON" ? post.value + ' Emons' : EmojiEnum[post.emojiType]}</td>
+                  <td>{post.messageType === "EMON" ? post.value + ' Emons' : EmojiEnum[post.emojiType]}</td>
                 </tr>))}
               </tbody>
             </table>

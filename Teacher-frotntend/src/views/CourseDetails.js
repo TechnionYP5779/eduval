@@ -59,7 +59,7 @@ class CourseDetails extends React.Component {
   updateStudents(){
     let self = this;
     let students = this.state.new_students;
-    if (students.length == 0)
+    if (students.length === 0)
       return;
     this.setState({disabled: true});
     server.addStudentsToCourse(function(response){
@@ -75,7 +75,7 @@ class CourseDetails extends React.Component {
   update(){
     let self = this;
     this.setState({disabled: true});
-    let checkFilled = (input) => (input == null || input == "" || !input);
+    let checkFilled = (input) => (input === null || input === "" || !input);
 
     if (checkFilled(this.state.course.name) || checkFilled(this.state.course.description) ||
       checkFilled(this.state.course.location) || checkFilled(this.state.course.startDate) ||

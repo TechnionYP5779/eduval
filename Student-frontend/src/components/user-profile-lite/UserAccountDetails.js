@@ -57,7 +57,7 @@ update(){
   };
 
   console.log("Hello");
-  axios.put('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev' + '/student', {
+  axios.put('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/student', {
     id:  this.state.details.id,
     name: this.state.details.id.name,
     email: this.state.details.email,

@@ -60,7 +60,7 @@ class Auth {
     // prefill: "street 123",
     validator: function(phone_number) {
       return {
-         valid: phone_number.length == 10 || phone_number.length == 0,
+         valid: phone_number.length === 10 || phone_number.length === 0,
          hint: "Must have 10 digits" // optional
         };
       }
@@ -160,7 +160,7 @@ class Auth {
       history.replace('/');
     })
     .catch(function(error){
-      if (error.response == null || error.response.status != 404){
+      if (error.response === null || error.response.status !== 404){
         console.log(error);
         history.replace('/');
         return;
