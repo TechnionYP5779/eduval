@@ -160,7 +160,7 @@ class Auth {
       history.replace('/');
     })
     .catch(function(error){
-      if (error.response == null || error.response.status != 404){
+      if (error.response === null || error.response.status !== 404){
         console.log(error);
         history.replace('/');
         return;

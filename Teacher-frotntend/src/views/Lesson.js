@@ -332,7 +332,7 @@ class Lesson extends React.Component {
                   </div>
                     <div className="mb-2 pb-1" style={{margin:"10px"}}>
                   <Button theme="primary" disabled={this.state.disabled} className="mb-2 mr-1" onClick={()=>{
-                    if (this.state.chosen_students.length == 0)
+                    if (this.state.chosen_students.length === 0)
                       return;
                     this.setState({disabled: true});
                     console.log("AWARD!");
@@ -344,7 +344,7 @@ class Lesson extends React.Component {
                     server.sendEMoney(function(response){
                       console.log("sent");
                       counter ++;
-                      if (counter == self.state.chosen_students.length){
+                      if (counter === self.state.chosen_students.length){
                         self.setState({chosen_students: [], success: success, error: error, disabled: false});
                         window.scrollTo(0, 0);
                       }
@@ -352,7 +352,7 @@ class Lesson extends React.Component {
                       success = false;
                       error = true;
                       counter ++;
-                      if (counter == self.state.chosen_students.length){
+                      if (counter === self.state.chosen_students.length){
                         self.setState({chosen_students: [], success: success, error: error, disabled: false});
                         window.scrollTo(0, 0);
                       }
