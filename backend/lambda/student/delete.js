@@ -1,3 +1,4 @@
+const knex = require('knex');
 const dbConfig = require('../db');
 
 function isAnInteger(obj) {
@@ -35,12 +36,12 @@ module.exports.handler = (event, context, callback) => {
 	}
 
 	// Connect
-	const knex = require('knex')(dbConfig);
+	const knexConnection = knex(dbConfig);
 
-	knex('Students').where({
+	knexConnection('Students').where({
 		studentId: event.pathParameters.studentId,
 	}).del().then((result) => {
-		knex.client.destroy();
+		knexConnection.client.destroy();
 
 		if (result === 1) {
 			callback(null, {
@@ -65,7 +66,7 @@ module.exports.handler = (event, context, callback) => {
 		.catch((err) => {
 			console.log('error occurred: ', err);
 			// Disconnect
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(err);
 		});
 };

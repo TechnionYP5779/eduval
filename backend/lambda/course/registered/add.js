@@ -1,3 +1,4 @@
+const knex = require('knex');
 const { validate } = require('jsonschema');
 const dbConfig = require('../../db');
 
@@ -108,11 +109,11 @@ module.exports.handler = (event, context, callback) => {
 		return;
 	}
 
-	const knex = require('knex')(dbConfig);
+	const knexConnection = knex(dbConfig);
 	new Promise(((resolve, reject) => {
 		if (typeof requestArray[0] === 'string') {
 			// then we need to get the IDs
-			resolve(knex('Students')
+			resolve(knexConnection('Students')
 				.select('studentId')
 				.where('email', 'in', requestArray)
 				.then(result => result.map(x => x.studentId)));
@@ -126,9 +127,9 @@ module.exports.handler = (event, context, callback) => {
 			courseId: event.pathParameters.courseId,
 		}));
 
-		return knex('Registered').insert(pairsArray);
+		return knexConnection('Registered').insert(pairsArray);
 	}).then((result) => {
-		knex.client.destroy();
+		knexConnection.client.destroy();
 		callback(null, {
 			statusCode: 200,
 			headers: {
@@ -141,7 +142,7 @@ module.exports.handler = (event, context, callback) => {
 		.catch((err) => {
 			console.log('error occurred: ', err);
 			// Disconnect
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(err);
 		});
 };

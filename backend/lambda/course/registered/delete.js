@@ -1,6 +1,9 @@
-'use strict';
-
+const knex = require('knex');
 const dbConfig = require('../../db');
+
+function isAnInteger(obj) {
+	return !Number.isNaN(Number(obj)) && Number.isInteger(Number(obj));
+}
 
 // DELETE course/{courseId}/registered/{studentId}
 module.exports.handler = (event, context, callback) => {
@@ -17,7 +20,7 @@ module.exports.handler = (event, context, callback) => {
 		});
 		return;
 	}
-	if (isNaN(event.pathParameters.courseId) || isNaN(event.pathParameters.studentId)) {
+	if (!isAnInteger(event.pathParameters.courseId) || !isAnInteger(event.pathParameters.studentId)) {
 		// then at least one of the IDs is invalid
 		callback(null, {
 			statusCode: 400,
@@ -33,13 +36,13 @@ module.exports.handler = (event, context, callback) => {
 	}
 
 	// Connect
-	const knex = require('knex')(dbConfig);
+	const knexConnection = knex(dbConfig);
 
-	knex('Registered').where({
+	knexConnection('Registered').where({
 		courseId: event.pathParameters.courseId,
-		    studentId: event.pathParameters.studentId,
+		studentId: event.pathParameters.studentId,
 	}).del().then((result) => {
-		knex.client.destroy();
+		knexConnection.client.destroy();
 
 		if (result === 1) {
 			callback(null, {
@@ -64,7 +67,7 @@ module.exports.handler = (event, context, callback) => {
 		.catch((err) => {
 			console.log('error occurred: ', err);
 			// Disconnect
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(err);
 		});
 };

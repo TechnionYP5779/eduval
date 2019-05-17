@@ -1,61 +1,61 @@
-const { validate } = require('jsonschema');
+const knex = require('knex');
 const dbConfig = require('../db');
-const models = require('../models');
 
 function dbRowToProperObject(obj) {
-	obj.time = obj.dtime;
-	delete obj.dtime;
-	delete obj.live;
+	const retObj = { ...obj };		// shallow copy
+	retObj.time = obj.dtime;
+	delete retObj.dtime;
+	delete retObj.live;
 	switch (obj.msgType) {
 	case 0:
-		delete obj.msgType;
-		obj.messageType = 'EMON';
-		obj.messageReason = `${obj.msgReason}`;
-		delete obj.msgReason;
-		obj.value = obj.val;
-		delete obj.val;
-		delete obj.live;
+		delete retObj.msgType;
+		retObj.messageType = 'EMON';
+		retObj.messageReason = `${obj.msgReason}`;
+		delete retObj.msgReason;
+		retObj.value = obj.val;
+		delete retObj.val;
+		delete retObj.live;
 
 		break;
 	case 1:
-		delete obj.msgType;
-		obj.messageType = 'EMOJI';
-		delete obj.msgReason;
-		delete obj.live;
+		delete retObj.msgType;
+		retObj.messageType = 'EMOJI';
+		delete retObj.msgReason;
+		delete retObj.live;
 		switch (obj.val) {
 		case 0:
-			obj.emojiType = 'EMOJI_HAPPY';
+			retObj.emojiType = 'EMOJI_HAPPY';
 			break;
 		case 1:
-			obj.emojiType = 'EMOJI_THUMBS_UP';
+			retObj.emojiType = 'EMOJI_THUMBS_UP';
 			break;
 		case 2:
-			obj.emojiType = 'EMOJI_ANGEL';
+			retObj.emojiType = 'EMOJI_ANGEL';
 			break;
 		case 3:
-			obj.emojiType = 'EMOJI_GRIN';
+			retObj.emojiType = 'EMOJI_GRIN';
 			break;
 		case 4:
-			obj.emojiType = 'EMOJI_SHUSH';
+			retObj.emojiType = 'EMOJI_SHUSH';
 			break;
 		case 5:
-			obj.emojiType = 'EMOJI_ZZZ';
+			retObj.emojiType = 'EMOJI_ZZZ';
 			break;
 		case 6:
-			obj.emojiType = 'EMOJI_ANGRY';
+			retObj.emojiType = 'EMOJI_ANGRY';
 			break;
 		case 7:
-			obj.emojiType = 'EMOJI_THUMBS_DOWN';
+			retObj.emojiType = 'EMOJI_THUMBS_DOWN';
 			break;
 		default:
-			obj.emojiType = 'ERROR_EMOJI';
+			retObj.emojiType = 'ERROR_EMOJI';
 		}
-		delete obj.val;
+		delete retObj.val;
 		break;
 	default:
-		obj.messageType = 'INVALID_MESSAGE';
+		retObj.messageType = 'INVALID_MESSAGE';
 	}
-	return obj;
+	return retObj;
 }
 
 function isAnInteger(obj) {
@@ -93,14 +93,14 @@ module.exports.handler = (event, context, callback) => {
 	}
 
 	// Connect
-	const knex = require('knex')(dbConfig);
+	const knexConnection = knex(dbConfig);
 
-	knex('Logs').where({
+	knexConnection('Logs').where({
 		courseId: event.pathParameters.courseId,
 		studentId: event.pathParameters.studentId,
 	}).select()
 		.then((result) => {
-			knex.client.destroy();
+			knexConnection.client.destroy();
 
 			callback(null, {
 				statusCode: 200,
@@ -114,7 +114,7 @@ module.exports.handler = (event, context, callback) => {
 		.catch((err) => {
 			console.log('error occurred: ', err);
 			// Disconnect
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(err);
 		});
 };

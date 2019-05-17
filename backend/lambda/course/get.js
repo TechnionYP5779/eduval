@@ -1,12 +1,14 @@
+const knex = require('knex');
 const dbConfig = require('../db');
 
 function dbRowToProperObject(obj) {
-	obj.id = obj.courseId;
-	delete obj.courseId;
-	obj.name = obj.courseName;
-	delete obj.courseName;
-	if ('studentId' in obj) { delete obj.studentId; }
-	return obj;
+	const retObj = { ...obj };		// shallow copy
+	retObj.id = obj.courseId;
+	delete retObj.courseId;
+	retObj.name = obj.courseName;
+	delete retObj.courseName;
+	if ('studentId' in obj) { delete retObj.studentId; }
+	return retObj;
 }
 
 function isAnInteger(obj) {
@@ -44,12 +46,12 @@ module.exports.byId = (event, context, callback) => {
 	}
 
 	// Connect
-	const knex = require('knex')(dbConfig);
+	const knexConnection = knex(dbConfig);
 
-	knex('Courses').where({
+	knexConnection('Courses').where({
 		courseId: event.pathParameters.courseId,
 	}).select().then((result) => {
-		knex.client.destroy();
+		knexConnection.client.destroy();
 
 		if (result.length === 1) {
 			callback(null, {
@@ -88,7 +90,7 @@ module.exports.byId = (event, context, callback) => {
 		.catch((err) => {
 			console.log('error occurred: ', err);
 			// Disconnect
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(err);
 		});
 };
@@ -124,12 +126,12 @@ module.exports.byTeacherId = (event, context, callback) => {
 	}
 
 	// Connect
-	const knex = require('knex')(dbConfig);
+	const knexConnection = knex(dbConfig);
 
-	knex('Courses').where({
+	knexConnection('Courses').where({
 		teacherId: event.pathParameters.teacherId,
 	}).select().then((result) => {
-		knex.client.destroy();
+		knexConnection.client.destroy();
 
 		if (result.length === 0) {
 			callback(null, {
@@ -156,7 +158,7 @@ module.exports.byTeacherId = (event, context, callback) => {
 		.catch((err) => {
 			console.log('error occurred: ', err);
 			// Disconnect
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(err);
 		});
 };
@@ -192,14 +194,14 @@ module.exports.byStudent = (event, context, callback) => {
 	}
 
 	// Connect
-	const knex = require('knex')(dbConfig);
+	const knexConnection = knex(dbConfig);
 
-	knex('Registered').where({
+	knexConnection('Registered').where({
 		studentId: event.pathParameters.studentId,
 	}).select()
 		.join('Courses', 'Courses.courseId', 'Registered.courseId')
 		.then((result) => {
-			knex.client.destroy();
+			knexConnection.client.destroy();
 
 			callback(null, {
 				statusCode: 200,
@@ -213,7 +215,7 @@ module.exports.byStudent = (event, context, callback) => {
 		.catch((err) => {
 			console.log('error occurred: ', err);
 			// Disconnect
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(err);
 		});
 };

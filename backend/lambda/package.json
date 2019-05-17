@@ -1,28 +1,30 @@
 {
-  "name": "lambda",
-  "version": "1.0.0",
-  "description": "",
-  "main": "db.js",
-  "scripts": {
-    "pretest": "eslint --ignore-path .gitignore .",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "aws-iot-device-sdk": "^2.2.1",
-    "axios": "^0.18.0",
-    "jsonschema": "^1.2.4",
-    "knex": "^0.16.5",
-    "mysql": "^2.16.0"
-  },
-  "devDependencies": {
-    "eslint": "^5.3.0",
-    "eslint-config-airbnb": "^17.1.0",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jsx-a11y": "^6.1.1",
-    "eslint-plugin-node": "^9.0.1",
-    "eslint-plugin-react": "^7.11.0",
-    "serverless-plugin-optimize": "^4.0.2-rc.1"
-  }
+    "name": "lambda",
+    "version": "1.0.0",
+    "description": "",
+    "engines": {
+        "node": ">=8.10.0"
+    },
+    "scripts": {
+        "pretest": "eslint --ignore-path .gitignore .",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "aws-iot-device-sdk": "^2.2.1",
+        "axios": "^0.18.0",
+        "jsonschema": "^1.2.4",
+        "knex": "^0.16.5",
+        "mysql": "^2.16.0"
+    },
+    "devDependencies": {
+        "eslint": "^5.3.0",
+        "eslint-config-airbnb": "^17.1.0",
+        "eslint-plugin-import": "^2.14.0",
+        "eslint-plugin-jsx-a11y": "^6.1.1",
+        "eslint-plugin-node": "^9.0.1",
+        "eslint-plugin-react": "^7.11.0",
+        "serverless-plugin-optimize": "^4.0.2-rc.1"
+    }
 }

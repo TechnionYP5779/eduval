@@ -1,12 +1,14 @@
+const knex = require('knex');
 const dbConfig = require('../../db');
 
 function dbRowToProperObject(obj) {
-	obj.id = obj.studentId;
-	delete obj.studentId;
-	obj.authIdToken = obj.idToken;
-	delete obj.idToken;
-	delete obj.courseId;
-	return obj;
+	const retObj = { ...obj };		// shallow copy
+	retObj.id = obj.studentId;
+	delete retObj.studentId;
+	retObj.authIdToken = obj.idToken;
+	delete retObj.idToken;
+	delete retObj.courseId;
+	return retObj;
 }
 
 function isAnInteger(obj) {
@@ -44,14 +46,14 @@ module.exports.handler = (event, context, callback) => {
 	}
 
 	// Connect
-	const knex = require('knex')(dbConfig);
+	const knexConnection = knex(dbConfig);
 
-	knex('Registered').where({
+	knexConnection('Registered').where({
 		courseId: event.pathParameters.courseId,
 	}).select()
 		.join('Students', 'Registered.studentId', 'Students.studentId')
 		.then((result) => {
-			knex.client.destroy();
+			knexConnection.client.destroy();
 
 			callback(null, {
 				statusCode: 200,
@@ -65,7 +67,7 @@ module.exports.handler = (event, context, callback) => {
 		.catch((err) => {
 			console.log('error occurred: ', err);
 			// Disconnect
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(err);
 		});
 };

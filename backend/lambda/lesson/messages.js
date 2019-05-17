@@ -1,113 +1,121 @@
+const knex = require('knex');
 const { validate } = require('jsonschema');
 const dbConfig = require('../db');
 const models = require('../models');
 const iot = require('./Notifications');
 
 function dbRowToProperObject(obj) {
-	delete obj.studentId;
-	delete obj.courseId;
-	delete obj.idToken;
-	delete obj.dtime;
+	const retObj = { ...obj };		// shallow copy
+	delete retObj.studentId;
+	delete retObj.courseId;
+	delete retObj.idToken;
+	delete retObj.dtime;
 	switch (obj.msgType) {
 	case 0:
-		delete obj.msgType;
-		obj.messageType = 'EMON';
-		obj.messageReason = `${obj.msgReason}`;
-		delete obj.msgReason;
-		obj.value = obj.val;
-		delete obj.val;
-		delete obj.live;
+		delete retObj.msgType;
+		retObj.messageType = 'EMON';
+		retObj.messageReason = `${obj.msgReason}`;
+		delete retObj.msgReason;
+		retObj.value = obj.val;
+		delete retObj.val;
+		delete retObj.live;
 
 		break;
 	case 1:
-		delete obj.msgType;
-		obj.messageType = 'EMOJI';
-		delete obj.msgReason;
-		delete obj.live;
+		delete retObj.msgType;
+		retObj.messageType = 'EMOJI';
+		delete retObj.msgReason;
+		delete retObj.live;
 		switch (obj.val) {
 		case 0:
-			obj.emojiType = 'EMOJI_HAPPY';
+			retObj.emojiType = 'EMOJI_HAPPY';
 			break;
 		case 1:
-			obj.emojiType = 'EMOJI_THUMBS_UP';
+			retObj.emojiType = 'EMOJI_THUMBS_UP';
 			break;
 		case 2:
-			obj.emojiType = 'EMOJI_ANGEL';
+			retObj.emojiType = 'EMOJI_ANGEL';
 			break;
 		case 3:
-			obj.emojiType = 'EMOJI_GRIN';
+			retObj.emojiType = 'EMOJI_GRIN';
 			break;
 		case 4:
-			obj.emojiType = 'EMOJI_SHUSH';
+			retObj.emojiType = 'EMOJI_SHUSH';
 			break;
 		case 5:
-			obj.emojiType = 'EMOJI_ZZZ';
+			retObj.emojiType = 'EMOJI_ZZZ';
 			break;
 		case 6:
-			obj.emojiType = 'EMOJI_ANGRY';
+			retObj.emojiType = 'EMOJI_ANGRY';
 			break;
 		case 7:
-			obj.emojiType = 'EMOJI_THUMBS_DOWN';
+			retObj.emojiType = 'EMOJI_THUMBS_DOWN';
 			break;
+		default:
+			retObj.emojiType = 'INVALID_EMOJI';
 		}
-		delete obj.val;
+		delete retObj.val;
 		break;
+	default:
+		retObj.messageType = 'INVALID_MESSAGE';
 	}
-	return obj;
+	return retObj;
 }
 
 function objToDBRow(obj, courseId, studentId) {
-	const nobj = Object.assign({}, obj);
-	nobj.courseId = courseId;
-	nobj.studentId = studentId;
-	nobj.dtime = new Date(Date.now()).toISOString();
-	nobj.live = true;
-	switch (nobj.messageType) {
+	const retObj = { ...obj };		// shallow copy
+	retObj.courseId = courseId;
+	retObj.studentId = studentId;
+	retObj.dtime = new Date(Date.now()).toISOString();
+	retObj.live = true;
+	switch (retObj.messageType) {
 	case 'EMON':
-		nobj.msgType = 0;
-		if ('messageReason' in nobj) {
+		retObj.msgType = 0;
+		if ('messageReason' in retObj) {
 			// currently unused
-			delete nobj.messageReason;
+			delete retObj.messageReason;
 		}
-		nobj.val = nobj.value;
-		delete nobj.value;
+		retObj.val = retObj.value;
+		delete retObj.value;
 
 		break;
 	case 'EMOJI':
-		nobj.msgType = 1;
+		retObj.msgType = 1;
 
-		switch (nobj.emojiType) {
+		switch (retObj.emojiType) {
 		case 'EMOJI_HAPPY':
-			nobj.val = 0;
+			retObj.val = 0;
 			break;
 		case 'EMOJI_THUMBS_UP':
-			nobj.val = 1;
+			retObj.val = 1;
 			break;
 		case 'EMOJI_ANGEL':
-			nobj.val = 2;
+			retObj.val = 2;
 			break;
 		case 'EMOJI_GRIN':
-			nobj.val = 3;
+			retObj.val = 3;
 			break;
 		case 'EMOJI_SHUSH':
-			nobj.val = 4;
+			retObj.val = 4;
 			break;
 		case 'EMOJI_ZZZ':
-			nobj.val = 5;
+			retObj.val = 5;
 			break;
 		case 'EMOJI_ANGRY':
-			nobj.val = 6;
+			retObj.val = 6;
 			break;
 		case 'EMOJI_THUMBS_DOWN':
-			nobj.val = 7;
+			retObj.val = 7;
 			break;
 		default:
 		}
-		delete nobj.emojiType;
+		delete retObj.emojiType;
 		break;
+	default:
+		retObj.msgType = -1;
 	}
-	delete nobj.messageType;
-	return nobj;
+	delete retObj.messageType;
+	return retObj;
 }
 
 function isAnInteger(obj) {
@@ -145,15 +153,15 @@ module.exports.get = (event, context, callback) => {
 	}
 
 	// Connect
-	const knex = require('knex')(dbConfig);
+	const knexConnection = knex(dbConfig);
 
-	knex('Logs').where({
+	knexConnection('Logs').where({
 		courseId: event.pathParameters.courseId,
 		studentId: event.pathParameters.studentId,
 		live: true,
 	}).select()
 		.then((result) => {
-			knex.client.destroy();
+			knexConnection.client.destroy();
 
 			callback(null, {
 				statusCode: 200,
@@ -167,7 +175,7 @@ module.exports.get = (event, context, callback) => {
 		.catch((err) => {
 			console.log('error occurred: ', err);
 			// Disconnect
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(err);
 		});
 };
@@ -241,12 +249,12 @@ module.exports.post = (event, context, callback) => {
 		event.pathParameters.studentId);
 
 	// Connect
-	const knex = require('knex')(dbConfig);
+	const knexConnection = knex(dbConfig);
 
-	knex('Logs')
+	knexConnection('Logs')
 		.insert(objToInsert)
 		.then(async (result) => {
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			iot.connect().then(() => {
 				iot.client.publish(`lesson/${event.pathParameters.courseId}/messages/${event.pathParameters.studentId}`, JSON.stringify(messageObj), {}, (uneededResult) => {
 					iot.client.end(false);
@@ -264,7 +272,7 @@ module.exports.post = (event, context, callback) => {
 		.catch((err) => {
 			console.log('error occurred: ', err);
 			// Disconnect
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(err);
 		});
 };
@@ -302,9 +310,9 @@ module.exports.delete = (event, context, callback) => {
 	}
 
 	// Connect
-	const knex = require('knex')(dbConfig);
+	const knexConnection = knex(dbConfig);
 
-	knex('Logs')
+	knexConnection('Logs')
 		.where({
 			courseId: event.pathParameters.courseId,
 			studentId: event.pathParameters.studentId,
@@ -312,7 +320,7 @@ module.exports.delete = (event, context, callback) => {
 		})
 		.update({ live: false })
 		.then(async (result) => {
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(null, {
 				statusCode: 200,
 				headers: {
@@ -325,7 +333,7 @@ module.exports.delete = (event, context, callback) => {
 		.catch((err) => {
 			console.log('error occurred: ', err);
 			// Disconnect
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(err);
 		});
 };

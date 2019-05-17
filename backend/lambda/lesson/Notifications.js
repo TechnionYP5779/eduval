@@ -1,9 +1,10 @@
+const https = require('https');
 const awsIot = require('aws-iot-device-sdk');
 
 function getContent(url) {
 	return new Promise((resolve, reject) => {
-		const lib = url.startsWith('https') ? require('https') : require('http');
-		const request = lib.get(url, (response) => {
+		// assume URL is https
+		const request = https.get(url, (response) => {
 			if (response.statusCode < 200 || response.statusCode > 299) {
 				reject(new Error(`Failed to load page, status code: ${response.statusCode}`));
 			}
@@ -18,15 +19,15 @@ function getContent(url) {
 
 
 module.exports.connect = async () => getContent('https://qh6vsuof2f.execute-api.eu-central-1.amazonaws.com/dev/iot/keys').then((res) => {
-	res = JSON.parse(res);
+	const resObj = JSON.parse(res);
 	module.exports.client = awsIot.device({
-		region: res.region,
+		region: resObj.region,
 		protocol: 'wss',
-		accessKeyId: res.accessKey,
-		secretKey: res.secretKey,
-		sessionToken: res.sessionToken,
+		accessKeyId: resObj.accessKey,
+		secretKey: resObj.secretKey,
+		sessionToken: resObj.sessionToken,
 		port: 443,
-		host: res.iotEndpoint,
+		host: resObj.iotEndpoint,
 	});
 });
 

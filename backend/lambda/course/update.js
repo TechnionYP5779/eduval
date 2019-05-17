@@ -1,15 +1,17 @@
+const knex = require('knex');
 const { validate } = require('jsonschema');
 const dbConfig = require('../db');
 const models = require('../models');
 
 function objectToDdRow(obj) {
-	obj.courseId = obj.id;
-	delete obj.id;
+	const retObj = { ...obj };		// shallow copy
+	retObj.courseId = obj.id;
+	delete retObj.id;
 	if ('name' in obj) {
-		obj.courseName = obj.name;
-		delete obj.name;
+		retObj.courseName = obj.name;
+		delete retObj.name;
 	}
-	return obj;
+	return retObj;
 }
 
 // PUT course
@@ -67,15 +69,15 @@ module.exports.handler = (event, context, callback) => {
 	courseObj = objectToDdRow(courseObj);
 
 	// Connect
-	const knex = require('knex')(dbConfig);
+	const knexConnection = knex(dbConfig);
 
-	knex('Courses')
+	knexConnection('Courses')
 		.where({
 			courseId: courseObj.courseId,
 		})
 		.update(courseObj)
 		.then((result) => {
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			if (result === 1) {
 				callback(null, {
 					statusCode: 200,
@@ -99,7 +101,7 @@ module.exports.handler = (event, context, callback) => {
 		.catch((err) => {
 			console.log('error occurred: ', err);
 			// Disconnect
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(err);
 		});
 };

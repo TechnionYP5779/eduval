@@ -1,3 +1,4 @@
+const knex = require('knex');
 const { validate } = require('jsonschema');
 const dbConfig = require('../db');
 const models = require('../models');
@@ -67,11 +68,11 @@ module.exports.handler = (event, context, callback) => {
 	}
 
 	// Connect
-	const knex = require('knex')(dbConfig);
+	const knexConnection = knex(dbConfig);
 
-	knex('Courses').insert(courseObj)
+	knexConnection('Courses').insert(courseObj)
 		.then((result) => {
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(null, {
 				statusCode: 200,
 				headers: {
@@ -84,7 +85,7 @@ module.exports.handler = (event, context, callback) => {
 		.catch((err) => {
 			console.log('error occurred: ', err);
 			// Disconnect
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(err);
 		});
 };

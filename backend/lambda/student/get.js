@@ -1,11 +1,13 @@
+const knex = require('knex');
 const dbConfig = require('../db');
 
 function dbRowToProperObject(obj) {
-	obj.id = obj.studentId;
-	delete obj.studentId;
-	obj.authIdToken = obj.idToken;
-	delete obj.idToken;
-	return obj;
+	const retObj = { ...obj };		// shallow copy
+	retObj.id = obj.studentId;
+	delete retObj.studentId;
+	retObj.authIdToken = obj.idToken;
+	delete retObj.idToken;
+	return retObj;
 }
 
 function isAnInteger(obj) {
@@ -43,12 +45,12 @@ module.exports.byId = (event, context, callback) => {
 	}
 
 	// Connect
-	const knex = require('knex')(dbConfig);
+	const knexConnection = knex(dbConfig);
 
-	knex('Students').where({
+	knexConnection('Students').where({
 		studentId: event.pathParameters.studentId,
 	}).select().then((result) => {
-		knex.client.destroy();
+		knexConnection.client.destroy();
 
 		if (result.length === 1) {
 			callback(null, {
@@ -87,7 +89,7 @@ module.exports.byId = (event, context, callback) => {
 		.catch((err) => {
 			console.log('error occurred: ', err);
 			// Disconnect
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(err);
 		});
 };
@@ -109,12 +111,12 @@ module.exports.byToken = (event, context, callback) => {
 	}
 
 	// Connect
-	const knex = require('knex')(dbConfig);
+	const knexConnection = knex(dbConfig);
 
-	knex('Students').where({
+	knexConnection('Students').where({
 		idToken: event.pathParameters.authToken,
 	}).select().then((result) => {
-		knex.client.destroy();
+		knexConnection.client.destroy();
 
 		if (result.length === 1) {
 			callback(null, {
@@ -153,7 +155,7 @@ module.exports.byToken = (event, context, callback) => {
 		.catch((err) => {
 			console.log('error occurred: ', err);
 			// Disconnect
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(err);
 		});
 };
@@ -189,14 +191,14 @@ module.exports.emons = (event, context, callback) => {
 	}
 
 	// Connect
-	const knex = require('knex')(dbConfig);
+	const knexConnection = knex(dbConfig);
 
-	knex('Logs').where({
+	knexConnection('Logs').where({
 		courseId: event.pathParameters.courseId,
 		studentId: event.pathParameters.studentId,
 		msgType: 0,
 	}).sum('val').then((result) => {
-		knex.client.destroy();
+		knexConnection.client.destroy();
 
 		if (result.length === 1) {
 			callback(null, {
@@ -223,7 +225,7 @@ module.exports.emons = (event, context, callback) => {
 		.catch((err) => {
 			console.log('error occurred: ', err);
 			// Disconnect
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(err);
 		});
 };

@@ -1,6 +1,6 @@
+const knex = require('knex');
 const { validate } = require('jsonschema');
 const dbConfig = require('../db');
-const models = require('../models');
 const iot = require('./Notifications');
 
 function isAnInteger(obj) {
@@ -38,12 +38,12 @@ module.exports.get = (event, context, callback) => {
 	}
 
 	// Connect
-	const knex = require('knex')(dbConfig);
+	const knexConnection = knex(dbConfig);
 
-	knex('Courses').where({
+	knexConnection('Courses').where({
 		courseId: event.pathParameters.courseId,
 	}).select().then((result) => {
-		knex.client.destroy();
+		knexConnection.client.destroy();
 
 		if (result.length === 1) {
 			callback(null, {
@@ -82,7 +82,7 @@ module.exports.get = (event, context, callback) => {
 		.catch((err) => {
 			console.log('error occurred: ', err);
 			// Disconnect
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(err);
 		});
 };
@@ -140,8 +140,8 @@ module.exports.post = (event, context, callback) => {
 	}
 
 	// Connect
-	const knex = require('knex')(dbConfig);
-	knex('Courses').where({
+	const knexConnection = knex(dbConfig);
+	knexConnection('Courses').where({
 		courseId: event.pathParameters.courseId,
 	})
 		.update({ status: newStatus })
@@ -157,7 +157,7 @@ module.exports.post = (event, context, callback) => {
 					}
 					resolve();
 				}).then(() => {
-					knex.client.destroy();
+					knexConnection.client.destroy();
 
 					iot.connect().then(() => {
 						iot.client.publish(`lesson/${event.pathParameters.courseId}/status`, newStatus, {}, (uneededResult) => {
@@ -187,7 +187,7 @@ module.exports.post = (event, context, callback) => {
 		.catch((err) => {
 			console.log('error occurred: ', err);
 			// Disconnect
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(err);
 		});
 };

@@ -1,3 +1,4 @@
+const knex = require('knex');
 const { validate } = require('jsonschema');
 const axios = require('axios');
 const dbConfig = require('../db');
@@ -5,11 +6,12 @@ const models = require('../models');
 const iot = require('./Notifications');
 
 function dbRowToProperObject(obj) {
-	obj.id = obj.studentId;
-	delete obj.studentId;
-	delete obj.courseId;
-	obj.authIdToken = obj.idToken;
-	delete obj.idToken;
+	const retObj = { ...obj };		// shallow copy
+	retObj.id = obj.studentId;
+	delete retObj.studentId;
+	delete retObj.courseId;
+	retObj.authIdToken = obj.idToken;
+	delete retObj.idToken;
 	return obj;
 }
 
@@ -48,14 +50,14 @@ module.exports.get = (event, context, callback) => {
 	}
 
 	// Connect
-	const knex = require('knex')(dbConfig);
+	const knexConnection = knex(dbConfig);
 
-	knex('PresentStudents').where({
+	knexConnection('PresentStudents').where({
 		courseId: event.pathParameters.courseId,
 	}).select()
 		.join('Students', 'PresentStudents.studentId', 'Students.studentId')
 		.then((result) => {
-			knex.client.destroy();
+			knexConnection.client.destroy();
 
 			callback(null, {
 				statusCode: 200,
@@ -69,7 +71,7 @@ module.exports.get = (event, context, callback) => {
 		.catch((err) => {
 			console.log('error occurred: ', err);
 			// Disconnect
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(err);
 		});
 };
@@ -158,12 +160,12 @@ module.exports.post = (event, context, callback) => {
 	};
 
 	// Connect
-	const knex = require('knex')(dbConfig);
+	const knexConnection = knex(dbConfig);
 
-	knex('PresentStudents')
+	knexConnection('PresentStudents')
 		.insert(objToInsert)
 		.then(async (result) => {
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			axios.post(
 				`${process.env.LAMBDA_ENDPOINT}/lesson/${event.pathParameters.courseId}/messages/${deskAndId.id}`,
 				{ messageType: 'EMON', messageReason: '1', value: 5 },
@@ -189,14 +191,14 @@ module.exports.post = (event, context, callback) => {
 				.catch((err) => {
 					console.log('error occurred: ', err);
 					// Disconnect
-					knex.client.destroy();
+					knexConnection.client.destroy();
 					callback(err);
 				});
 		})
 		.catch((err) => {
 			console.log('error occurred: ', err);
 			// Disconnect
-			knex.client.destroy();
+			knexConnection.client.destroy();
 			callback(err);
 		});
 };
