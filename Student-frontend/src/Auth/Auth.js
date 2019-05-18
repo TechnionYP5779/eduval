@@ -1,140 +1,143 @@
-import Auth0Lock from 'auth0-lock';
+import auth0 from 'auth0-js';
 import { AUTH_CONFIG } from './auth0-variables';
 import history from '../history';
+import { SERVER_CONFIG } from '../Server/server-variables';
+const axios = require('axios');
 
 class Auth {
 
+  accessToken;
+  idToken;
+  expiresAt;
+  sub;
 
-  lock = new Auth0Lock(AUTH_CONFIG.clientId, AUTH_CONFIG.domain, {
-    autoclose: true,
-    auth: {
-      redirectUrl: AUTH_CONFIG.callbackUrl,
-      responseType: 'token id_token',
-      params: {
-        scope: 'openid profile email user_metadata app_metadata'
-      }
-    },
-    languageDictionary: {
-      title: "EMon Log-in"
-    },
-    theme: {
-      logo: require('../images/shards-dashboards-logo.svg'),
-      primaryColor: '#007bff'
-    },
-    allowShowPassword: true,
-    additionalSignUpFields: [
-      {
-    name: "first_name",
-    placeholder: "your first name",
-    // icon: require('../phone_icon.png'),
-    // The following properties are optional
-    ariaLabel: "first_name",
-    // prefill: "street 123",
-    validator: function(first_name) {
-      return {
-         valid: first_name.length > 0,
-         hint: "You're required to provide first name!" // optional
-        };
-      }
-    },
-    {
-    name: "last_name",
-    placeholder: "your last name",
-    // icon: require('../phone_icon.png'),
-    // The following properties are optional
-    ariaLabel: "last_name",
-    // prefill: "street 123",
-    validator: function(last_name) {
-      return {
-         valid: last_name.length > 0,
-         hint: "You're required to provide last name!" // optional
-        };
-      }
-    }, {
-    name: "phone_number",
-    placeholder: "your phone number",
-    // icon: require('../phone_icon.png'),
-    // The following properties are optional
-    ariaLabel: "Phone",
-    // prefill: "street 123",
-    validator: function(phone_number) {
-      return {
-         valid: phone_number.length === 10 || phone_number.length === 0,
-         hint: "Must have 10 digits" // optional
-        };
-      }
-    },]
+  auth0 = new auth0.WebAuth({
+    domain: AUTH_CONFIG.domain,
+    clientID: AUTH_CONFIG.clientId,
+    redirectUri: AUTH_CONFIG.callbackUrl,
+    responseType: 'token id_token',
+    sso: false,
+    scope: 'openid  profile email user_metadata app_metadata'
   });
 
-
   constructor() {
-    this.handleAuthentication();
-    // binds functions to keep this context
+
     this.login = this.login.bind(this);
     this.logout = this.logout.bind(this);
+    this.handleAuthentication = this.handleAuthentication.bind(this);
     this.isAuthenticated = this.isAuthenticated.bind(this);
+    this.getAccessToken = this.getAccessToken.bind(this);
+    this.getIdToken = this.getIdToken.bind(this);
+    this.renewSession = this.renewSession.bind(this);
+    this.getUserInfo = this.getUserInfo.bind(this);
+
+    let accessToken = localStorage.getItem('accessToken');
+    let idToken = localStorage.getItem('idToken');
+    let expiresAt = localStorage.getItem('expiresAt');
+    let sub = localStorage.getItem('sub');
+
+    if (accessToken != null)
+      this.accessToken = accessToken;
+    if (idToken != null)
+      this.idToken = idToken;
+    if (expiresAt != null)
+      this.expiresAt = expiresAt;
+    if (sub != null)
+      this.sub = sub;
   }
 
   login() {
-    // Call the show method to display the widget.
-    console.log("login");
-    this.lock.show();
+    this.auth0.authorize();
   }
 
   handleAuthentication() {
-    console.log("handleAuthentication");
-    // Add a callback for Lock's `authenticated` event
-    this.lock.on('authenticated', this.setSession.bind(this));
-    // Add a callback for Lock's `authorization_error` event
-    this.lock.on('authorization_error', (err) => {
-      console.log(err);
-      alert(`Error: ${err.error}. Check the console for further details.`);
-      history.replace('/');
+    console.log("==== handleAuthentication ====");
+    this.auth0.parseHash((err, authResult) => {
+      console.log("auth result:");
+      console.log(authResult);
+      if (authResult && authResult.accessToken && authResult.idToken) {
+        this.setSession(authResult);
+      } else if (err) {
+        history.replace('/');
+        console.log(err);
+        alert(`Error: ${err.error}. Check the console for further details.`);
+      }
     });
   }
 
-  setSession(authResult) {
-    console.log("setSession");
-    if (authResult && authResult.accessToken && authResult.idToken) {
-      console.log("authResult");
-      console.log(authResult);
-      // Set the time that the access token will expire at
-      let expiresAt = JSON.stringify((authResult.expiresIn * 1000) + new Date().getTime());
-      console.log("new expiresAt", expiresAt);
-      localStorage.setItem('access_token', authResult.accessToken);
-      localStorage.setItem('id_token', authResult.idToken);
-      localStorage.setItem('expires_at', expiresAt);
-      localStorage.setItem('sub', authResult.idTokenPayload.sub);
-      // navigate to the home route
-      history.replace('/');
-    }
+  getAccessToken() {
+    return this.accessToken;
   }
 
-  logout() {
-    // Clear access token and ID token from local storage
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('id_token');
-    localStorage.removeItem('expires_at');
-    localStorage.removeItem('sub');
-    localStorage.removeItem('student_id');
+  getIdToken() {
+    return this.idToken;
+  }
+
+  setSession(authResult) {
+    // Set the time that the access token will expire at
+    let expiresAt = (authResult.expiresIn * 1000) + new Date().getTime();
+    this.accessToken = authResult.accessToken;
+    this.idToken = authResult.idToken;
+    this.expiresAt = expiresAt;
+    this.sub = authResult.idTokenPayload.sub;
+
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('expiresAt', expiresAt);
+    localStorage.setItem('accessToken', authResult.accessToken);
+    localStorage.setItem('idToken', authResult.idToken);
+    localStorage.setItem('sub', authResult.idTokenPayload.sub);
+
     // navigate to the home route
-    history.replace('/');
   }
 
   getUserInfo(callback){
-    let access_token = localStorage.getItem('access_token');
+    let access_token = this.accessToken;
     if(access_token != null){
-      this.lock.getUserInfo(access_token, callback);
+      this.auth0.client.userInfo(access_token, callback);
     }
+  }
+
+  renewSession() {
+    this.auth0.checkSession({}, (err, authResult) => {
+       if (authResult && authResult.accessToken && authResult.idToken) {
+         this.setSession(authResult);
+       } else if (err) {
+         this.logout();
+         console.log(err);
+         alert(`Could not get a new token (${err.error}: ${err.error_description}).`);
+       }
+    });
+  }
+
+  logout() {
+    // Remove tokens and expiry time
+    this.accessToken = null;
+    this.idToken = null;
+    this.expiresAt = 0;
+
+    // Remove isLoggedIn flag from localStorage
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('expiresAt');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('idToken');
+    localStorage.removeItem('sub');
+    localStorage.removeItem('student_id');
+
+    this.auth0.logout({
+      returnTo: window.location.origin
+    });
+
+    // navigate to the home route
+    history.replace('/');
   }
 
   isAuthenticated() {
     // Check whether the current time is past the
     // access token's expiry time
-    let expiresAt = JSON.parse(localStorage.getItem('expires_at'));
-    console.log("expire at ", expiresAt);
+    let expiresAt = this.expiresAt;
     return new Date().getTime() < expiresAt;
   }
+
 }
 
 
