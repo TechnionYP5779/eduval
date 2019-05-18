@@ -88,6 +88,7 @@ class Auth {
     localStorage.setItem('sub', authResult.idTokenPayload.sub);
 
     // navigate to the home route
+    history.replace('/');
   }
 
   getUserInfo(callback){
