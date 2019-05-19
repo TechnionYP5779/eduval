@@ -3,17 +3,14 @@
 
 service:        dbFunctions
 
-# contains the credentials needed to connect to the DB
-custom:
-    secrets:    ${file(secrets.json)}
-
 provider:
     name:       aws
     runtime:    nodejs8.10
-    stage:      dev
+    stage:      tmp
     region:     eu-central-1
     apiKeys:
-        - myApiKey
+        # - myApiKey
+        - ${self:provider.stage}-api-key
 
     # defines environment variables for connecting to DB
     environment:
@@ -25,11 +22,15 @@ provider:
         LAMBDA_ENDPOINT:        ${self:custom.secrets.LAMBDA_ENDPOINT}
         LAMBDA_APIKEY:        ${self:custom.secrets.LAMBDA_APIKEY}
 
-package:
-    individually: true
+#package:
+#    individually: true
 
 plugins:
-    - serverless-plugin-optimize
+    - serverless-offline
+
+custom:
+    # contains the credentials needed to connect to the DB
+    secrets:    ${file(secrets.json)}
 
 #TODO: Implement a more strict CORS policy
 functions:
@@ -197,7 +198,7 @@ functions:
                         paths:
                             teacherId: true
     getCoursesByStudent:
-        handler: course/get.byStudent
+        handler: course/get.byStudentId
         description: Get courses a student is registered in.
         events:
             - http:

@@ -1,6 +1,11 @@
 const knex = require('knex');
-const { validate } = require('jsonschema');
+const middy = require('middy');
+const {
+	cors, httpErrorHandler, httpEventNormalizer, validator,
+} = require('middy/middlewares');
+const createError = require('http-errors');
 const dbConfig = require('../db');
+const corsConfig = require('../cors');
 const iot = require('./Notifications');
 
 function isAnInteger(obj) {
@@ -8,142 +13,64 @@ function isAnInteger(obj) {
 }
 
 // GET lesson/{courseId}/status
-module.exports.get = (event, context, callback) => {
-	if (!('pathParameters' in event) || !(event.pathParameters) || !(event.pathParameters.courseId)) {
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: "Invalid Input, please send us the course's ID!",
-			}),
-		});
-		return;
+const getLessonStatus = async (event, context, callback) => {
+	if (!event.pathParameters.courseId) {
+		return callback(createError.BadRequest("Course's ID required."));
 	}
 	if (!isAnInteger(event.pathParameters.courseId)) {
-		// then the ID is invalid
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: 'Invalid ID! It should be an integer.',
-			}),
-		});
-		return;
+		return callback(createError.BadRequest('ID should be an integer.'));
 	}
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
-	knexConnection('Courses').where({
-		courseId: event.pathParameters.courseId,
-	}).select().then((result) => {
-		knexConnection.client.destroy();
+	return knexConnection('Courses')
+		.where({
+			courseId: event.pathParameters.courseId,
+		})
+		.select()
+		.then((result) => {
+			knexConnection.client.destroy();
 
-		if (result.length === 1) {
-			callback(null, {
-				statusCode: 200,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: result[0].status,
-			});
-		} else if (result.length === 0) {
-			callback(null, {
-				statusCode: 404,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify({
-					message: 'Course not found.',
-				}),
-			});
-		} else {
-			callback(null, {
-				statusCode: 400,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify({
-					message: "There's more than one course with this ID?!",
-					data: result,
-				}),
-			});
-		}
-	})
+			if (result.length === 1) {
+				callback(null, {
+					statusCode: 200,
+					body: result[0].status,
+				});
+			} else if (result.length === 0) {
+				callback(createError.NotFound('Course not found.'));
+			} else {
+				callback(createError.InternalServerError('More than one course with this ID.'));
+			}
+		})
 		.catch((err) => {
-			console.log('error occurred: ', err);
 			// Disconnect
 			knexConnection.client.destroy();
-			callback(err);
+			// eslint-disable-next-line no-console
+			console.log(`ERROR getting course status: ${JSON.stringify(err)}`);
+			return callback(createError.InternalServerError('Error getting course status.'));
 		});
 };
 
-
 // POST lesson/{courseId}/status
-module.exports.post = (event, context, callback) => {
+const updateLessonStatus = async (event, context, callback) => {
 	// context.callbackWaitsForEmptyEventLoop = false
-	if (!('pathParameters' in event) || !(event.pathParameters) || !(event.pathParameters.courseId)) {
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: "Invalid Input, please send us the course's ID!",
-			}),
-		});
-		return;
+	if (!event.pathParameters.courseId) {
+		return callback(createError.BadRequest("Course's ID required."));
 	}
 	if (!isAnInteger(event.pathParameters.courseId)) {
-		// then the ID is invalid
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: 'Invalid ID! It should be an integer.',
-			}),
-		});
-		return;
+		return callback(createError.BadRequest('ID should be an integer.'));
 	}
 
 	const newStatus = event.body;
-	const schema = {
-		type: 'string',
-		enum: ['LESSON_START', 'LESSON_END'],
-	};
-	const validateRes = validate(newStatus, schema);
-	if (!validateRes.valid) {
-		callback(null, {
-			statusCode: 405,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: `Invalid status. Errors: ${JSON.stringify(validateRes.errors)}`,
-			}),
-		});
-		return;
-	}
 
 	// Connect
 	const knexConnection = knex(dbConfig);
-	knexConnection('Courses').where({
-		courseId: event.pathParameters.courseId,
-	})
+
+	return knexConnection('Courses')
+		.where({
+			courseId: event.pathParameters.courseId,
+		})
 		.update({ status: newStatus })
 		.then(async (result) => {
 			if (result === 1) {
@@ -164,30 +91,46 @@ module.exports.post = (event, context, callback) => {
 							iot.client.end(false);
 							callback(null, {
 								statusCode: 200,
-								headers: {
-									'Access-Control-Allow-Origin': '*',
-									'Access-Control-Allow-Credentials': true,
-								},
 								body: '',
 							});
 						});
 					});
 				});
+			} else if (result.length === 0) {
+				callback(createError.NotFound('Course not found.'));
 			} else {
-				callback(null, {
-					statusCode: 404,
-					headers: {
-						'Access-Control-Allow-Origin': '*',
-						'Access-Control-Allow-Credentials': true,
-					},
-					body: '',
-				});
+				callback(createError.InternalServerError('More than one course (with same ID) updated.'));
 			}
 		})
 		.catch((err) => {
-			console.log('error occurred: ', err);
 			// Disconnect
 			knexConnection.client.destroy();
-			callback(err);
+			// eslint-disable-next-line no-console
+			console.log(`ERROR updating status: ${JSON.stringify(err)}`);
+			return callback(createError.InternalServerError('Error updating status.'));
 		});
 };
+
+const get = middy(getLessonStatus)
+	.use(cors(corsConfig))
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler());
+
+const schema = {
+	type: 'string',
+	enum: ['LESSON_START', 'LESSON_END'],
+};
+
+const post = middy(updateLessonStatus)
+	.use(cors(corsConfig))
+	.use(validator({
+		inputSchema: {
+			type: 'object',
+			properties: {
+				body: schema,
+			},
+		},
+	}))
+	.use(httpErrorHandler());
+
+module.exports = { get, post };

@@ -1,5 +1,11 @@
 const knex = require('knex');
+const middy = require('middy');
+const {
+	cors, httpErrorHandler, httpEventNormalizer,
+} = require('middy/middlewares');
+const createError = require('http-errors');
 const dbConfig = require('../../db');
+const corsConfig = require('../../cors');
 
 function dbRowToProperObject(obj) {
 	const retObj = { ...obj };		// shallow copy
@@ -16,58 +22,43 @@ function isAnInteger(obj) {
 }
 
 // GET course/{courseId}/registered
-module.exports.handler = (event, context, callback) => {
-	if (!('pathParameters' in event) || !(event.pathParameters) || !(event.pathParameters.courseId)) {
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: "Invalid Input, please send us the course's ID!",
-			}),
-		});
-		return;
+const getCourseRegistered = async (event, context, callback) => {
+	if (!event.pathParameters.courseId) {
+		return callback(createError.BadRequest("Course's ID required."));
 	}
 	if (!isAnInteger(event.pathParameters.courseId)) {
-		// then the ID is invalid
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: 'Invalid ID! It should be an integer.',
-			}),
-		});
-		return;
+		return callback(createError.BadRequest('ID should be an integer.'));
 	}
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
-	knexConnection('Registered').where({
-		courseId: event.pathParameters.courseId,
-	}).select()
+	return knexConnection('Registered')
+		.where({
+			courseId: event.pathParameters.courseId,
+		})
+		.select()
 		.join('Students', 'Registered.studentId', 'Students.studentId')
 		.then((result) => {
 			knexConnection.client.destroy();
 
 			callback(null, {
 				statusCode: 200,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
 				body: JSON.stringify(result.map(dbRowToProperObject)),
 			});
 		})
 		.catch((err) => {
-			console.log('error occurred: ', err);
 			// Disconnect
 			knexConnection.client.destroy();
-			callback(err);
+			// eslint-disable-next-line no-console
+			console.log(`ERROR getting registered students: ${JSON.stringify(err)}`);
+			return callback(createError.InternalServerError('Error getting registered students.'));
 		});
 };
+
+const handler = middy(getCourseRegistered)
+	.use(cors(corsConfig))
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler());
+
+module.exports = { handler };

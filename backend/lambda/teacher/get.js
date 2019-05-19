@@ -1,5 +1,11 @@
 const knex = require('knex');
+const middy = require('middy');
+const {
+	cors, httpErrorHandler, httpEventNormalizer,
+} = require('middy/middlewares');
+const createError = require('http-errors');
 const dbConfig = require('../db');
+const corsConfig = require('../cors');
 
 function dbRowToProperObject(obj) {
 	const retObj = { ...obj };		// shallow copy
@@ -15,147 +21,90 @@ function isAnInteger(obj) {
 }
 
 // GET teacher/{teacherId}
-module.exports.byId = (event, context, callback) => {
-	if (!('pathParameters' in event) || !(event.pathParameters) || !(event.pathParameters.teacherId)) {
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: "Invalid Input, please send us the teacher's ID! Don't even know how this can happen",
-			}),
-		});
-		return;
+const getTeacherById = async (event, context, callback) => {
+	if (!event.pathParameters.teacherId) {
+		return callback(createError.BadRequest("Teacher's ID required."));
 	}
 	if (!isAnInteger(event.pathParameters.teacherId)) {
-		// then the ID is invalid
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: 'Invalid ID! It should be an integer.',
-			}),
-		});
-		return;
+		return callback(createError.BadRequest('ID should be an integer.'));
 	}
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
-	knexConnection('Teachers').where({
-		teacherId: event.pathParameters.teacherId,
-	}).select().then((result) => {
-		knexConnection.client.destroy();
+	return knexConnection('Teachers')
+		.where({
+			teacherId: event.pathParameters.teacherId,
+		})
+		.select()
+		.then((result) => {
+			knexConnection.client.destroy();
 
-		if (result.length === 1) {
-			callback(null, {
-				statusCode: 200,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify(dbRowToProperObject(result[0])),
-			});
-		} else if (result.length === 0) {
-			callback(null, {
-				statusCode: 404,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify({
-					message: 'Teacher not found.',
-				}),
-			});
-		} else {
-			callback(null, {
-				statusCode: 400,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify({
-					message: "There's more than one teacher with this ID?!",
-					data: result,
-				}),
-			});
-		}
-	})
+			if (result.length === 1) {
+				callback(null, {
+					statusCode: 200,
+					body: JSON.stringify(dbRowToProperObject(result[0])),
+				});
+			} else if (result.length === 0) {
+				callback(createError.NotFound('Teacher not found.'));
+			} else {
+				callback(createError.InternalServerError('More than one teacher with this ID.'));
+			}
+		})
 		.catch((err) => {
-			console.log('error occurred: ', err);
 			// Disconnect
 			knexConnection.client.destroy();
-			callback(err);
+			// eslint-disable-next-line no-console
+			console.log(`ERROR getting teacher: ${JSON.stringify(err)}`);
+			return callback(createError.InternalServerError('Error getting teacher.'));
 		});
 };
 
 // GET teacher/byToken/{authToken}
-module.exports.byToken = (event, context, callback) => {
-	if (!('pathParameters' in event) || !(event.pathParameters) || !(event.pathParameters.authToken)) {
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: "Invalid Input, please send us the teacher's token!",
-			}),
-		});
-		return;
+const getTeacherByToken = async (event, context, callback) => {
+	if (!event.pathParameters.authToken) {
+		return callback(createError.BadRequest("Teacher's token required."));
 	}
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
-	knexConnection('Teachers').where({
-		idToken: event.pathParameters.authToken,
-	}).select().then((result) => {
-		knexConnection.client.destroy();
+	return knexConnection('Teachers')
+		.where({
+			idToken: event.pathParameters.authToken,
+		})
+		.select()
+		.then((result) => {
+			knexConnection.client.destroy();
 
-		if (result.length === 1) {
-			callback(null, {
-				statusCode: 200,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify(dbRowToProperObject(result[0])),
-			});
-		} else if (result.length === 0) {
-			callback(null, {
-				statusCode: 404,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify({
-					message: 'Teacher not found.',
-				}),
-			});
-		} else {
-			callback(null, {
-				statusCode: 400,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify({
-					message: "There's more than one teacher with this token?!",
-					data: result,
-				}),
-			});
-		}
-	})
+			if (result.length === 1) {
+				callback(null, {
+					statusCode: 200,
+					body: JSON.stringify(dbRowToProperObject(result[0])),
+				});
+			} else if (result.length === 0) {
+				callback(createError.NotFound('Teacher not found.'));
+			} else {
+				callback(createError.InternalServerError('More than one teacher with this token.'));
+			}
+		})
 		.catch((err) => {
-			console.log('error occurred: ', err);
 			// Disconnect
 			knexConnection.client.destroy();
-			callback(err);
+			// eslint-disable-next-line no-console
+			console.log(`ERROR updating teacher: ${JSON.stringify(err)}`);
+			return callback(createError.InternalServerError('Error getting teacher.'));
 		});
 };
+
+const byId = middy(getTeacherById)
+	.use(cors(corsConfig))
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler());
+
+const byToken = middy(getTeacherByToken)
+	.use(cors(corsConfig))
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler());
+
+module.exports = { byId, byToken };

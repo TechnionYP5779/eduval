@@ -1,6 +1,12 @@
-const { validate } = require('jsonschema');
 const knex = require('knex');
+const middy = require('middy');
+const {
+	cors, jsonBodyParser, validator, httpErrorHandler,
+} = require('middy/middlewares');
+const createError = require('http-errors');
+
 const dbConfig = require('../db');
+const corsConfig = require('../cors');
 const models = require('../models');
 
 function objectToDdRow(obj) {
@@ -15,63 +21,14 @@ function objectToDdRow(obj) {
 }
 
 // PUT teacher
-module.exports.handler = (event, context, callback) => {
-	if (!event.body) {
-		callback(null, {
-			statusCode: 405,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: 'Invalid Input. JSON object required.',
-			}),
-		});
-		return;
-	}
-
-	let teacherObj;
-	try {
-		teacherObj = JSON.parse(event.body);
-	} catch (e) {
-		callback(null, {
-			statusCode: 405,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: `Invalid JSON. Error: ${e.message}`,
-			}),
-		});
-		return;
-	}
-
-	const oldRequired = models.Teacher.required;
-	models.Teacher.required = ['id'];
-	const validateRes = validate(teacherObj, models.Teacher);
-	models.Teacher.required = oldRequired;
-	if (!validateRes.valid) {
-		callback(null, {
-			statusCode: 405,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: `Invalid JSON object. Errors: ${JSON.stringify(validateRes.errors)}`,
-			}),
-		});
-		return;
-	}
-
+const updateTeacher = async (event, context, callback) => {
 	// convert to format stored in DB, and discard ID
-	teacherObj = objectToDdRow(teacherObj);
+	const teacherObj = objectToDdRow(event.body);
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
-	knexConnection('Teachers')
+	return knexConnection('Teachers')
 		.where({
 			teacherId: teacherObj.teacherId,
 		})
@@ -81,27 +38,37 @@ module.exports.handler = (event, context, callback) => {
 			if (result === 1) {
 				callback(null, {
 					statusCode: 200,
-					headers: {
-						'Access-Control-Allow-Origin': '*',
-						'Access-Control-Allow-Credentials': true,
-					},
 					body: '',
 				});
+			} else if (result === 0) {
+				callback(createError.NotFound('Teacher not found.'));
 			} else {
-				callback(null, {
-					statusCode: 404,
-					headers: {
-						'Access-Control-Allow-Origin': '*',
-						'Access-Control-Allow-Credentials': true,
-					},
-					body: '',
-				});
+				callback(createError.InternalServerError('More than one teacher updated.'));
 			}
 		})
 		.catch((err) => {
-			console.log('error occurred: ', err);
 			// Disconnect
 			knexConnection.client.destroy();
-			callback(err);
+			// eslint-disable-next-line no-console
+			console.log(`ERROR updating teacher: ${JSON.stringify(err)}`);
+			return callback(createError.InternalServerError('Failed to update teacher.'));
 		});
 };
+
+const schema = { ...models.Teacher };
+schema.required = ['id'];
+
+const handler = middy(updateTeacher)
+	.use(cors(corsConfig))
+	.use(jsonBodyParser())
+	.use(validator({
+		inputSchema: {
+			type: 'object',
+			properties: {
+				body: schema,
+			},
+		},
+	}))
+	.use(httpErrorHandler());
+
+module.exports = { handler };

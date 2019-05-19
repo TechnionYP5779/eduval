@@ -3,7 +3,6 @@ exports.Teacher = {
 	properties: {
 		id: {
 			type: 'integer',
-			format: 'int64',
 		},
 		authIdToken: {
 			type: 'string',
@@ -29,7 +28,6 @@ exports.Student = {
 	properties: {
 		id: {
 			type: 'integer',
-			format: 'int64',
 		},
 		authIdToken: {
 			type: 'string',
@@ -55,14 +53,12 @@ exports.Course = {
 	properties: {
 		id: {
 			type: 'integer',
-			format: 'int64',
 		},
 		name: {
 			type: 'string',
 		},
 		teacherId: {
 			type: 'integer',
-			format: 'int64',
 		},
 		location: {
 			type: 'string',
@@ -90,15 +86,12 @@ exports.Log = {
 		properties: {
 			id: {
 				type: 'integer',
-				format: 'int64',
 			},
 			studentId: {
 				type: 'integer',
-				format: 'int64',
 			},
 			courseId: {
 				type: 'integer',
-				format: 'int64',
 			},
 			messageType: {
 				type: 'string',
@@ -116,7 +109,6 @@ exports.Log = {
 			},
 			value: {
 				type: 'integer',
-				format: 'int64',
 				description: 'The amount of emon given.',
 			},
 		},
@@ -126,15 +118,12 @@ exports.Log = {
 		properties: {
 			id: {
 				type: 'integer',
-				format: 'int64',
 			},
 			studentId: {
 				type: 'integer',
-				format: 'int64',
 			},
 			courseId: {
 				type: 'integer',
-				format: 'int64',
 			},
 			messageType: {
 				type: 'string',
@@ -178,7 +167,6 @@ exports.Message = {
 			},
 			value: {
 				type: 'integer',
-				format: 'int64',
 			},
 		},
 		required: ['messageType', 'value'],

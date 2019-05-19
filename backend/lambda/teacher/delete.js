@@ -1,72 +1,59 @@
 const knex = require('knex');
+const middy = require('middy');
+const {
+	cors, httpErrorHandler, httpEventNormalizer,
+} = require('middy/middlewares');
+const createError = require('http-errors');
 const dbConfig = require('../db');
+const corsConfig = require('../cors');
 
 function isAnInteger(obj) {
 	return !Number.isNaN(Number(obj)) && Number.isInteger(Number(obj));
 }
 
 // DELETE teacher/{teacherId}
-module.exports.handler = (event, context, callback) => {
-	if (!('pathParameters' in event) || !(event.pathParameters) || !(event.pathParameters.teacherId)) {
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: "Invalid Input, please send us the teacher's ID! Don't even know how this can happen",
-			}),
-		});
-		return;
+const deleteTeacher = async (event, context, callback) => {
+	if (!event.pathParameters.teacherId) {
+		return callback(createError.BadRequest("Teacher's ID required."));
 	}
 	if (!isAnInteger(event.pathParameters.teacherId)) {
-		// then the ID is invalid
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: 'Invalid ID! It should be an integer.',
-			}),
-		});
-		return;
+		return callback(createError.BadRequest('ID should be an integer.'));
 	}
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
-	knexConnection('Teachers').where({
-		teacherId: event.pathParameters.teacherId,
-	}).del().then((result) => {
-		knexConnection.client.destroy();
+	return knexConnection('Teachers')
+		.where({
+			teacherId: event.pathParameters.teacherId,
+		})
+		.del()
+		.then((result) => {
+			knexConnection.client.destroy();
 
-		if (result === 1) {
-			callback(null, {
-				statusCode: 200,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: '',
-			});
-		} else {
-			callback(null, {
-				statusCode: 404,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: '',
-			});
-		}
-	})
+			if (result === 1) {
+				callback(null, {
+					statusCode: 200,
+					body: '',
+				});
+			} else if (result === 0) {
+				callback(createError.NotFound('Teacher not found.'));
+			} else {
+				callback(createError.InternalServerError('More than one teacher deleted.'));
+			}
+		})
 		.catch((err) => {
-			console.log('error occurred: ', err);
 			// Disconnect
 			knexConnection.client.destroy();
-			callback(err);
+			// eslint-disable-next-line no-console
+			console.log(`ERROR deleting teacher: ${JSON.stringify(err)}`);
+			return callback(createError.InternalServerError('Error deleting teacher.'));
 		});
 };
+
+const handler = middy(deleteTeacher)
+	.use(cors(corsConfig))
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler());
+
+module.exports = { handler };

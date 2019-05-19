@@ -1,5 +1,12 @@
 const knex = require('knex');
+const middy = require('middy');
+const {
+	cors, httpErrorHandler, httpEventNormalizer,
+} = require('middy/middlewares');
+const createError = require('http-errors');
 const dbConfig = require('../db');
+const corsConfig = require('../cors');
+
 
 function dbRowToProperObject(obj) {
 	const retObj = { ...obj };		// shallow copy
@@ -16,206 +23,131 @@ function isAnInteger(obj) {
 }
 
 // GET course/{courseId}
-module.exports.byId = (event, context, callback) => {
-	if (!('pathParameters' in event) || !(event.pathParameters) || !(event.pathParameters.courseId)) {
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: "Invalid Input, please send us the course's ID!",
-			}),
-		});
-		return;
+const getCourseById = async (event, context, callback) => {
+	if (!event.pathParameters.courseId) {
+		return callback(createError.BadRequest("Course's ID required."));
 	}
 	if (!isAnInteger(event.pathParameters.courseId)) {
-		// then the ID is invalid
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: 'Invalid ID! It should be an integer.',
-			}),
-		});
-		return;
+		return callback(createError.BadRequest('ID should be an integer.'));
 	}
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
-	knexConnection('Courses').where({
-		courseId: event.pathParameters.courseId,
-	}).select().then((result) => {
-		knexConnection.client.destroy();
+	return knexConnection('Courses')
+		.where({
+			courseId: event.pathParameters.courseId,
+		})
+		.select()
+		.then((result) => {
+			knexConnection.client.destroy();
 
-		if (result.length === 1) {
-			callback(null, {
-				statusCode: 200,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify(dbRowToProperObject(result[0])),
-			});
-		} else if (result.length === 0) {
-			callback(null, {
-				statusCode: 404,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify({
-					message: 'Course not found.',
-				}),
-			});
-		} else {
-			callback(null, {
-				statusCode: 400,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify({
-					message: "There's more than one course with this ID?!",
-					data: result,
-				}),
-			});
-		}
-	})
+			if (result.length === 1) {
+				callback(null, {
+					statusCode: 200,
+					body: JSON.stringify(dbRowToProperObject(result[0])),
+				});
+			} else if (result.length === 0) {
+				callback(createError.NotFound('Course not found.'));
+			} else {
+				callback(createError.InternalServerError('More than one course with this ID.'));
+			}
+		})
 		.catch((err) => {
-			console.log('error occurred: ', err);
 			// Disconnect
 			knexConnection.client.destroy();
-			callback(err);
+			// eslint-disable-next-line no-console
+			console.log(`ERROR getting course: ${JSON.stringify(err)}`);
+			return callback(createError.InternalServerError('Error getting course.'));
 		});
 };
 
 // GET course/byTeacher/{teacherId}
-module.exports.byTeacherId = (event, context, callback) => {
-	if (!('pathParameters' in event) || !(event.pathParameters) || !(event.pathParameters.teacherId)) {
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: "Invalid Input, please send us the teacherId's ID!",
-			}),
-		});
-		return;
+const getCoursesByTeacher = async (event, context, callback) => {
+	if (event.pathParameters.teacherId) {
+		return callback(createError.BadRequest("Teacher's ID required."));
 	}
 	if (!isAnInteger(event.pathParameters.teacherId)) {
-		// then the ID is invalid
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: 'Invalid ID! It should be an integer.',
-			}),
-		});
-		return;
+		return callback(createError.BadRequest('ID should be an integer.'));
 	}
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
-	knexConnection('Courses').where({
-		teacherId: event.pathParameters.teacherId,
-	}).select().then((result) => {
-		knexConnection.client.destroy();
+	return knexConnection('Courses')
+		.where({
+			teacherId: event.pathParameters.teacherId,
+		})
+		.select()
+		.then((result) => {
+			knexConnection.client.destroy();
 
-		if (result.length === 0) {
-			callback(null, {
-				statusCode: 404,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify({
-					message: 'No courses found.',
-				}),
-			});
-		} else {
-			callback(null, {
-				statusCode: 200,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify(result.map(dbRowToProperObject)),
-			});
-		}
-	})
+			if (result.length === 0) {
+				callback(createError.NotFound('No courses found for teacher.'));
+			} else {
+				callback(null, {
+					statusCode: 200,
+					body: JSON.stringify(result.map(dbRowToProperObject)),
+				});
+			}
+		})
 		.catch((err) => {
-			console.log('error occurred: ', err);
 			// Disconnect
 			knexConnection.client.destroy();
-			callback(err);
+			// eslint-disable-next-line no-console
+			console.log(`ERROR getting courses by teacher: ${JSON.stringify(err)}`);
+			return callback(createError.InternalServerError('Error getting courses by teacher.'));
 		});
 };
 
 // GET course/byStudent/{studentId}
-module.exports.byStudent = (event, context, callback) => {
-	if (!('pathParameters' in event) || !(event.pathParameters) || !(event.pathParameters.studentId)) {
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: "Invalid Input, please send us the student's ID!",
-			}),
-		});
-		return;
+const getCoursesByStudent = async (event, context, callback) => {
+	if (!event.pathParameters.studentId) {
+		return callback(createError.BadRequest("Student's ID required."));
 	}
 	if (!isAnInteger(event.pathParameters.studentId)) {
-		// then the ID is invalid
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: 'Invalid ID! It should be an integer.',
-			}),
-		});
-		return;
+		return callback(createError.BadRequest('ID should be an integer.'));
 	}
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
-	knexConnection('Registered').where({
-		studentId: event.pathParameters.studentId,
-	}).select()
+	return knexConnection('Registered')
+		.where({
+			studentId: event.pathParameters.studentId,
+		})
+		.select()
 		.join('Courses', 'Courses.courseId', 'Registered.courseId')
 		.then((result) => {
 			knexConnection.client.destroy();
 
 			callback(null, {
 				statusCode: 200,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
 				body: JSON.stringify(result.map(dbRowToProperObject)),
 			});
 		})
 		.catch((err) => {
-			console.log('error occurred: ', err);
 			// Disconnect
 			knexConnection.client.destroy();
-			callback(err);
+			// eslint-disable-next-line no-console
+			console.log(`ERROR getting courses of student: ${JSON.stringify(err)}`);
+			return callback(createError.InternalServerError('Error getting courses of student.'));
 		});
 };
+
+const byId = middy(getCourseById)
+	.use(cors(corsConfig))
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler());
+
+const byTeacherId = middy(getCoursesByTeacher)
+	.use(cors(corsConfig))
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler());
+
+const byStudentId = middy(getCoursesByStudent)
+	.use(cors(corsConfig))
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler());
+
+module.exports = { byId, byTeacherId, byStudentId };

@@ -1,8 +1,13 @@
 const knex = require('knex');
-const { validate } = require('jsonschema');
+const middy = require('middy');
+const {
+	cors, httpErrorHandler, httpEventNormalizer, jsonBodyParser, validator,
+} = require('middy/middlewares');
+const createError = require('http-errors');
 const dbConfig = require('../db');
 const models = require('../models');
 const iot = require('./Notifications');
+const corsConfig = require('../cors');
 
 function dbRowToProperObject(obj) {
 	const retObj = { ...obj };		// shallow copy
@@ -123,196 +128,93 @@ function isAnInteger(obj) {
 }
 
 // GET lesson/{courseId}/messages/{studentId}
-module.exports.get = (event, context, callback) => {
-	if (!('pathParameters' in event) || !(event.pathParameters) || !(event.pathParameters.courseId) || !(event.pathParameters.studentId)) {
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: "Invalid Input, please send us the course's ID and the student's ID!",
-			}),
-		});
-		return;
+const getStudentMessages = async (event, context, callback) => {
+	if (!event.pathParameters.courseId || !event.pathParameters.studentId) {
+		return callback(createError.BadRequest("Course's and student's ID required."));
 	}
 	if (!isAnInteger(event.pathParameters.courseId) || !isAnInteger(event.pathParameters.studentId)) {
-		// then the ID is invalid
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: 'Invalid ID! It should be an integer.',
-			}),
-		});
-		return;
+		return callback(createError.BadRequest('IDs should be integers.'));
 	}
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
-	knexConnection('Logs').where({
-		courseId: event.pathParameters.courseId,
-		studentId: event.pathParameters.studentId,
-		live: true,
-	}).select()
+	return knexConnection('Logs')
+		.where({
+			courseId: event.pathParameters.courseId,
+			studentId: event.pathParameters.studentId,
+			live: true,
+		}).select()
 		.then((result) => {
 			knexConnection.client.destroy();
 
-			callback(null, {
+			return callback(null, {
 				statusCode: 200,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
 				body: JSON.stringify(result.map(dbRowToProperObject)),
 			});
 		})
 		.catch((err) => {
-			console.log('error occurred: ', err);
 			// Disconnect
 			knexConnection.client.destroy();
-			callback(err);
+			// eslint-disable-next-line no-console
+			console.log(`ERROR getting student messages: ${JSON.stringify(err)}`);
+			return callback(createError.InternalServerError('Error getting student messages.'));
 		});
 };
 
-
 // POST lesson/{courseId}/messages/{studentId}
-module.exports.post = (event, context, callback) => {
+const postStudentMessages = async (event, context, callback) => {
 	// context.callbackWaitsForEmptyEventLoop = false
-	if (!('pathParameters' in event) || !(event.pathParameters) || !(event.pathParameters.courseId) || !(event.pathParameters.studentId)) {
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: "Invalid Input, please send us the course's ID and the student's ID!",
-			}),
-		});
-		return;
+	if (!event.pathParameters.courseId || !event.pathParameters.studentId) {
+		return callback(createError.BadRequest("Course's and student's ID required."));
 	}
 	if (!isAnInteger(event.pathParameters.courseId) || !isAnInteger(event.pathParameters.studentId)) {
-		// then the ID is invalid
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: 'Invalid ID! It should be an integer.',
-			}),
-		});
-		return;
+		return callback(createError.BadRequest('IDs should be integers.'));
 	}
 
-	let messageObj;
-	try {
-		messageObj = JSON.parse(event.body);
-	} catch (e) {
-		callback(null, {
-			statusCode: 405,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: `Invalid JSON. Error: ${e.message}`,
-			}),
-		});
-		return;
-	}
-
-
-	const validateRes = validate(messageObj, models.Message);
-	if (!validateRes.valid) {
-		callback(null, {
-			statusCode: 405,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: `Invalid JSON object. Errors: ${JSON.stringify(validateRes.errors)}`,
-			}),
-		});
-		return;
-	}
-
-	const objToInsert = objToDBRow(messageObj, event.pathParameters.courseId,
+	const objToInsert = objToDBRow(event.body, event.pathParameters.courseId,
 		event.pathParameters.studentId);
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
-	knexConnection('Logs')
+	return knexConnection('Logs')
 		.insert(objToInsert)
 		.then(async (result) => {
 			knexConnection.client.destroy();
 			iot.connect().then(() => {
-				iot.client.publish(`lesson/${event.pathParameters.courseId}/messages/${event.pathParameters.studentId}`, JSON.stringify(messageObj), {}, (uneededResult) => {
+				iot.client.publish(`lesson/${event.pathParameters.courseId}/messages/${event.pathParameters.studentId}`, JSON.stringify(event.body), {}, (uneededResult) => {
 					iot.client.end(false);
-					callback(null, {
+					return callback(null, {
 						statusCode: 200,
-						headers: {
-							'Access-Control-Allow-Origin': '*',
-							'Access-Control-Allow-Credentials': true,
-						},
 						body: '',
 					});
 				});
 			});
 		})
 		.catch((err) => {
-			console.log('error occurred: ', err);
 			// Disconnect
 			knexConnection.client.destroy();
-			callback(err);
+			// eslint-disable-next-line no-console
+			console.log(`ERROR posting message: ${JSON.stringify(err)}`);
+			return callback(createError.InternalServerError('Error posting message.'));
 		});
 };
 
-
 // DELETE lesson/{courseId}/messages/{studentId}
-module.exports.delete = (event, context, callback) => {
+const clearStudentMessages = async (event, context, callback) => {
 	// context.callbackWaitsForEmptyEventLoop = false
-	if (!('pathParameters' in event) || !(event.pathParameters) || !(event.pathParameters.courseId) || !(event.pathParameters.studentId)) {
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: "Invalid Input, please send us the course's ID and the student's ID!",
-			}),
-		});
-		return;
+	if (!event.pathParameters.courseId || !event.pathParameters.studentId) {
+		return callback(createError.BadRequest("Course's and student's ID required."));
 	}
 	if (!isAnInteger(event.pathParameters.courseId) || !isAnInteger(event.pathParameters.studentId)) {
-		// then the ID is invalid
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: 'Invalid ID! It should be an integer.',
-			}),
-		});
-		return;
+		return callback(createError.BadRequest('IDs should be integers.'));
 	}
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
-	knexConnection('Logs')
+	return knexConnection('Logs')
 		.where({
 			courseId: event.pathParameters.courseId,
 			studentId: event.pathParameters.studentId,
@@ -321,19 +223,43 @@ module.exports.delete = (event, context, callback) => {
 		.update({ live: false })
 		.then(async (result) => {
 			knexConnection.client.destroy();
-			callback(null, {
+			return callback(null, {
 				statusCode: 200,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
 				body: '',
 			});
 		})
 		.catch((err) => {
-			console.log('error occurred: ', err);
 			// Disconnect
 			knexConnection.client.destroy();
-			callback(err);
+			// eslint-disable-next-line no-console
+			console.log(`ERROR clearing messages: ${JSON.stringify(err)}`);
+			return callback(createError.InternalServerError('Error clearing messages.'));
 		});
 };
+
+const get = middy(getStudentMessages)
+	.use(cors(corsConfig))
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler());
+
+const schema = models.Message;
+
+const post = middy(postStudentMessages)
+	.use(cors(corsConfig))
+	.use(jsonBodyParser())
+	.use(validator({
+		inputSchema: {
+			type: 'object',
+			properties: {
+				body: schema,
+			},
+		},
+	}))
+	.use(httpErrorHandler());
+
+const del = middy(clearStudentMessages)
+	.use(cors(corsConfig))
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler());
+
+module.exports = { get, post, delete: del };

@@ -1,5 +1,11 @@
 const knex = require('knex');
+const middy = require('middy');
+const {
+	cors, httpErrorHandler, httpEventNormalizer,
+} = require('middy/middlewares');
+const createError = require('http-errors');
 const dbConfig = require('../db');
+const corsConfig = require('../cors');
 
 function dbRowToProperObject(obj) {
 	const retObj = { ...obj };		// shallow copy
@@ -15,217 +21,135 @@ function isAnInteger(obj) {
 }
 
 // GET student/{studentId}
-module.exports.byId = (event, context, callback) => {
-	if (!('pathParameters' in event) || !(event.pathParameters) || !(event.pathParameters.studentId)) {
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: "Invalid Input, please send us the student's ID!",
-			}),
-		});
-		return;
+const getStudentById = async (event, context, callback) => {
+	if (!event.pathParameters.studentId) {
+		return callback(createError.BadRequest("Student's ID required."));
 	}
 	if (!isAnInteger(event.pathParameters.studentId)) {
-		// then the ID is invalid
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: 'Invalid ID! It should be an integer.',
-			}),
-		});
-		return;
+		return callback(createError.BadRequest('ID should be an integer.'));
 	}
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
-	knexConnection('Students').where({
-		studentId: event.pathParameters.studentId,
-	}).select().then((result) => {
-		knexConnection.client.destroy();
+	return knexConnection('Students')
+		.where({
+			studentId: event.pathParameters.studentId,
+		})
+		.select()
+		.then((result) => {
+			knexConnection.client.destroy();
 
-		if (result.length === 1) {
-			callback(null, {
-				statusCode: 200,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify(dbRowToProperObject(result[0])),
-			});
-		} else if (result.length === 0) {
-			callback(null, {
-				statusCode: 404,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify({
-					message: 'Student not found.',
-				}),
-			});
-		} else {
-			callback(null, {
-				statusCode: 400,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify({
-					message: "There's more than one student with this ID?!",
-					data: result,
-				}),
-			});
-		}
-	})
+			if (result.length === 1) {
+				callback(null, {
+					statusCode: 200,
+					body: JSON.stringify(dbRowToProperObject(result[0])),
+				});
+			} else if (result.length === 0) {
+				callback(createError.NotFound('Student not found.'));
+			} else {
+				callback(createError.InternalServerError('More than one student with this ID.'));
+			}
+		})
 		.catch((err) => {
-			console.log('error occurred: ', err);
 			// Disconnect
 			knexConnection.client.destroy();
-			callback(err);
+			// eslint-disable-next-line no-console
+			console.log(`ERROR updating student: ${JSON.stringify(err)}`);
+			return callback(createError.InternalServerError('Error getting student.'));
 		});
 };
 
 // GET student/byToken/{authToken}
-module.exports.byToken = (event, context, callback) => {
-	if (!('pathParameters' in event) || !(event.pathParameters) || !(event.pathParameters.authToken)) {
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: "Invalid Input, please send us the student's token!",
-			}),
-		});
-		return;
+const getStudentByToken = async (event, context, callback) => {
+	if (!event.pathParameters.authToken) {
+		return callback(createError.BadRequest("Student's token required."));
 	}
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
-	knexConnection('Students').where({
-		idToken: event.pathParameters.authToken,
-	}).select().then((result) => {
-		knexConnection.client.destroy();
+	return knexConnection('Students')
+		.where({
+			idToken: event.pathParameters.authToken,
+		})
+		.select()
+		.then((result) => {
+			knexConnection.client.destroy();
 
-		if (result.length === 1) {
-			callback(null, {
-				statusCode: 200,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify(dbRowToProperObject(result[0])),
-			});
-		} else if (result.length === 0) {
-			callback(null, {
-				statusCode: 404,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify({
-					message: 'Student not found.',
-				}),
-			});
-		} else {
-			callback(null, {
-				statusCode: 400,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify({
-					message: "There's more than one student with this token?!",
-					data: result,
-				}),
-			});
-		}
-	})
+			if (result.length === 1) {
+				callback(null, {
+					statusCode: 200,
+					body: JSON.stringify(dbRowToProperObject(result[0])),
+				});
+			} else if (result.length === 0) {
+				callback(createError.NotFound('Student not found.'));
+			} else {
+				callback(createError.InternalServerError('More than one student with this token.'));
+			}
+		})
 		.catch((err) => {
-			console.log('error occurred: ', err);
 			// Disconnect
 			knexConnection.client.destroy();
-			callback(err);
+			// eslint-disable-next-line no-console
+			console.log(`ERROR updating student: ${JSON.stringify(err)}`);
+			return callback(createError.InternalServerError('Error getting student.'));
 		});
 };
 
 // GET student/{studentId}/emonBalance/byCourse/{courseId}
-module.exports.emons = (event, context, callback) => {
-	if (!('pathParameters' in event) || !(event.pathParameters) || !(event.pathParameters.courseId) || !(event.pathParameters.studentId)) {
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: "Invalid Input, please send us the course's ID and the student's ID!",
-			}),
-		});
-		return;
+const getEmons = async (event, context, callback) => {
+	if (!event.pathParameters.courseId || !event.pathParameters.studentId) {
+		return callback(createError.BadRequest("Course's and student's IDs are required."));
 	}
 	if (!isAnInteger(event.pathParameters.courseId) || !isAnInteger(event.pathParameters.studentId)) {
-		// then the ID is invalid
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: 'Invalid ID! It should be an integer.',
-			}),
-		});
-		return;
+		return callback(createError.BadRequest('IDs should be integers.'));
 	}
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
-	knexConnection('Logs').where({
-		courseId: event.pathParameters.courseId,
-		studentId: event.pathParameters.studentId,
-		msgType: 0,
-	}).sum('val').then((result) => {
-		knexConnection.client.destroy();
+	return knexConnection('Logs')
+		.where({
+			courseId: event.pathParameters.courseId,
+			studentId: event.pathParameters.studentId,
+			msgType: 0,
+		})
+		.sum('val')
+		.then((result) => {
+			knexConnection.client.destroy();
 
-		if (result.length === 1) {
-			callback(null, {
-				statusCode: 200,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify(result[0]['sum(`val`)']),
-			});
-		} else if (result.length === 0) {
-			callback(null, {
-				statusCode: 404,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify({
-					message: 'Student not found.',
-				}),
-			});
-		}
-	})
+			if (result.length === 1) {
+				callback(null, {
+					statusCode: 200,
+					body: JSON.stringify(result[0]['sum(`val`)']),
+				});
+			} else if (result.length === 0) {
+				callback(createError.NotFound('Student or course not found.'));
+			}
+		})
 		.catch((err) => {
-			console.log('error occurred: ', err);
 			// Disconnect
 			knexConnection.client.destroy();
-			callback(err);
+			// eslint-disable-next-line no-console
+			console.log(`ERROR getting balance: ${JSON.stringify(err)}`);
+			return callback(createError.InternalServerError('Error getting balance.'));
 		});
 };
+
+const byId = middy(getStudentById)
+	.use(cors(corsConfig))
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler());
+
+const byToken = middy(getStudentByToken)
+	.use(cors(corsConfig))
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler());
+
+const emons = middy(getEmons)
+	.use(cors(corsConfig))
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler());
+
+module.exports = { byId, byToken, emons };

@@ -1,5 +1,11 @@
 const knex = require('knex');
+const middy = require('middy');
+const {
+	cors, httpErrorHandler, httpEventNormalizer,
+} = require('middy/middlewares');
+const createError = require('http-errors');
 const dbConfig = require('../db');
+const corsConfig = require('../cors');
 
 function dbRowToProperObject(obj) {
 	const retObj = { ...obj };		// shallow copy
@@ -63,58 +69,43 @@ function isAnInteger(obj) {
 }
 
 // GET log/ofStudent/{studentId}/byCourse/{courseId}
-module.exports.handler = (event, context, callback) => {
-	if (!('pathParameters' in event) || !(event.pathParameters) || !(event.pathParameters.courseId) || !(event.pathParameters.studentId)) {
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: "Invalid Input, please send us the course's ID and the student's ID!",
-			}),
-		});
-		return;
+const getStudentLog = async (event, context, callback) => {
+	if (!event.pathParameters.courseId || !event.pathParameters.studentId) {
+		return callback(createError.BadRequest("Student's and course's IDs required."));
 	}
 	if (!isAnInteger(event.pathParameters.courseId) || !isAnInteger(event.pathParameters.studentId)) {
-		// then the ID is invalid
-		callback(null, {
-			statusCode: 400,
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Credentials': true,
-			},
-			body: JSON.stringify({
-				message: 'Invalid ID! It should be an integer.',
-			}),
-		});
-		return;
+		return callback(createError.BadRequest('IDs should be integers.'));
 	}
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
-	knexConnection('Logs').where({
-		courseId: event.pathParameters.courseId,
-		studentId: event.pathParameters.studentId,
-	}).select()
+	return knexConnection('Logs')
+		.where({
+			courseId: event.pathParameters.courseId,
+			studentId: event.pathParameters.studentId,
+		})
+		.select()
 		.then((result) => {
 			knexConnection.client.destroy();
 
 			callback(null, {
 				statusCode: 200,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
 				body: JSON.stringify(result.map(dbRowToProperObject)),
 			});
 		})
 		.catch((err) => {
-			console.log('error occurred: ', err);
 			// Disconnect
 			knexConnection.client.destroy();
-			callback(err);
+			// eslint-disable-next-line no-console
+			console.log(`ERROR getting log: ${JSON.stringify(err)}`);
+			return callback(createError.InternalServerError('Error getting log.'));
 		});
 };
+
+const handler = middy(getStudentLog)
+	.use(cors(corsConfig))
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler());
+
+module.exports = { handler };
