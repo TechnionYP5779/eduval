@@ -20,6 +20,7 @@ import {
   Alert
 } from "shards-react";
 
+import TimeoutAlert from "../components/common/TimeoutAlert"
 import Colors from "../components/components-overview/Colors";
 import Checkboxes from "../components/components-overview/Checkboxes";
 import RadioButtons from "../components/components-overview/RadioButtons";
@@ -193,18 +194,10 @@ class Lesson extends React.Component {
     return (
       <div>
       {this.state.error &&
-      <Container fluid className="px-0">
-        <Alert className="mb-0" theme="danger">
-          <i className="fa fa-info mx-2"></i> An error has occured!
-        </Alert>
-      </Container>
+      <TimeoutAlert className="mb-0" theme="danger" msg={"An error has occured!"} time={3000}/>
       }
       {this.state.success &&
-      <Container fluid className="px-0">
-        <Alert className="mb-0" theme="success">
-          <i className="fa fa-info mx-2"></i> Messages sent successfully
-        </Alert>
-      </Container>
+      <TimeoutAlert className="mb-0" theme="success" msg={"Messages sent successfully!"} time={3000}/>
       }
       <Container fluid className="main-content-container px-4">
         {/* Page Header */}

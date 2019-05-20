@@ -20,6 +20,7 @@ import {
   Alert
 } from "shards-react";
 import PageTitle from "../components/common/PageTitle";
+import TimeoutAlert from "../components/common/TimeoutAlert"
 import server from "../Server/Server";
 import TagsInput from 'react-tagsinput';
 class CourseDetails extends React.Component {
@@ -161,18 +162,10 @@ class CourseDetails extends React.Component {
     return(
       <div>
       {this.state.error &&
-      <Container fluid className="px-0">
-        <Alert className="mb-0" theme="danger">
-          <i className="fa fa-info mx-2"></i> {this.state.error}
-        </Alert>
-      </Container>
+      <TimeoutAlert className="mb-0" theme="danger" msg={this.state.error} time={3000}/>
       }
       {this.state.success &&
-      <Container fluid className="px-0">
-        <Alert className="mb-0" theme="success">
-          <i className="fa fa-info mx-2"></i> Success! Your course has been updated!
-        </Alert>
-      </Container>
+      <TimeoutAlert className="mb-0" theme="success" msg={"Success! Your course has been updated!"} time={3000}/>
       }
       <Container fluid className="main-content-container px-4 pb-4">
 
