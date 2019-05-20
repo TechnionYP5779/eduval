@@ -1,9 +1,14 @@
 import React, { Component } from 'react';
 import loading from './loading.svg';
+import auth from '../Auth/Auth'
 
 import server from "../Server/Server"
 
 class Callback extends Component {
+
+  componentDidMount(){
+    auth.handleAuthentication();
+  }
 
   render() {
     const style = {

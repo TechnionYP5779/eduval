@@ -8,6 +8,7 @@ import Editor from "../components/add-new-post/Editor";
 import SidebarActions from "../components/add-new-post/SidebarActions";
 import SidebarCategories from "../components/add-new-post/SidebarCategories";
 import NewCourseForm from "../components/add-new-post/NewCourseForm";
+import TimeoutAlert from "../components/common/TimeoutAlert";
 
 export default class AddNewCourse extends React.Component {
 
@@ -19,9 +20,19 @@ export default class AddNewCourse extends React.Component {
     };
 
     this.handler = this.handler.bind(this)
+    // this.removeAlert = this.removeAlert.bind(this);
   }
 
+  // removeAlert(){
+  //   this.setState({error: false, success: false, timeout: false});
+  // }
+
   handler(errorMsg){
+    // var removeAlert = this.removeAlert;
+    // if (this.state.timeout)
+    //   clearTimeout(this.state.timeout);
+    // this.setState({timeout: setTimeout(removeAlert, 3000)});
+
     if (errorMsg){
       this.setState({success: false, error: errorMsg});
       window.scrollTo(0, 0);
@@ -34,21 +45,20 @@ export default class AddNewCourse extends React.Component {
 
   render(){
     var handler  =   this.handler;
+
+    // <i className="fa fa-info mx-2"></i> Success! Your course has been added!
+    // </TimeoutAlert>
+
+  //   <i className="fa fa-info mx-2"></i> {this.state.error}
+  // </TimeoutAlert>
+    var successMsg = "Success! Your course has been added!";
     return (
           <div>
             {this.state.error &&
-            <Container fluid className="px-0">
-              <Alert className="mb-0" theme="danger">
-                <i className="fa fa-info mx-2"></i> {this.state.error}
-              </Alert>
-            </Container>
+              <TimeoutAlert msg={this.state.error} time={3000} className="mb-0" theme="danger"/>
             }
             {this.state.success &&
-            <Container fluid className="px-0">
-              <Alert className="mb-0" theme="success">
-                <i className="fa fa-info mx-2"></i> Success! Your course has been added!
-              </Alert>
-            </Container>
+              <TimeoutAlert msg={successMsg} time={3000} className="mb-0" theme="success"/>
             }
 
             <Container fluid className="main-content-container px-4 pb-4">
