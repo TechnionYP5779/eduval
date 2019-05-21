@@ -162,10 +162,10 @@ class CourseDetails extends React.Component {
     return(
       <div>
       {this.state.error &&
-      <TimeoutAlert className="mb-0" theme="danger" msg={this.state.error} time={3000}/>
+      <TimeoutAlert className="mb-0" theme="danger" msg={this.state.error} time={10000}/>
       }
       {this.state.success &&
-      <TimeoutAlert className="mb-0" theme="success" msg={"Success! Your course has been updated!"} time={3000}/>
+      <TimeoutAlert className="mb-0" theme="success" msg={"Success! Your course has been updated!"} time={10000}/>
       }
       <Container fluid className="main-content-container px-4 pb-4">
 

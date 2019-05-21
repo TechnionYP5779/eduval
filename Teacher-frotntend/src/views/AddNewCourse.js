@@ -55,10 +55,10 @@ export default class AddNewCourse extends React.Component {
     return (
           <div>
             {this.state.error &&
-              <TimeoutAlert msg={this.state.error} time={3000} className="mb-0" theme="danger"/>
+              <TimeoutAlert msg={this.state.error} time={10000} className="mb-0" theme="danger"/>
             }
             {this.state.success &&
-              <TimeoutAlert msg={successMsg} time={3000} className="mb-0" theme="success"/>
+              <TimeoutAlert msg={successMsg} time={10000} className="mb-0" theme="success"/>
             }
 
             <Container fluid className="main-content-container px-4 pb-4">
