@@ -57,6 +57,14 @@ class Lesson extends React.Component {
 
     this.state = {
 
+      messages: [{type: 0, studentId: 1},{type: 2, studentId: 3},{type: 1, studentId: 1}],
+
+      message_types: [{text:"I have a question.",color:"Tomato"},{text: "Speak louder, please.",color:"Violet"},{text: "May I go out?",color:"Orange"},{text:"I know the answer!",color:"MediumSeaGreen"}],
+
+      showing_student: true,
+
+      showing_messages: true,
+
       disabled: false,
 
       connected: false,
@@ -209,11 +217,21 @@ class Lesson extends React.Component {
           <Col lg="8" className="mb-4">
             <Card small className="mb-4">
               <CardHeader className="border-bottom">
-                <h5 className="m-0">Attending Students</h5>
-                <h6 style={{fontSize:"12px"}}>Pick the students you want to send E-Money too</h6>
+                <Row>
+                  <Col sm="11">
+                    <h5 className="m-0">Attending Students</h5>
+                    <h6 style={{fontSize:"12px"}}>Pick the students you want to send E-Money too</h6>
+                  </Col>
+                  <Col sm="1">  
+                    <Button style={{padding:"0px"}} onClick={()=>{this.setState({showing_student:!this.state.showing_student});}}>
+                      {this.state.showing_student && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CE;</i>}
+                      {!this.state.showing_student && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CF;</i>}
+                    </Button>
+                  </Col>  
+                </Row>
               </CardHeader>
 
-              <ListGroup flush>
+              {this.state.showing_student && <ListGroup flush>
                 <ListGroupItem className="p-0 px-3 pt-3">
                   <Row>
 
@@ -241,7 +259,44 @@ class Lesson extends React.Component {
 
                   </Row>
                 </ListGroupItem>
-              </ListGroup>
+              </ListGroup>}
+            </Card>
+
+            <Card small className="mb-4">
+              <CardHeader className="border-bottom">
+                <Row>
+                  <Col sm="11">
+                    <h5 className="m-0">Messages from Students</h5>
+                    <h6 style={{fontSize:"12px"}}>Click <i className="material-icons">&#xE8F4;</i> to see students who sent messages or <i className="material-icons">&#xE888;</i> to clear messages.</h6>
+                  </Col>
+                  <Col sm="1">  
+                    <Button style={{padding:"0px"}} onClick={()=>{this.setState({showing_messages:!this.state.showing_messages});}}>
+                      {this.state.showing_messages && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CE;</i>}
+                      {!this.state.showing_messages && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CF;</i>}
+                    </Button>
+                  </Col>  
+                </Row>
+              </CardHeader>
+
+              {this.state.showing_messages && <table className="table mb-0">
+                <thead className="bg-light" style={{color:"#485170"}}>
+                  <tr>
+                    <th scope="col" className="border-0" style={{fontWeight:"600"}}>#</th>
+                    <th scope="col" className="border-0" style={{fontWeight:"600"}}>Message Type</th>
+                    <th scope="col" className="border-0" style={{fontWeight:"600"}}>Show Senders</th>
+                    <th scope="col" className="border-0" style={{fontWeight:"600"}}>Clear</th>
+                  </tr>
+                </thead>
+                {this.state.message_types.map((messtype) => (
+                  <tr style={{color:messtype.color}}>
+                    <td scope="col" className="border-0" style={{fontWeight:"600"}}>3</td>
+                    <td scope="col" className="border-0" style={{fontWeight:"600"}}>{messtype.text}</td>
+                    <td scope="col" className="border-0" style={{fontWeight:"600"}}><Button outline style={{color:messtype.color}}><i className="material-icons">&#xE8F4;</i></Button></td>
+                    <td scope="col" className="border-0" style={{fontWeight:"600"}}><Button outline style={{color:messtype.color}}><i className="material-icons">clear</i></Button></td>
+                  </tr>  
+                ))}
+                  
+              </table>}
             </Card>
 
           </Col>
