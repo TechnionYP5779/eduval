@@ -318,6 +318,7 @@ functions:
                     parameters:
                         paths:
                             courseId: true
+    
     getStudentMessages:
         handler: lesson/messages.get
         description: Get the list of present students.
@@ -360,6 +361,47 @@ functions:
                         paths:
                             courseId: true
                             studentId: true
+
+    getTeacherMessages:
+        handler: lesson/teacherMessages.get
+        description: Get the list of present students.
+        events:
+            - http:
+                path: lesson/{courseId}/teacherMessages
+                method: get
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    postTeacherMessage:
+        handler: lesson/teacherMessages.post
+        description: Add a student to the list of present students.
+        events:
+            - http:
+                path: lesson/{courseId}/teacherMessages
+                method: post
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    clearTeacherMessages:
+        handler: lesson/teacherMessages.delete
+        description: Add a student to the list of present students.
+        events:
+            - http:
+                path: lesson/{courseId}/teacherMessages
+                method: delete
+                private: true
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+
 
     getStudentLog:
         handler: log/get.handler

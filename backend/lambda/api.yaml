@@ -4,7 +4,7 @@ info:
   description: blablabla description.
   version: 1.0.0
 servers:
-  - url: 'https://someserver.eu-central-1.amazonaws.com/'
+  - url: 'https://api.emon-teach.com/'
 tags:
   - name: teacher
     description: stuff related to the teachers
@@ -26,6 +26,7 @@ tags:
       * ``lesson/{courseId}/status`` - A message will be published here when the lesson starts/ends.
       * ``lesson/{courseId}/messages/{studentId}`` - Any messages sent to a student will be published here.
       * ``lesson/{courseId}/students`` - Messages about students connecting will be sent here.
+      * ``lesson/{courseId}/teacherMessages`` - Any messages sent to the teacher will be published here.
       
       IMPORTANT: Please note there is no leading slash (``/``) at the beginning of topic names.  
       Also remember that you can use wildcards.
@@ -51,8 +52,8 @@ paths:
         '404':
           description: Teacher not found
           content: {}
-        '405':
-          description: Validation exception
+        '400':
+          description: Validation exception. Invalid JSON.
           content: {}
       security:
         - api_key: []
@@ -77,8 +78,8 @@ paths:
                 format: int64
                 example: 15
                 description: 'ID of inserted teacher'
-        '405':
-          description: Invalid input
+        '400':
+          description: Validation exception. Invalid JSON.
           content: {}
       security:
         - api_key: []
@@ -105,7 +106,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Teacher'
         '400':
-          description: Invalid ID supplied
+          description: Validation exception. Invalid ID.
           content: {}
         '404':
           description: Teacher not found
@@ -129,7 +130,7 @@ paths:
           description: All OK
           content: {}
         '400':
-          description: Invalid ID supplied
+          description: Validation exception. Invalid ID.
           content: {}
         '404':
           description: Teacher not found
@@ -157,6 +158,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Teacher'
+        '400':
+          description: Validation exception. Missing token.
+          content: {}
         '404':
           description: Teacher not found
           content: {}
@@ -185,8 +189,8 @@ paths:
         '404':
           description: Student not found
           content: {}
-        '405':
-          description: Validation exception
+        '400':
+          description: Validation exception. Invalid JSON.
           content: {}
       security:
         - api_key: []
@@ -211,8 +215,8 @@ paths:
                 format: int64
                 example: 15
                 description: 'ID of inserted student'
-        '405':
-          description: Invalid input
+        '400':
+          description: Validation exception. Invalid JSON.
           content: {}
       security:
         - api_key: []
@@ -239,7 +243,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Student'
         '400':
-          description: Invalid ID supplied
+          description: Validation exception. Invalid ID.
           content: {}
         '404':
           description: Teacher not found
@@ -263,7 +267,7 @@ paths:
           description: All OK
           content: {}
         '400':
-          description: Invalid ID supplied
+          description: Validation exception. Invalid ID.
           content: {}
         '404':
           description: Student not found
@@ -291,6 +295,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Student'
+        '400':
+          description: Validation exception. Missing token.
+          content: {}
         '404':
           description: Student not found
           content: {}
@@ -328,7 +335,7 @@ paths:
                 format: int64
                 example: 15
         '400':
-          description: Invalid ID supplied
+          description: Validation exception. Invalid ID(s).
           content: {}
         '404':
           description: Course not found
@@ -357,8 +364,8 @@ paths:
         '404':
           description: Course not found
           content: {}
-        '405':
-          description: Validation exception
+        '400':
+          description: Validation exception. Invalid JSON.
           content: {}
       security:
         - api_key: []
@@ -383,8 +390,8 @@ paths:
                 format: int64
                 example: 15
                 description: 'ID of inserted course'
-        '405':
-          description: Invalid input
+        '400':
+          description: Validation exception. Invalid JSON.
           content: {}
       security:
         - api_key: []
@@ -411,7 +418,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Course'
         '400':
-          description: Invalid ID supplied
+          description: Validation exception. Invalid ID.
           content: {}
         '404':
           description: Course not found
@@ -435,7 +442,7 @@ paths:
           description: All OK
           content: {}
         '400':
-          description: Invalid ID supplied
+          description: Validation exception. Invalid ID.
           content: {}
         '404':
           description: Course not found
@@ -467,6 +474,9 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Student'
+        '400':
+          description: Validation exception. Invalid ID.
+          content: {}
         '404':
           description: No such course
           content: {}
@@ -508,8 +518,8 @@ paths:
         '200':
           description: All OK
           content: {}
-        '405':
-          description: Invalid input
+        '400':
+          description: Validation exception. Invalid ID/JSON.
           content: {}
       security:
         - api_key: []
@@ -539,6 +549,9 @@ paths:
       responses:
         '200':
           description: All OK
+          content: {}
+        '400':
+          description: Validation exception. Invalid ID(s).
           content: {}
         '404':
           description: No such registration pair
@@ -570,7 +583,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Course'
         '400':
-          description: Invalid ID supplied
+          description: Validation exception. Invalid ID.
           content: {}
         '404':
           description: Teacher not found
@@ -602,7 +615,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Course'
         '400':
-          description: Invalid ID supplied
+          description: Validation exception. Invalid ID.
           content: {}
         '404':
           description: Student not found
@@ -642,7 +655,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Log'
         '400':
-          description: Invalid ID supplied
+          description: Validation exception. Invalid ID(s).
           content: {}
         '404':
           description: Course not found
@@ -679,8 +692,8 @@ paths:
         '404':
           description: Course not found
           content: {}
-        '405':
-          description: Invalid ID
+        '400':
+          description: Validation exception. Invalid ID.
           content: {}
       security:
         - api_key: []
@@ -717,12 +730,12 @@ paths:
         '404':
           description: Course not found
           content: {}
-        '405':
-          description: Invalid ID
+        '400':
+          description: Validation exception. Invalid ID/status.
           content: {}
       security:
         - api_key: []
-        
+  
   '/lesson/{courseId}/messages/{studentId}':
     get:
       tags:
@@ -754,7 +767,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Message'
         '400':
-          description: Invalid ID supplied
+          description: Validation exception. Invalid ID(s).
           content: {}
         '404':
           description: Course not found
@@ -794,8 +807,8 @@ paths:
         '404':
           description: Course not found
           content: {}
-        '405':
-          description: Invalid ID
+        '400':
+          description: Validation exception. Invalid ID(s)/JSON.
           content: {}
       security:
         - api_key: []
@@ -826,8 +839,8 @@ paths:
         '404':
           description: Course not found
           content: {}
-        '405':
-          description: Invalid ID
+        '400':
+          description: Validation exception. Invalid ID(s).
           content: {}
       security:
         - api_key: []
@@ -900,6 +913,95 @@ paths:
           content: {}
       security:
         - api_key: []
+  
+  '/lesson/{courseId}/teacherMessages':
+    get:
+      tags:
+        - lesson
+      summary: Get the messages sent to the teacher
+      description: Returns all the messages the teacher got during this lesson from students.
+      parameters:
+        - name: courseId
+          in: path
+          description: ID of the lesson's course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TeacherMessage'
+        '400':
+          description: Validation exception. Invalid ID.
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+      security:
+        - api_key: []
+    post:
+      tags:
+        - lesson
+      summary: Send a message to the teacher
+      parameters:
+        - name: courseId
+          in: path
+          description: The ID of the lesson's course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The message to send.
+        content:
+          application/javascript:
+            schema:
+              $ref: '#/components/schemas/TeacherMessage'
+        required: true
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+        '400':
+          description: Validation exception. Invalid ID/JSON.
+          content: {}
+      security:
+        - api_key: []
+    delete:
+      tags:
+        - lesson
+      summary: Clear the teacher's messages
+      description: At the end of the lesson, clear all messages the teacher got. This is so next lesson they can have a clear slate.
+      parameters:
+        - name: courseId
+          in: path
+          description: The ID of the lesson's course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+        '400':
+          description: Validation exception. Invalid ID.
+          content: {}
+      security:
+        - api_key: []
+
  
   
 components:
@@ -995,6 +1097,33 @@ components:
               description: The amount of emon given.
         - type: object
           properties:
+            messageType:
+              type: string
+              enum: ["EMOJI"]
+            emojiType:
+              type: string
+              description: what emoji was sent
+              enum: ["EMOJI_HAPPY", "EMOJI_THUMBS_UP", "EMOJI_ANGEL", "EMOJI_GRIN", "EMOJI_SHUSH", "EMOJI_ZZZ", "EMOJI_ANGRY", "EMOJI_THUMBS_DOWN"]
+          
+    TeacherMessage:
+      oneOf:
+        - type: object
+          properties:
+            studentId:
+              type: integer
+              format: int64
+            messageType:
+              type: string
+              enum: ["MESSAGE"]
+            content:
+              type: string
+              description: what message was sent
+              enum: ["MESSAGE_CONFUSED", "MESSAGE_QUESTION"]
+        - type: object
+          properties:
+            studentId:
+              type: integer
+              format: int64
             messageType:
               type: string
               enum: ["EMOJI"]
