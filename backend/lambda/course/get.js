@@ -64,7 +64,7 @@ const getCourseById = async (event, context, callback) => {
 
 // GET course/byTeacher/{teacherId}
 const getCoursesByTeacher = async (event, context, callback) => {
-	if (event.pathParameters.teacherId) {
+	if (!event.pathParameters.teacherId) {
 		return callback(createError.BadRequest("Teacher's ID required."));
 	}
 	if (!isAnInteger(event.pathParameters.teacherId)) {

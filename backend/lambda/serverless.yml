@@ -6,11 +6,11 @@ service:        dbFunctions
 provider:
     name:       aws
     runtime:    nodejs8.10
-    stage:      tmp
+    stage:      dev
     region:     eu-central-1
     apiKeys:
-        # - myApiKey
-        - ${self:provider.stage}-api-key
+        - myApiKey
+        #- ${self:provider.stage}-api-key
 
     # defines environment variables for connecting to DB
     environment:

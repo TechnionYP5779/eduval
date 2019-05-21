@@ -77,7 +77,7 @@ const updateLessonStatus = async (event, context, callback) => {
 				new Promise((resolve, reject) => {
 					if (newStatus === 'LESSON_END') {
 						// then we need to clear out the present students
-						const promise = knex('PresentStudents').where({
+						const promise = knexConnection('PresentStudents').where({
 							courseId: event.pathParameters.courseId,
 						}).del();
 						resolve(promise);

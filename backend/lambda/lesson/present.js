@@ -16,7 +16,7 @@ function dbRowToProperObject(obj) {
 	delete retObj.courseId;
 	retObj.authIdToken = obj.idToken;
 	delete retObj.idToken;
-	return obj;
+	return retObj;
 }
 
 function isAnInteger(obj) {
@@ -122,7 +122,6 @@ const schema = {
 		},
 		id: {
 			type: 'integer',
-			format: 'int64',
 		},
 	},
 	required: ['desk', 'id'],
