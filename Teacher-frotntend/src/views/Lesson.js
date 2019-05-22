@@ -289,10 +289,16 @@ class Lesson extends React.Component {
                 </thead>
                 {this.state.message_types.map((messtype) => (
                   <tr style={{color:messtype.color}}>
+                    <style>{`
+                      :root {
+                        --mess-color: messtype.color;
+                        }
+                      `}
+                    </style>
                     <td scope="col" className="border-0" style={{fontWeight:"600"}}>3</td>
                     <td scope="col" className="border-0" style={{fontWeight:"600"}}>{messtype.text}</td>
-                    <td scope="col" className="border-0" style={{fontWeight:"600"}}><Button outline style={{color:messtype.color}}><i className="material-icons">&#xE8F4;</i></Button></td>
-                    <td scope="col" className="border-0" style={{fontWeight:"600"}}><Button outline style={{color:messtype.color}}><i className="material-icons">clear</i></Button></td>
+                    <td scope="col" className="border-0" style={{fontWeight:"600"}}><Button className="mb-2 mr-1 custom-button" data-color={messtype.color}><i className="material-icons">&#xE8F4;</i></Button></td>
+                    <td scope="col" className="border-0" style={{fontWeight:"600"}}><Button outline style={{borderColor: messtype.color ,color:messtype.color}}><i className="material-icons">clear</i></Button></td>
                   </tr>  
                 ))}
                   

@@ -1,3 +1,7 @@
+:root {
+  --mess-color: red;
+}
+
 .badge1 {
    position:relative;
 }
@@ -17,6 +21,16 @@
    border-radius: 0.375rem;
 }
 
+.custom-button{
+   color:var(--mess-color);
+   border-color:var(--mess-color);
+   background:white;
+}
+
+.custom-button:hover{
+  background:var(--mess-color);
+  color:white;
+}
 
 
 .react-tagsinput {
