@@ -1,0 +1,33 @@
+{
+    "name": "lambda",
+    "version": "1.0.0",
+    "description": "",
+    "private": true,
+    "engines": {
+        "node": ">=8.10.0"
+    },
+    "scripts": {
+        "debug": "node --inspect %USERPROFILE%\\AppData\\Roaming\\npm\\node_modules\\serverless\\bin\\serverless offline -P 3001",
+        "pretest": "eslint --ignore-path .gitignore .",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "dependencies": {
+        "aws-iot-device-sdk": "^2.2.1",
+        "axios": "^0.18.0",
+        "http-errors": "^1.7.2",
+        "knex": "^0.16.5",
+        "middy": "^0.27.0",
+        "mysql": "^2.16.0"
+    },
+    "devDependencies": {
+        "eslint": "^5.16.0",
+        "eslint-config-airbnb": "^17.1.0",
+        "eslint-plugin-import": "^2.14.0",
+        "eslint-plugin-jsx-a11y": "^6.1.1",
+        "eslint-plugin-node": "^9.0.1",
+        "eslint-plugin-react": "^7.11.0",
+        "serverless-domain-manager": "^3.2.2",
+        "serverless-offline": "^4.10.3"
+    }
+}

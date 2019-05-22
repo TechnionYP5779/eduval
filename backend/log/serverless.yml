@@ -1,0 +1,52 @@
+# For full config options, check the docs:
+#    docs.serverless.com
+
+service:        log
+
+provider:
+    name:       aws
+    runtime:    nodejs8.10
+    stage:      prod
+    region:     eu-central-1
+
+    # defines environment variables for connecting to DB
+    environment:
+        DB_NAME:        ${self:custom.secrets.DB_NAME}
+        DB_USER:        ${self:custom.secrets.DB_USER}
+        DB_PASSWORD:    ${self:custom.secrets.DB_PASSWORD}
+        DB_HOST:        ${self:custom.secrets.DB_HOST}
+        DB_PORT:        ${self:custom.secrets.DB_PORT}
+        LAMBDA_ENDPOINT:        ${self:custom.secrets.LAMBDA_ENDPOINT}
+        LAMBDA_APIKEY:        ${self:custom.secrets.LAMBDA_APIKEY}
+
+#package:
+#    individually: true
+
+plugins:
+    - serverless-offline
+    - serverless-domain-manager
+
+custom:
+    # contains the credentials needed to connect to the DB
+    secrets:    ${file(secrets.json)}
+    customDomain:
+        domainName: 'api.emon-teach.com'
+        basePath: 'log' # This will be prefixed to all routes
+        stage: ${self:provider.stage}
+        createRoute53Record: true
+
+#TODO: Implement a more strict CORS policy
+functions:
+    getStudentLog:
+        handler: src/get.handler
+        description: Get blaaaaaaaaaaaaaaa
+        events:
+            - http:
+                path: ofStudent/{studentId}/byCourse/{courseId}/
+                method: get
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+                            studentId: true
