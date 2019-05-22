@@ -222,12 +222,12 @@ class Lesson extends React.Component {
                     <h5 className="m-0">Attending Students</h5>
                     <h6 style={{fontSize:"12px"}}>Pick the students you want to send E-Money too</h6>
                   </Col>
-                  <Col sm="1">  
+                  <Col sm="1">
                     <Button style={{padding:"0px"}} onClick={()=>{this.setState({showing_student:!this.state.showing_student});}}>
                       {this.state.showing_student && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CE;</i>}
                       {!this.state.showing_student && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CF;</i>}
                     </Button>
-                  </Col>  
+                  </Col>
                 </Row>
               </CardHeader>
 
@@ -269,12 +269,12 @@ class Lesson extends React.Component {
                     <h5 className="m-0">Messages from Students</h5>
                     <h6 style={{fontSize:"12px"}}>Click <i className="material-icons">&#xE8F4;</i> to see students who sent messages or <i className="material-icons">&#xE888;</i> to clear messages.</h6>
                   </Col>
-                  <Col sm="1">  
+                  <Col sm="1">
                     <Button style={{padding:"0px"}} onClick={()=>{this.setState({showing_messages:!this.state.showing_messages});}}>
                       {this.state.showing_messages && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CE;</i>}
                       {!this.state.showing_messages && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CF;</i>}
                     </Button>
-                  </Col>  
+                  </Col>
                 </Row>
               </CardHeader>
 
@@ -288,20 +288,23 @@ class Lesson extends React.Component {
                   </tr>
                 </thead>
                 {this.state.message_types.map((messtype) => (
-                  <tr style={{color:messtype.color}}>
-                    <style>{`
-                      :root {
-                        --mess-color: messtype.color;
-                        }
-                      `}
-                    </style>
+                  <tr style={{color:messtype.color, "--mess-color" : messtype.color}}>
+
                     <td scope="col" className="border-0" style={{fontWeight:"600"}}>3</td>
                     <td scope="col" className="border-0" style={{fontWeight:"600"}}>{messtype.text}</td>
-                    <td scope="col" className="border-0" style={{fontWeight:"600"}}><Button className="mb-2 mr-1 custom-button" data-color={messtype.color}><i className="material-icons">&#xE8F4;</i></Button></td>
-                    <td scope="col" className="border-0" style={{fontWeight:"600"}}><Button outline style={{borderColor: messtype.color ,color:messtype.color}}><i className="material-icons">clear</i></Button></td>
-                  </tr>  
+                    <td scope="col" className="border-0" style={{fontWeight:"600"}}>
+                      <Button className="mb-2 mr-1 custom-button">
+                        <i className="material-icons">&#xE8F4;</i>
+                      </Button>
+                    </td>
+                    <td scope="col" className="border-0" style={{fontWeight:"600"}}>
+                      <Button className="mb-2 mr-1 custom-button">
+                        <i className="material-icons">clear</i>
+                      </Button>
+                    </td>
+                  </tr>
                 ))}
-                  
+
               </table>}
             </Card>
 

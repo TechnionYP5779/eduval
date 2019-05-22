@@ -29,9 +29,53 @@
 
 .custom-button:hover{
   background:var(--mess-color);
+  border-color:var(--mess-color);
+  color:white;
+  box-shadow: inset 0 3px 5px rgba(0,0,0,.125) !important;
+}
+
+.custom-button:active{
+  background:var(--mess-color);
+  border-color:var(--mess-color);
   color:white;
 }
 
+.custom-button:target{
+  background:var(--mess-color);
+  border-color:var(--mess-color);
+  color:white;
+}
+
+.custom-button:focus{
+  background:var(--mess-color);
+  border-color:var(--mess-color);
+  color:white;
+  box-shadow: 0 5px 15px rgba(0,0,0,.05), 0 4px 10px rgba(0,0,0,.25);
+}
+
+.custom-button:active{
+  background:var(--mess-color) !important;
+  border-color:var(--mess-color) !important;
+  color:white !important;
+}
+
+.custom-button:visited{
+  background:var(--mess-color);
+  border-color:var(--mess-color);
+  color:white;
+}
+
+.custom-button:focus-within{
+  background:var(--mess-color);
+  border-color:var(--mess-color);
+  color:white;
+}
+
+.custom-button:after{
+  background:var(--mess-color);
+  border-color:var(--mess-color);
+  color:white;
+}
 
 .react-tagsinput {
   background-color: #fff;
