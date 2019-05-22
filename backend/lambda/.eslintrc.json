@@ -1,8 +1,0 @@
-{
-	"extends": ["airbnb", "plugin:node/recommended"],
-  	"plugins": ["node"],
-	"rules": {
-		"indent": ["error", "tab"],
-        "no-tabs": 0
-	}
-}

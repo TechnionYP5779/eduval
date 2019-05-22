@@ -11,17 +11,26 @@ const corsConfig = require('../cors');
 
 function dbRowToProperObject(obj) {
 	const retObj = { ...obj };		// shallow copy
-	delete retObj.studentId;
 	delete retObj.courseId;
 	delete retObj.idToken;
 	delete retObj.dtime;
 	switch (obj.msgType) {
 	case 0:
 		delete retObj.msgType;
-		retObj.messageType = 'EMON';
-		retObj.messageReason = `${obj.msgReason}`;
-		delete retObj.msgReason;
-		retObj.value = obj.val;
+		retObj.messageType = 'MESSAGE';
+		switch (obj.val) {
+		case 0:
+			retObj.content = 'MESSAGE_CONFUSED';
+			break;
+		case 1:
+			retObj.content = 'MESSAGE_QUESTION';
+			break;
+		case 2:
+			retObj.content = 'MESSAGE_NEED_TO_LEAVE';
+			break;
+		default:
+			retObj.content = 'INVALID_MESSAGE';
+		}
 		delete retObj.val;
 		delete retObj.live;
 
@@ -67,21 +76,30 @@ function dbRowToProperObject(obj) {
 	return retObj;
 }
 
-function objToDBRow(obj, courseId, studentId) {
+function objToDBRow(obj, courseId) {
 	const retObj = { ...obj };		// shallow copy
 	retObj.courseId = courseId;
-	retObj.studentId = studentId;
+	retObj.studentId = obj.studentId;
 	retObj.dtime = new Date(Date.now()).toISOString();
 	retObj.live = true;
 	switch (retObj.messageType) {
-	case 'EMON':
+	case 'MESSAGE':
 		retObj.msgType = 0;
-		if ('messageReason' in retObj) {
-			// currently unused
-			delete retObj.messageReason;
+		switch (obj.content) {
+		case 'MESSAGE_CONFUSED':
+			retObj.val = 0;
+			break;
+		case 'MESSAGE_QUESTION':
+			retObj.val = 1;
+			break;
+		case 'MESSAGE_NEED_TO_LEAVE':
+			retObj.val = 2;
+			break;
+		default:
+			retObj.val = -1;
+			break;
 		}
-		retObj.val = retObj.value;
-		delete retObj.value;
+		delete retObj.content;
 
 		break;
 	case 'EMOJI':
@@ -142,7 +160,6 @@ const getTeacherMessages = async (event, context, callback) => {
 	return knexConnection('TeacherLogs')
 		.where({
 			courseId: event.pathParameters.courseId,
-			studentId: event.body.studentId,
 			live: true,
 		}).select()
 		.then((result) => {
@@ -182,7 +199,7 @@ const postTeacherMessages = async (event, context, callback) => {
 		.then(async (result) => {
 			knexConnection.client.destroy();
 			iot.connect().then(() => {
-				iot.client.publish(`lesson/${event.pathParameters.courseId}/TeacherMessages`, JSON.stringify(event.body), {}, (uneededResult) => {
+				iot.client.publish(`lesson/${event.pathParameters.courseId}/teacherMessages`, JSON.stringify(event.body), {}, (uneededResult) => {
 					iot.client.end(false);
 					return callback(null, {
 						statusCode: 200,
