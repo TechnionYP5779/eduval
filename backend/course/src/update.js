@@ -59,7 +59,6 @@ const schema = { ...models.Course };
 schema.required = ['id'];
 
 const handler = middy(updateCourse)
-	.use(cors(corsConfig))
 	.use(jsonBodyParser())
 	.use(validator({
 		inputSchema: {
@@ -69,6 +68,7 @@ const handler = middy(updateCourse)
 			},
 		},
 	}))
-	.use(httpErrorHandler());
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
 
 module.exports = { handler };

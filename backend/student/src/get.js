@@ -138,18 +138,18 @@ const getEmons = async (event, context, callback) => {
 };
 
 const byId = middy(getStudentById)
-	.use(cors(corsConfig))
 	.use(httpEventNormalizer())
-	.use(httpErrorHandler());
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
 
 const byToken = middy(getStudentByToken)
-	.use(cors(corsConfig))
 	.use(httpEventNormalizer())
-	.use(httpErrorHandler());
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
 
 const emons = middy(getEmons)
-	.use(cors(corsConfig))
 	.use(httpEventNormalizer())
-	.use(httpErrorHandler());
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
 
 module.exports = { byId, byToken, emons };

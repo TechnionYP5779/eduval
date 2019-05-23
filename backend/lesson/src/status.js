@@ -112,9 +112,9 @@ const updateLessonStatus = async (event, context, callback) => {
 };
 
 const get = middy(getLessonStatus)
-	.use(cors(corsConfig))
 	.use(httpEventNormalizer())
-	.use(httpErrorHandler());
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
 
 const schema = {
 	type: 'string',
@@ -122,7 +122,6 @@ const schema = {
 };
 
 const post = middy(updateLessonStatus)
-	.use(cors(corsConfig))
 	.use(validator({
 		inputSchema: {
 			type: 'object',
@@ -131,6 +130,7 @@ const post = middy(updateLessonStatus)
 			},
 		},
 	}))
-	.use(httpErrorHandler());
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
 
 module.exports = { get, post };

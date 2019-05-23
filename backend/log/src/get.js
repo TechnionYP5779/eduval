@@ -104,8 +104,8 @@ const getStudentLog = async (event, context, callback) => {
 };
 
 const handler = middy(getStudentLog)
-	.use(cors(corsConfig))
 	.use(httpEventNormalizer())
-	.use(httpErrorHandler());
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
 
 module.exports = { handler };

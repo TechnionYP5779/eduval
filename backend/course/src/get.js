@@ -136,18 +136,18 @@ const getCoursesByStudent = async (event, context, callback) => {
 };
 
 const byId = middy(getCourseById)
-	.use(cors(corsConfig))
 	.use(httpEventNormalizer())
-	.use(httpErrorHandler());
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
 
 const byTeacherId = middy(getCoursesByTeacher)
-	.use(cors(corsConfig))
 	.use(httpEventNormalizer())
-	.use(httpErrorHandler());
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
 
 const byStudentId = middy(getCoursesByStudent)
-	.use(cors(corsConfig))
 	.use(httpEventNormalizer())
-	.use(httpErrorHandler());
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
 
 module.exports = { byId, byTeacherId, byStudentId };

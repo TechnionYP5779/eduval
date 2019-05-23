@@ -51,7 +51,6 @@ const addTeacher = async (event, context, callback) => {
 const schema = models.Teacher;
 
 const handler = middy(addTeacher)
-	.use(cors(corsConfig))
 	.use(jsonBodyParser())
 	.use(validator({
 		inputSchema: {
@@ -61,6 +60,7 @@ const handler = middy(addTeacher)
 			},
 		},
 	}))
-	.use(httpErrorHandler());
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
 
 module.exports = { handler };

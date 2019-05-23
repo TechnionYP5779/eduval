@@ -98,13 +98,13 @@ const getTeacherByToken = async (event, context, callback) => {
 };
 
 const byId = middy(getTeacherById)
-	.use(cors(corsConfig))
 	.use(httpEventNormalizer())
-	.use(httpErrorHandler());
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
 
 const byToken = middy(getTeacherByToken)
-	.use(cors(corsConfig))
 	.use(httpEventNormalizer())
-	.use(httpErrorHandler());
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
 
 module.exports = { byId, byToken };
