@@ -61,7 +61,7 @@ class CourseSummery extends React.Component {
           let headers = {
             'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
             };
-            axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/course/'+this.state.lesson_id,
+            axios.get('https://api.emon-teach.com/course/'+this.state.lesson_id,
               {headers: headers})
               .then((response) => {
               this.setState(

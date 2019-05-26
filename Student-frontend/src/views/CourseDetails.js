@@ -59,7 +59,7 @@ class CourseDetails extends React.Component {
         var course =this.props.match.params.id;
 
 
-        axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/student/'+
+        axios.get('https://api.emon-teach.com/student/'+
         student+
         '/emonBalance/byCourse/'+course,
        {headers: headers})
@@ -67,14 +67,14 @@ class CourseDetails extends React.Component {
        this.setState({balance: response.data ? response.data : 0});
      });
 
-        axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/course/'+
+        axios.get('https://api.emon-teach.com/course/'+
              course,
             {headers: headers})
             .then((response) => {
             this.setState({courseName: response.data.name});
           });
 
-          axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/log/ofStudent/'
+          axios.get('https://api.emon-teach.com/log/ofStudent/'
           + student+'/byCourse/'+course,
               {headers: headers})
               .then((response) => {

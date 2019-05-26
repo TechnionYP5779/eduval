@@ -29,7 +29,8 @@ class UserAccountDetails extends React.Component {
   this.state = {
     details:
     {
-      id: "",
+      id: localStorage.getItem('student_id'),
+      authIdToken: "",
       name: "",
       password: "",
       email: "",
@@ -57,27 +58,29 @@ update(){
   };
 
   console.log("Hello");
-  axios.put('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/student', {
+  axios.put('https://api.emon-teach.com/student', {
     id:  this.state.details.id,
-    name: this.state.details.id.name,
-    email: this.state.details.email,
+    // authIdToken: this.state.details.authIdToken,
+    // name: this.state.details.name,
+    // email: this.state.details.email,
     phoneNum: this.state.details.phoneNum
   }, config)
   .then((response) => {console.log("worked", response);
       self.setState({error: false, success: true, disabled: false});
-      window.scrollTo(0, 0);}).catch((error) => {console.log("failed", error);
+      window.scrollTo(0, 0);})
+      .catch((error) => {console.log("failed", error);
       self.setState({error: "An error has occured", success: false, disabled: false});
       window.scrollTo(0, 0);});
 }
 
 updateEmail(evnt){
-  let dets = this.state.details;
+  var dets = this.state.details;
   dets.email = evnt.target.value;
   this.setState({details: dets})
 }
 
 updatePhoneNumber(evnt){
-  let dets = this.state.details;
+  var dets = this.state.details;
   dets.phoneNum = evnt.target.value;
   this.setState({details: dets})
 }
