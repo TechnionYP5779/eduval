@@ -1,0 +1,141 @@
+# For full config options, check the docs:
+#    docs.serverless.com
+
+service:        course
+
+provider:
+    name:       aws
+    runtime:    nodejs8.10
+    stage:      prod
+    region:     eu-central-1
+
+    # defines environment variables for connecting to DB
+    environment:
+        DB_NAME:        ${self:custom.secrets.DB_NAME}
+        DB_USER:        ${self:custom.secrets.DB_USER}
+        DB_PASSWORD:    ${self:custom.secrets.DB_PASSWORD}
+        DB_HOST:        ${self:custom.secrets.DB_HOST}
+        DB_PORT:        ${self:custom.secrets.DB_PORT}
+        LAMBDA_ENDPOINT:        ${self:custom.secrets.LAMBDA_ENDPOINT}
+        LAMBDA_APIKEY:        ${self:custom.secrets.LAMBDA_APIKEY}
+
+#package:
+#    individually: true
+
+plugins:
+    - serverless-offline
+    - serverless-domain-manager
+
+custom:
+    # contains the credentials needed to connect to the DB
+    secrets:    ${file(secrets.json)}
+    customDomain:
+        domainName: 'api.emon-teach.com'
+        basePath: 'course' # This will be prefixed to all routes
+        stage: ${self:provider.stage}
+        createRoute53Record: true
+
+#TODO: Implement a more strict CORS policy
+functions:
+    #course
+    updateCourse:
+        handler: src/update.handler
+        description: Update a course's information.
+        events:
+            - http:
+                path: /
+                method: put
+                cors: true
+    addCourse:
+        handler: src/create.handler
+        description: Create a new course.
+        events:
+            - http:
+                path: /
+                method: post
+                cors: true
+    getCourseById:
+        handler: src/get.byId
+        description: Get information about a course by their ID.
+        events:
+            - http:
+                path: /{courseId}
+                method: get
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    getCoursesByTeacher:
+        handler: src/get.byTeacherId
+        description: Get courses taught by a certain teacher.
+        events:
+            - http:
+                path: byTeacher/{teacherId}
+                method: get
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            teacherId: true
+    getCoursesByStudent:
+        handler: src/get.byStudentId
+        description: Get courses a student is registered in.
+        events:
+            - http:
+                path: byStudent/{studentId}
+                method: get
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            studentId: true
+    deleteCourse:
+        handler: src/delete.handler
+        description: Delete course with a certain ID.
+        events:
+            - http:
+                path: /{courseId}
+                method: delete
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    getCourseRegistered:
+        handler: src/registered/get.handler
+        description: Get students registered to course.
+        events:
+            - http:
+                path: /{courseId}/registered
+                method: get
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    addCourseRegistered:
+        handler: src/registered/add.handler
+        description: Register students to a course.
+        events:
+            - http:
+                path: /{courseId}/registered
+                method: post
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    removeCourseRegistered:
+        handler: src/registered/remove.handler
+        description: Register students to a course.
+        events:
+            - http:
+                path: /{courseId}/registered/{studentId}
+                method: post
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+                            studentId: true

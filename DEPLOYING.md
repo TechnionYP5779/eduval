@@ -13,5 +13,5 @@ Default output format [None]: ENTER
 ```
 3. Inside the *-frontend directory, run:
 ```bash
-npm deploy
+npm run deploy
 ```

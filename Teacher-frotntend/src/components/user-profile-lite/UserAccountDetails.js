@@ -102,10 +102,10 @@ class UserAccountDetails extends React.Component {
   return(
     <div>
     {this.state.error &&
-      <TimeoutAlert className="mb-0" theme="danger" msg={this.state.error} time={3000}/>
+      <TimeoutAlert className="mb-0" theme="danger" msg={this.state.error} time={10000}/>
     }
     {this.state.success &&
-      <TimeoutAlert className="mb-0" theme="success" msg={"Success! Your details have been updated!"} time={3000}/>
+      <TimeoutAlert className="mb-0" theme="success" msg={"Success! Your details have been updated!"} time={10000}/>
     }
 
     <Card small className="mb-4">

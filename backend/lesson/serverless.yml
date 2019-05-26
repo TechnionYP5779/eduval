@@ -1,0 +1,164 @@
+# For full config options, check the docs:
+#    docs.serverless.com
+
+service:        lesson
+
+provider:
+    name:       aws
+    runtime:    nodejs8.10
+    stage:      prod
+    region:     eu-central-1
+
+    # defines environment variables for connecting to DB
+    environment:
+        DB_NAME:        ${self:custom.secrets.DB_NAME}
+        DB_USER:        ${self:custom.secrets.DB_USER}
+        DB_PASSWORD:    ${self:custom.secrets.DB_PASSWORD}
+        DB_HOST:        ${self:custom.secrets.DB_HOST}
+        DB_PORT:        ${self:custom.secrets.DB_PORT}
+        LAMBDA_ENDPOINT:        ${self:custom.secrets.LAMBDA_ENDPOINT}
+        LAMBDA_APIKEY:        ${self:custom.secrets.LAMBDA_APIKEY}
+
+#package:
+#    individually: true
+
+plugins:
+    - serverless-offline
+    - serverless-domain-manager
+
+custom:
+    # contains the credentials needed to connect to the DB
+    secrets:    ${file(secrets.json)}
+    customDomain:
+        domainName: 'api.emon-teach.com'
+        basePath: 'lesson' # This will be prefixed to all routes
+        stage: ${self:provider.stage}
+        createRoute53Record: true
+
+functions:
+    getLessonStatus:
+        handler: src/status.get
+        description: Get the current status of a lesson.
+        events:
+            - http:
+                path: /{courseId}/status
+                method: get
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    updateLessonStatus:
+        handler: src/status.post
+        description: Update the status of a lesson.
+        events:
+            - http:
+                path: /{courseId}/status
+                method: post
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+
+    getPresentStudents:
+        handler: src/present.get
+        description: Get the list of present students.
+        events:
+            - http:
+                path: /{courseId}/present
+                method: get
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    updatePresentStudents:
+        handler: src/present.post
+        description: Add a student to the list of present students.
+        events:
+            - http:
+                path: /{courseId}/present
+                method: post
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    
+    getStudentMessages:
+        handler: src/messages.get
+        description: Get the list of present students.
+        events:
+            - http:
+                path: /{courseId}/messages/{studentId}
+                method: get
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+                            studentId: true
+    postStudentMessage:
+        handler: src/messages.post
+        description: Add a student to the list of present students.
+        events:
+            - http:
+                path: /{courseId}/messages/{studentId}
+                method: post
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+                            studentId: true
+    clearStudentMessages:
+        handler: src/messages.delete
+        description: Add a student to the list of present students.
+        events:
+            - http:
+                path: /{courseId}/messages/{studentId}
+                method: delete
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+                            studentId: true
+
+    getTeacherMessages:
+        handler: src/teacherMessages.get
+        description: Get the list of present students.
+        events:
+            - http:
+                path: /{courseId}/teacherMessages
+                method: get
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    postTeacherMessage:
+        handler: src/teacherMessages.post
+        description: Add a student to the list of present students.
+        events:
+            - http:
+                path: /{courseId}/teacherMessages
+                method: post
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    clearTeacherMessages:
+        handler: src/teacherMessages.delete
+        description: Add a student to the list of present students.
+        events:
+            - http:
+                path: /{courseId}/teacherMessages
+                method: delete
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true

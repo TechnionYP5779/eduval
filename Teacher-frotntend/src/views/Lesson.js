@@ -202,10 +202,10 @@ class Lesson extends React.Component {
     return (
       <div>
       {this.state.error &&
-      <TimeoutAlert className="mb-0" theme="danger" msg={"An error has occured!"} time={3000}/>
+      <TimeoutAlert className="mb-0" theme="danger" msg={"An error has occured!"} time={10000}/>
       }
       {this.state.success &&
-      <TimeoutAlert className="mb-0" theme="success" msg={"Messages sent successfully!"} time={3000}/>
+      <TimeoutAlert className="mb-0" theme="success" msg={"Messages sent successfully!"} time={10000}/>
       }
       <Container fluid className="main-content-container px-4">
         {/* Page Header */}
