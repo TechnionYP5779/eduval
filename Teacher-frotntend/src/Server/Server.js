@@ -172,12 +172,13 @@ class Server {
   =================== Get Attending Students ====================
   @params:
     - callback: function to do in case of success that has one paramater - the response
-      + response is {data: [course objects]}
+      + response is {data: [student objects]}
     - callbackError: function to do in case of error that has one paramater - the error
       + error is {response: {data: {error object}}}
     - courseId: the course id
   @use conditions:
     - User should be logged in when called.
+    - Lesson in session.
   */
   async getAttendingStudents(callback, callbackError, courseId){
     let teacher_id = localStorage.getItem('teacher_id');
@@ -188,6 +189,54 @@ class Server {
       return;
     }
     axios.get(SERVER_CONFIG.domain + "/lesson/" + courseId + "/present", this.config)
+    .then(callback)
+    .catch(callbackError);
+  }
+
+  /*
+  =================== Get Messages from Students ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+      + response is {data: [message objects]}
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - courseId: the course id
+  @use conditions:
+    - User should be logged in when called.
+    - Lesson in session.
+  */
+  getMessagesFromStudents(callback, callbackError, courseId){
+    let teacher_id = localStorage.getItem('teacher_id');
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    axios.get(SERVER_CONFIG.domain + "/lesson/" + courseId + "/teacherMessages", this.config)
+    .then(callback)
+    .catch(callbackError);
+  }
+
+  /*
+  =================== Delete Lesson Messages ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+      + response is {}
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - courseId: the course id
+  @use conditions:
+    - User should be logged in when called.
+    - Lesson in session.
+  */
+  deleteLessonMessages(callback, callbackError, courseId){
+    let teacher_id = localStorage.getItem('teacher_id');
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    axios.delete(SERVER_CONFIG.domain + "/lesson/" + courseId + "/teacherMessages", this.config)
     .then(callback)
     .catch(callbackError);
   }

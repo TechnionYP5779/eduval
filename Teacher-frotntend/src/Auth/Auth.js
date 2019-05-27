@@ -126,7 +126,7 @@ class Auth {
     })
     .catch(function(error){
       console.log("error");
-      if (error.response === null || error.response.status !== 404){
+      if (!error.response || error.response.status !== 404){
         console.log(error);
         history.replace('/');
         return;
@@ -189,7 +189,7 @@ class Auth {
     });
 
     // navigate to the home route
-    history.replace('/');
+    // history.replace('/');
   }
 
   isAuthenticated() {

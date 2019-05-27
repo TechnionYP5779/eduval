@@ -12,7 +12,7 @@
    right:-14px;
    font-size: 85%;
    font-weight: 500;
-   background: #00b8d8;
+   background: #00b8d8 !important;
    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
    color:white;
    padding: 0.08rem 0.3rem;
@@ -76,6 +76,65 @@
   border-color:var(--mess-color);
   color:white;
 }
+
+
+
+.custom-active{
+  background:var(--mess-color) !important;
+  border-color:var(--mess-color) !important;
+  color:white !important;
+}
+
+.custom-active:hover{
+  background:var(--mess-color) !important;
+  border-color:var(--mess-color) !important;
+  color:white !important;
+}
+
+.custom-active:active{
+  background:var(--mess-color) !important;
+  border-color:var(--mess-color) !important;
+  color:white !important;
+}
+
+.custom-active:target{
+  background:var(--mess-color) !important;
+  border-color:var(--mess-color) !important;
+  color:white !important;
+}
+
+.custom-active:focus{
+  background:var(--mess-color) !important;
+  border-color:var(--mess-color) !important;
+  color:white !important;
+}
+
+.custom-active:active{
+  background:var(--mess-color) !important;
+  border-color:var(--mess-color) !important;
+  color:white !important;
+}
+
+.custom-active:visited{
+  background:var(--mess-color) !important;
+  border-color:var(--mess-color) !important;
+  color:white !important;
+}
+
+.custom-active:focus-within{
+  background:var(--mess-color) !important;
+  border-color:var(--mess-color) !important;
+  color:white !important;
+}
+
+.custom-active:after{
+  background:var(--mess-color) !important;
+  border-color:var(--mess-color) !important;
+  color:white !important;
+}
+
+
+
 
 .react-tagsinput {
   background-color: #fff;
