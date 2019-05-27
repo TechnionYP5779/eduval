@@ -65,6 +65,7 @@ class CourseDetails extends React.Component {
     this.setState({disabled: true});
     server.addStudentsToCourse(function(response){
       console.log("added students");
+      console.log(response);
       window.location.reload();
     }, function(error){
       console.log("failed", error);

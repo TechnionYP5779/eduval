@@ -5,8 +5,9 @@ const axios = require('axios');
 
 class iotClient {
 
-  constructor(){
-    this.sendTest = this.sendTest.bind(this);
+
+  constructor(topic){
+    this.iotTopic = topic;
   }
 
   config = {
@@ -35,12 +36,8 @@ class iotClient {
     });
   }
 
-  sendTest(){
-    this.client.publish(this.iotTopic, "testing testing");
-  }
-
   connect(courseId, connectCallback, messageCallback, offlineCallback){
-    this.iotTopic = IOT_CONFIG.iotTopic(courseId);
+    this.iotTopic = this.iotTopic(courseId);
     console.log("=========connect========");
     console.log(this.iotTopic);
     this.client = awsIot.device({
@@ -93,6 +90,8 @@ class iotClient {
 
 }
 
-let iot = new iotClient();
+let iotPresent = new iotClient(IOT_CONFIG.topicPresent);
+let iotMessages = new iotClient(IOT_CONFIG.topicMessages);
 
-export default iot;
+// export default iotPresent;
+export {iotPresent, iotMessages};
