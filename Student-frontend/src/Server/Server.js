@@ -46,7 +46,7 @@ class Server {
     })
     .catch(function(error){
 
-      if (error.response.status !== 404){
+      if (error.status !== 404){
         callbackError(error);
         return;
       }

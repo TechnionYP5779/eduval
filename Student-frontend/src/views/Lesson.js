@@ -60,7 +60,7 @@ const EmojiEnum = {
       "EMOJI_THUMBS_DOWN":"👎"
 };
 
-
+var client;
 
 
 
@@ -205,7 +205,7 @@ class Lesson extends React.Component {
     	    request.on('error', (err) => reject(err))
         })
     };
-    var client;
+
 
     var connect = async () => {
     	return getContent('https://qh6vsuof2f.execute-api.eu-central-1.amazonaws.com/dev/iot/keys').then((res) => {
@@ -357,69 +357,45 @@ class Lesson extends React.Component {
 
           <Col lg="4" className="mb-4" >
             {/* Sliders & Progress Bars */}
-            <Card small className="mb-4" >{
-              // <CardHeader className="border-bottom">
-              //   <h6 className="m-0">Send To Teacher</h6>
-              // </CardHeader>
-              // <ListGroup flush>
-              // <div className="mb-2 pb-1" style={{margin:"10px"}}>
-              //   <h7 style={{fontSize:"12px"}}>Choose an emoji to send</h7>
-              //   </div>
-              //   <Row style={{margin:"2px"}}>
-              //   {smileys.map((smile, idx) => (
-              //     <Col xs="3">
-              //     {
-              //       (this.state.chosen_smile == smile.id) &&
-              //       <Button style={{fontSize:"20px"}} theme={smile.type} className="mb-2 mr-1" onClick={()=>{
-              //         console.log("unchosing", smile.id);
-              //         this.setState({chosen_smile : -1});
-              //       }}>
-              //         {smile.smile}
-              //       </Button>
-              //     }
-              //     {
-              //       (this.state.chosen_smile != smile.id) &&
-              //       <Button outline style={{fontSize:"20px"}} theme={smile.type} className="mb-2 mr-1" onClick={()=>{
-              //         console.log("chosing", smile.id);
-              //         console.log("current", this.state.chosen_smile);
-              //         this.setState({chosen_smile : smile.id});
-              //       }}>
-              //         {smile.smile}
-              //       </Button>
-              //     }
-              //
-              //   </Col>))}
-              //   </Row>
-              //     <div className="mb-2 pb-1" style={{margin:"10px"}}>
-              //   <h7 style={{fontSize:"12px"}}>Choose a message to send</h7>
-              //   </div>
-              //   <Row style={{margin:"2px"}}>
-              //   {messages.map((message, idx) => (
-              //     <Col xs="8">
-              //     {
-              //       (this.state.chosen_message == message.id) &&
-              //       <Button style={{fontSize:"13px"}} className="mb-2 mr-1" onClick={()=>{
-              //         console.log("unchosing", message.id);
-              //         this.setState({chosen_message : -1});
-              //       }}>
-              //         {message.message}
-              //       </Button>
-              //     }
-              //     {
-              //       (this.state.chosen_message != message.id) &&
-              //       <Button outline style={{fontSize:"13px"}} className="mb-2 mr-1" onClick={()=>{
-              //         console.log("chosing", message.id);
-              //         console.log("current", this.state.chosen_message);
-              //         this.setState({chosen_message : message.id});
-              //       }}>
-              //         {message.message}
-              //       </Button>
-              //     }
-              //
-              //   </Col>))}
-              //   </Row>
-              // </ListGroup>
-            }
+            <Card small className="mb-4" >
+              <CardHeader className="border-bottom">
+                <h6 className="m-0">Send To Teacher</h6>
+              </CardHeader>
+              <ListGroup flush>
+              <div className="mb-2 pb-1" style={{margin:"10px"}}>
+
+                </div>
+
+                  <div className="mb-2 pb-1" style={{margin:"10px"}}>
+                <h7 style={{fontSize:"12px"}}>Choose a message to send</h7>
+                </div>
+                <Row style={{margin:"2px"}}>
+                {messages.map((message, idx) => (
+                  <Col xs="8">
+                  {
+                    (this.state.chosen_message == message.id) &&
+                    <Button style={{fontSize:"13px"}} className="mb-2 mr-1" onClick={()=>{
+                      console.log("unchosing", message.id);
+                      this.setState({chosen_message : -1});
+                    }}>
+                      {message.message}
+                    </Button>
+                  }
+                  {
+                    (this.state.chosen_message != message.id) &&
+                    <Button outline style={{fontSize:"13px"}} className="mb-2 mr-1" onClick={()=>{
+                      console.log("chosing", message.id);
+                      console.log("current", this.state.chosen_message);
+                      this.setState({chosen_message : message.id});
+                    }}>
+                      {message.message}
+                    </Button>
+                  }
+
+                </Col>))}
+                </Row>
+              </ListGroup>
+
             </Card>
 
           </Col>
