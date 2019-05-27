@@ -67,10 +67,6 @@ var client;
 
 class Lesson extends React.Component {
 
-
-
-
-
   constructor(props) {
       super(props);
 
@@ -89,61 +85,30 @@ class Lesson extends React.Component {
 
       messages: [{
           message: "I have a question",
-          id: 1
+          enum: "MESSAGE_QUESTION",
+          id: 0
       },
       {
           message: "I didn't understand",
+          enum: "MESSAGE_CONFUSED",
           id: 2
       },
       {
           message: "I need to leave the class",
+          enum: "NEED_TO_LEAVE",
           id: 3
-      }
-    ],
-      smileys: [{
-          smile: "🙂",
-          type: "success",
-          id: 1
-        },
-        {
-          smile: "👍",
-          type: "success",
-          id: 2
-        },
-        {
-          smile: "☝",
-          type: "success",
-          id: 3
-        },
-        {
-          smile: "✌",
-          type: "success",
+      },
+      {
+          message: "I know the answer!",
+          enum: "ANSWER",
           id: 4
-        },
-        {
-          smile: "😐",
-          type: "warning",
+      },
+      {
+          message: "Speak louder,please",
+          enum: "LOUDER",
           id: 5
-        },
-        {
-          smile: "🙁",
-          type: "warning",
-          id: 6
-        },
-        {
-          smile: "😰",
-          type: "danger",
-          id: 7
-        },
-        {
-          smile: "👎",
-          type: "danger",
-          id: 8
-        }
-      ],currentEmojis: [
-      ]
-      ,
-
+      }
+    ],currentEmojis: [],
    };
    const getHistory=() =>{
     var LessonsMessageURL='lesson/'+this.state.lesson_id+'/messages/'+localStorage.getItem('student_id');
@@ -387,6 +352,11 @@ class Lesson extends React.Component {
                       console.log("chosing", message.id);
                       console.log("current", this.state.chosen_message);
                       this.setState({chosen_message : message.id});
+                      axios.post(
+                      'https://api.emon-teach.com' + "/lesson/" + this.state.lesson_id + "/teacherMessages" ,
+                      {messageType: "MESSAGE", studentId:  this.state.student_id, content: message.enum},
+                      this.config)
+                    .then(console.log("message sent!"));
                     }}>
                       {message.message}
                     </Button>
