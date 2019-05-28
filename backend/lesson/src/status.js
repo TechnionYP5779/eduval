@@ -76,10 +76,22 @@ const updateLessonStatus = async (event, context, callback) => {
 			if (result === 1) {
 				new Promise((resolve, reject) => {
 					if (newStatus === 'LESSON_END') {
-						// then we need to clear out the present students
+						// then we need to clean up
 						const promise = knexConnection('PresentStudents').where({
 							courseId: event.pathParameters.courseId,
-						}).del();
+						}).del()
+							.then(result => knexConnection('Logs')
+								.where({
+									courseId: event.pathParameters.courseId,
+									live: true,
+								})
+								.update({ live: false }))
+							.then(result => knexConnection('TeacherLogs')
+								.where({
+									courseId: event.pathParameters.courseId,
+									live: true,
+								})
+								.update({ live: false }));
 						resolve(promise);
 					}
 					resolve();

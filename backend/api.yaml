@@ -4,7 +4,7 @@ info:
   description: blablabla description.
   version: 1.0.0
 servers:
-  - url: 'https://api.emon-teach.com/'
+  - url: 'https://api.emon-teach.com'
 tags:
   - name: teacher
     description: stuff related to the teachers
@@ -80,6 +80,40 @@ paths:
                 description: 'ID of inserted teacher'
         '400':
           description: Validation exception. Invalid JSON.
+          content: {}
+      security:
+        - api_key: []
+  
+  '/teacher/{teacherId}/activeLesson':
+    get:
+      tags:
+        - teacher
+      summary: Return the taught course
+      description: Returns the lesson the teacher is teaching right now.
+      parameters:
+        - name: teacherId
+          in: path
+          description: ID of teacher to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+                description: The ID of the course being taught.
+        '204':
+          description: No content. The request is valid, but there is no course being taught.
+        '400':
+          description: Validation exception. Invalid ID.
+          content: {}
+        '404':
+          description: Teacher not found
           content: {}
       security:
         - api_key: []
@@ -300,6 +334,40 @@ paths:
           content: {}
         '404':
           description: Student not found
+          content: {}
+      security:
+        - api_key: []
+  
+  '/student/{teacherId}/activeLesson':
+    get:
+      tags:
+        - student
+      summary: Return the taught course
+      description: Returns the lesson the teacher is teaching right now.
+      parameters:
+        - name: teacherId
+          in: path
+          description: ID of teacher to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+                description: The ID of the course being taught.
+        '204':
+          description: No content. The request is valid, but there is no course being taught.
+        '400':
+          description: Validation exception. Invalid ID.
+          content: {}
+        '404':
+          description: Teacher not found
           content: {}
       security:
         - api_key: []
@@ -812,38 +880,6 @@ paths:
           content: {}
       security:
         - api_key: []
-    delete:
-      tags:
-        - lesson
-      summary: Clear a student's messages
-      description: At the end of the lesson, clear all messages from the student's table. This is so next lesson they can have a clear slate.
-      parameters:
-        - name: courseId
-          in: path
-          description: The ID of the lesson's course
-          required: true
-          schema:
-            type: integer
-            format: int64
-        - name: studentId
-          in: path
-          description: ID of the student
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: All OK
-          content: {}
-        '404':
-          description: Course not found
-          content: {}
-        '400':
-          description: Validation exception. Invalid ID(s).
-          content: {}
-      security:
-        - api_key: []
 
   '/lesson/{courseId}/present':
     get:
@@ -976,31 +1012,6 @@ paths:
           content: {}
       security:
         - api_key: []
-    delete:
-      tags:
-        - lesson
-      summary: Clear the teacher's messages
-      description: At the end of the lesson, clear all messages the teacher got. This is so next lesson they can have a clear slate.
-      parameters:
-        - name: courseId
-          in: path
-          description: The ID of the lesson's course
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: All OK
-          content: {}
-        '404':
-          description: Course not found
-          content: {}
-        '400':
-          description: Validation exception. Invalid ID.
-          content: {}
-      security:
-        - api_key: []
 
  
   
@@ -1118,7 +1129,7 @@ components:
             content:
               type: string
               description: what message was sent
-              enum: ["MESSAGE_CONFUSED", "MESSAGE_QUESTION"]
+              enum: ["MESSAGE_CONFUSED", "MESSAGE_QUESTION", "MESSAGE_NEED_TO_LEAVE"]
         - type: object
           properties:
             studentId:

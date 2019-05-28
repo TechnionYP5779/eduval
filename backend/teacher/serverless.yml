@@ -61,6 +61,18 @@ functions:
                     parameters:
                         paths:
                             teacherId: true
+    getActiveLesson:
+        handler: src/get.activeLesson
+        description: Get information about a teacher by their Auth Token.
+        events:
+            - http:
+                path: /{teacherId}/activeLesson
+                method: get
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            teacherId: true
     deleteTeacher:
         handler: src/delete.handler
         description: Delete teacher with a certain ID.

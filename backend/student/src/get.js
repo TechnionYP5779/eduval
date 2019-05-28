@@ -137,6 +137,55 @@ const getEmons = async (event, context, callback) => {
 		});
 };
 
+
+// GET student/{studentId}/activeLesson
+const getActiveLesson = async (event, context, callback) => {
+	if (!event.pathParameters.studentId) {
+		return callback(createError.BadRequest("Student's ID required."));
+	}
+	if (!isAnInteger(event.pathParameters.studentId)) {
+		return callback(createError.BadRequest('ID should be an integer.'));
+	}
+
+	// Connect
+	const knexConnection = knex(dbConfig);
+
+	return knexConnection('Registered')
+		.where({
+			studentId: event.pathParameters.studentId,
+		})
+		.select()
+		.then(result => knexConnection('Courses')
+			.where({
+				status: 'LESSON_START',
+			})
+			.whereIn('courseId', result.map(obj => obj.courseId)))
+		.then((result) => {
+			knexConnection.client.destroy();
+
+			if (result.length === 1) {
+				callback(null, {
+					statusCode: 200,
+					body: result[0].courseId,
+				});
+			} else if (result.length === 0) {
+				callback(null, {
+					statusCode: 204,
+					body: '',
+				});
+			} else {
+				callback(createError.InternalServerError('More than one active course.'));
+			}
+		})
+		.catch((err) => {
+			// Disconnect
+			knexConnection.client.destroy();
+			// eslint-disable-next-line no-console
+			console.log(`ERROR getting active lessons: ${JSON.stringify(err)}`);
+			return callback(createError.InternalServerError('Error getting active lessons.'));
+		});
+};
+
 const byId = middy(getStudentById)
 	.use(httpEventNormalizer())
 	.use(httpErrorHandler())
@@ -152,4 +201,12 @@ const emons = middy(getEmons)
 	.use(httpErrorHandler())
 	.use(cors(corsConfig));
 
-module.exports = { byId, byToken, emons };
+const activeLesson = middy(getActiveLesson)
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
+
+
+module.exports = {
+	byId, byToken, emons, activeLesson,
+};
