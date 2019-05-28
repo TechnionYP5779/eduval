@@ -1,0 +1,47 @@
+{
+  "name": "emon-teacher-app",
+  "version": "1.0.0",
+  "private": true,
+  "homepage": "/",
+  "dependencies": {
+    "auth0-js": "^9.10.2",
+    "auth0-lock": "^11.14.1",
+    "aws-iot-device-sdk": "^2.2.1",
+    "axios": "^0.18.0",
+    "camelize": "^1.0.0",
+    "chart.js": "^2.7.3",
+    "classnames": "^2.2.6",
+    "cross-env": "^5.2.0",
+    "dateformat": "^3.0.3",
+    "flux": "^3.1.3",
+    "lodash.find": "^4.6.0",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
+    "react-ga": "^2.5.6",
+    "react-quill": "^1.3.3",
+    "react-router-dom": "^4.3.1",
+    "react-scripts": "^3.0.0",
+    "react-tagsinput": "^3.19.0",
+    "shards-react": "^1.0.0",
+    "shortid": "^2.2.14"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build:prod": "cross-env REACT_APP_BASENAME=/ npm run build",
+    "build": "cross-env REACT_APP_BASENAME=/ react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "aws s3 sync build/ s3://emon-teacher --cache-control max-age=31536000,public && aws s3 cp s3://emon-teacher/service-worker.js s3:/emon-teacher/service-worker.js --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type application/javascript && aws s3 cp s3://emon-teacher/index.html s3://emon-teacher/index.html --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type text/html",
+    "postdeploy": "aws cloudfront create-invalidation --distribution-id E29A3DV9K1DK8P --paths /index.html && aws cloudfront create-invalidation --distribution-id E29A3DV9K1DK8P --paths /service-worker.js"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}

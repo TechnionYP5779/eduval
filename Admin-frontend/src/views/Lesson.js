@@ -126,7 +126,7 @@ class Lesson extends React.Component {
       message_types: [
         {text:"I have a question.", color:"Tomato", content: "MESSAGE_QUESTION"},
         {text: "May I go out?", color:"Orange", content: "MESSAGE_NEED_TO_GO"},
-        {text:"I didn't understand", color:"Violet", content: "MESSAGE_CONFUSED"}
+        {text:"I didn't understand", color:"MediumSeaGreen", content: "MESSAGE_CONFUSED"}
       ],
 
       // ============================================
