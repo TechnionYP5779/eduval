@@ -238,14 +238,13 @@ const clearStudentMessages = async (event, context, callback) => {
 };
 
 const get = middy(getStudentMessages)
-	.use(cors(corsConfig))
 	.use(httpEventNormalizer())
-	.use(httpErrorHandler());
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
 
 const schema = models.Message;
 
 const post = middy(postStudentMessages)
-	.use(cors(corsConfig))
 	.use(jsonBodyParser())
 	.use(validator({
 		inputSchema: {
@@ -255,11 +254,12 @@ const post = middy(postStudentMessages)
 			},
 		},
 	}))
-	.use(httpErrorHandler());
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
 
 const del = middy(clearStudentMessages)
-	.use(cors(corsConfig))
 	.use(httpEventNormalizer())
-	.use(httpErrorHandler());
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
 
 module.exports = { get, post, delete: del };

@@ -57,8 +57,8 @@ const getCourseRegistered = async (event, context, callback) => {
 };
 
 const handler = middy(getCourseRegistered)
-	.use(cors(corsConfig))
 	.use(httpEventNormalizer())
-	.use(httpErrorHandler());
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
 
 module.exports = { handler };

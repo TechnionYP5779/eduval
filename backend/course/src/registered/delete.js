@@ -51,8 +51,8 @@ const removeCourseRegistered = async (event, context, callback) => {
 };
 
 const handler = middy(removeCourseRegistered)
-	.use(cors(corsConfig))
 	.use(httpEventNormalizer())
-	.use(httpErrorHandler());
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
 
 module.exports = { handler };
