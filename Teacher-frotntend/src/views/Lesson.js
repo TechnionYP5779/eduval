@@ -297,7 +297,7 @@ class Lesson extends React.Component {
                         return (<Col xs="3" key={idx}>
                         {
                           this.state.chosen_students.indexOf(student.id) >= 0 &&
-                          <Button disabled={this.state.disabled} style={{margin:"6px", width: "100%", "--mess-color" : color}} className="mb-2 mr-1 badge1 custom-active" data-badge={"desk #" + student.desk} onClick={()=>{
+                          <Button disabled={this.state.disabled} style={{margin:"6px", fontWeight: "600", fontSize: "0.9em", width: "100%", "--mess-color" : color}} className="mb-2 mr-1 badge1 custom-active" data-badge={"desk #" + student.desk} onClick={()=>{
                             unchooseStudent(student.id);
                           }}>
                             {student.name}
@@ -305,7 +305,7 @@ class Lesson extends React.Component {
                         }
                         {
                           this.state.chosen_students.indexOf(student.id) < 0 &&
-                          <Button outline disabled={this.state.disabled} style={{margin:"6px", width: "100%", "--mess-color" : color}} className="mb-2 mr-1 badge1 custom-button" data-badge={"desk #" + student.desk} onClick={()=>{
+                          <Button outline disabled={this.state.disabled} style={{margin:"6px", fontWeight: "600", fontSize: "0.9em", borderWidth:"2px", width: "100%", "--mess-color" : color}} className="mb-2 mr-1 badge1 custom-button" data-badge={"desk #" + student.desk} onClick={()=>{
                             let tmp_chosen = this.state.chosen_students;
                             tmp_chosen.push(student.id);
                             this.setState({chosen_students : tmp_chosen, success: false, error: false});
@@ -345,6 +345,8 @@ class Lesson extends React.Component {
                     <th scope="col" className="border-0" style={{fontWeight:"600", width: "45%"}}>Message Type</th>
                     <th scope="col" className="border-0" style={{fontWeight:"600"}}>
                     <Button onClick={()=>{
+                      this.setState({show_messaged: false});
+                      messaged_students.clear();
                       server.deleteLessonMessages(()=>{
                         server.getMessagesFromStudents((response)=>{
                           self.setState({messages: response.data});
