@@ -110,7 +110,7 @@ render()
     {this.state.success &&
     <Container fluid className="px-0">
       <Alert className="mb-0" theme="success">
-        <i className="fa fa-info mx-2"></i> Success! Your course has been updated!
+        <i className="fa fa-info mx-2"></i> Success! Your profile has been updated!
       </Alert>
     </Container>
     }
