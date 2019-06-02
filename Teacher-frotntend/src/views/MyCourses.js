@@ -36,6 +36,11 @@ class MyCourses extends React.Component {
         self.setState({courses: response.data});
       }, function(error){
     });
+    server.getActiveLesson(function(response){
+      console.log("res:", response);
+      if (response.data)
+        self.setState({activeLesson: response.data});
+    }, (err)=>{console.log("err", err);});
   }
 
 
@@ -91,10 +96,14 @@ class MyCourses extends React.Component {
                     </div>
                   </div>
                   <div className="my-auto ml-auto">
-                    <Button disabled={this.state.disabled} size="sm" theme="white"
+                    <Button disabled={this.state.disabled || (this.state.activeLesson && this.state.activeLesson != course.id)} size="sm" theme={(this.state.activeLesson != course.id && "white") || (this.state.activeLesson == course.id && "primary")}
                       onClick={()=>{
                         console.log("click!");
                         this.setState({disabled: true});
+                        if (this.state.activeLesson == course.id){
+                          history.push("/lesson/" + course.id);
+                          return;
+                        }
                         let self = this;
                         server.changeLessonStatus(function(response){
                           history.push("/lesson/" + course.id);
@@ -103,7 +112,7 @@ class MyCourses extends React.Component {
                           self.setState({disabled: false, error: "An error has occured"});
                         }, course.id, "LESSON_START");
                       }}>
-                      <i className="far fa-bookmark mr-1" /> Start lesson
+                      <i className="far fa-bookmark mr-1" /> {this.state.activeLesson != course.id && "Start lesson"} {this.state.activeLesson == course.id && "Resume lesson"}
                     </Button>
                   </div>
                 </CardFooter>

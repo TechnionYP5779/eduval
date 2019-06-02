@@ -242,6 +242,31 @@ class Server {
   }
 
   /*
+  =================== Get Active Lesson ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+      + response is {data: <Integer>}
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+  @use conditions:
+    - User should be logged in when called.
+  */
+  getActiveLesson(callback, callbackError){
+    console.log("getCourse");
+    let teacher_id = localStorage.getItem('teacher_id');
+    console.log(teacher_id);
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    console.log("got here?");
+    axios.get(SERVER_CONFIG.domain + "/teacher/" + teacher_id + "/activeLesson", this.config)
+    .then(callback)
+    .catch(callbackError);
+  }
+
+  /*
   =================== Get Students ====================
   @params:
     - callback: function to do in case of success that has one paramater - the response
