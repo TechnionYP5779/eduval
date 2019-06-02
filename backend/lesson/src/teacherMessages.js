@@ -28,6 +28,12 @@ function dbRowToProperObject(obj) {
 		case 2:
 			retObj.content = 'MESSAGE_NEED_TO_LEAVE';
 			break;
+		case 3:
+			retObj.content = 'MESSAGE_ANSWER';
+			break;
+		case 4:
+			retObj.content = 'MESSAGE_LOUDER';
+			break;
 		default:
 			retObj.content = 'INVALID_MESSAGE';
 		}
@@ -94,6 +100,12 @@ function objToDBRow(obj, courseId) {
 			break;
 		case 'MESSAGE_NEED_TO_LEAVE':
 			retObj.val = 2;
+			break;
+		case 'MESSAGE_ANSWER':
+			retObj.val = 3;
+			break;
+		case 'MESSAGE_LOUDER':
+			retObj.val = 4;
 			break;
 		default:
 			retObj.val = -1;

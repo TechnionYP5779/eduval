@@ -45,7 +45,7 @@ exports.TeacherMessage = {
 			},
 			content: {
 				type: 'string',
-				enum: ['MESSAGE_CONFUSED', 'MESSAGE_QUESTION', 'MESSAGE_NEED_TO_LEAVE'],
+				enum: ['MESSAGE_CONFUSED', 'MESSAGE_QUESTION', 'MESSAGE_NEED_TO_LEAVE', 'MESSAGE_ANSWER', 'MESSAGE_LOUDER'],
 			},
 		},
 		required: ['studentId', 'messageType', 'content'],
