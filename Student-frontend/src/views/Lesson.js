@@ -20,7 +20,7 @@ import {
   Alert
 } from "shards-react";
 import axios from 'axios';
-
+import TimeoutAlert from "../components/common/TimeoutAlert";
 import Colors from "../components/components-overview/Colors";
 import Checkboxes from "../components/components-overview/Checkboxes";
 import RadioButtons from "../components/components-overview/RadioButtons";
@@ -44,14 +44,28 @@ import PageTitle from "../components/common/PageTitle";
 
 
 import awsIot  from 'aws-iot-device-sdk';
-import "./Lesson.css"
+import "./Lesson.css";
 
+const headers = {
+    'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
+};
+const EmojiEnum = {
+      "EMOJI_HAPPY": "🙂",
+      "EMOJI_THUMBS_UP" : "👍",
+      "EMOJI_ANGEL": "👼",
+      "EMOJI_GRIN":"😄",
+      "EMOJI_SHUSH":"🤐",
+      "EMOJI_ZZZ":"😴",
+      "EMOJI_ANGRY":"😠",
+      "EMOJI_THUMBS_DOWN":"👎"
+};
+
+var client;
 
 
 
 
 class Lesson extends React.Component {
-
 
   constructor(props) {
       super(props);
@@ -71,73 +85,79 @@ class Lesson extends React.Component {
 
       messages: [{
           message: "I have a question",
-          id: 1
+          enum: "MESSAGE_QUESTION",
+          color:"Tomato",
+          id: 0
       },
       {
           message: "I didn't understand",
+          enum: "MESSAGE_CONFUSED",
+          color:"Violet",
           id: 2
       },
       {
           message: "I need to leave the class",
+          enum: "MESSAGE_NEED_TO_LEAVE",
+          color:"Orange",
           id: 3
-      }
-    ],
-      smileys: [{
-          smile: "🙂",
-          type: "success",
-          id: 1
-        },
-        {
-          smile: "👍",
-          type: "success",
-          id: 2
-        },
-        {
-          smile: "☝",
-          type: "success",
-          id: 3
-        },
-        {
-          smile: "✌",
-          type: "success",
+      },
+      {
+          message: "I know the answer!",
+          enum: "MESSAGE_ANSWER",
+          color:"MediumSeaGreen",
           id: 4
-        },
-        {
-          smile: "😐",
-          type: "warning",
+      },
+      {
+          message: "Speak louder please",
+          enum: "MESSAGE_LOUDER",
+          color:"SlateBlue",
           id: 5
-        },
-        {
-          smile: "🙁",
-          type: "warning",
-          id: 6
-        },
-        {
-          smile: "😰",
-          type: "danger",
-          id: 7
-        },
-        {
-          smile: "👎",
-          type: "danger",
-          id: 8
-        }
-      ],currentEmojis: [
-      ]
-      ,
-
+      }
+    ],currentEmojis: [],
    };
+   const getHistory=() =>{
+    var LessonsMessageURL='lesson/'+this.state.lesson_id+'/messages/'+localStorage.getItem('student_id');
+    var LessonsStatusURL = 'lesson/'+this.state.lesson_id+'/status';
+    this.setState(prevState => ({
+    reward_money : 0
+      }));
+      this.setState(prevState => ({
+      currentEmojis : []
+    }));
+    axios.get('https://api.emon-teach.com/'+LessonsMessageURL,
+     {headers: headers})
+     .then((response) =>
+     {
 
-const EmojiEnum = {
-      "EMOJI_HAPPY": "🙂",
-      "EMOJI_THUMBS_UP" : "👍",
-      "EMOJI_ANGEL": "👼",
-      "EMOJI_GRIN":"😄",
-      "EMOJI_SHUSH":"🤐",
-      "EMOJI_ZZZ":"😴",
-      "EMOJI_ANGRY":"😠",
-      "EMOJI_THUMBS_DOWN":"👎"
-    };
+       //iterating over the recieved messages
+      var data=response.data;
+      for(var res of data){
+        //if got an emoji
+        if(res.messageType != "EMON"){
+            console.log("emoji: " + EmojiEnum[res.emojiType])
+            this.setState(prevState => ({
+            currentEmojis : [...this.state.currentEmojis, EmojiEnum[res.emojiType]]
+          }));
+        }else
+        {
+          //if got an emoji
+          console.log("got: " + res.value)
+          var updated_reward_money = this.state.reward_money ? this.state.reward_money : 0;
+          updated_reward_money +=res.value
+          console.log("value: " + this.state.reward_money)
+
+          this.setState(prevState => ({
+          reward_money : updated_reward_money
+        }));
+      }
+   }})
+   .catch((error)=>{
+     console.log(error);
+   });
+
+   }
+
+
 
 
     const getContent = function(url) {
@@ -155,9 +175,9 @@ const EmojiEnum = {
     	    request.on('error', (err) => reject(err))
         })
     };
-    let client;
 
-    let connect = async () => {
+
+    var connect = async () => {
     	return getContent('https://qh6vsuof2f.execute-api.eu-central-1.amazonaws.com/dev/iot/keys').then((res) => {
     		res = JSON.parse(res)
     		client = awsIot.device({
@@ -172,17 +192,27 @@ const EmojiEnum = {
     	})
 
     }
-    let LessonsMessageURL='lesson/'+this.state.lesson_id+'/messages/'+localStorage.getItem('student_id');
-    let LessonsStatusURL = 'lesson/'+this.state.lesson_id+'/status';
+    var LessonsMessageURL='lesson/'+this.state.lesson_id+'/messages/'+localStorage.getItem('student_id');
+    var LessonsStatusURL = 'lesson/'+this.state.lesson_id+'/status';
     let counter=0;
     connect().then(() => {
 
       client.subscribe(LessonsMessageURL);
       client.subscribe(LessonsStatusURL);
+      //checking if a message was sent
+      getHistory();
+
+      const onReconnect = () => {
+        console.log("reconnecting");
+        getHistory();
+      };
+      client.on('reconnect', onReconnect);
+
+
 
       client.on('message', (topic, message) => {
         if(topic === LessonsMessageURL){
-            console.log("topic: " + topic);
+            console.log("techer message " );
             var res=JSON.parse(message);
             console.log("message: " + res.messageType)
             if(res.messageType === "EMOJI"){
@@ -202,9 +232,11 @@ const EmojiEnum = {
             }
 
         }else{
-          console.log("topic: " + topic);
 
-            if(message === "LESSON_END"){
+              axios.delete('https://api.emon-teach.com/'+LessonsMessageURL,
+               {headers: headers})
+               .then((response) =>console.log("deleted from DB"));
+
               this.setState({message: "The lesson ended", success: false});
               window.scrollTo(0, 0);
               window.location.href = "/course-summery/" + JSON.stringify( {
@@ -212,22 +244,13 @@ const EmojiEnum = {
                   reward_money: this.state.reward_money,
                   emojis: this.state.currentEmojis
                 })
-              }
+
             }
 
 
       })
     });
-
-
-
-
-
-
-   let headers = {
-       'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
-   };
-   axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/course/'+this.state.lesson_id,
+   axios.get('https://api.emon-teach.com/course/'+this.state.lesson_id,
     {headers: headers})
     .then((response) => {
     this.setState(
@@ -245,6 +268,7 @@ const EmojiEnum = {
 
 
 
+
   render() {
 
    const {messages, smileys} = this.state;
@@ -255,17 +279,13 @@ const EmojiEnum = {
 
             {this.state.error &&
     <Container fluid className="px-0" >
-      <Alert className="mb-0" theme="danger">
-        <i className="fa fa-info mx-2"></i> {this.state.message}
-      </Alert>
+      <TimeoutAlert className="mb-0" theme="danger" msg={this.state.message} time={3000} />
     </Container>
     }
 
            {this.state.success &&
     <Container fluid className="px-0">
-      <Alert className="mb-0" theme="success" >
-        <i className="fa fa-info mx-2"></i> {this.state.message}
-      </Alert>
+    <TimeoutAlert className="mb-0" theme="success" msg={this.state.message} time={3000} />
     </Container>
     }
         {/* Page Header */}
@@ -307,69 +327,48 @@ const EmojiEnum = {
 
           <Col lg="4" className="mb-4" >
             {/* Sliders & Progress Bars */}
-            <Card small className="mb-4" >{
-              // <CardHeader className="border-bottom">
-              //   <h6 className="m-0">Send To Teacher</h6>
-              // </CardHeader>
-              // <ListGroup flush>
-              // <div className="mb-2 pb-1" style={{margin:"10px"}}>
-              //   <h7 style={{fontSize:"12px"}}>Choose an emoji to send</h7>
-              //   </div>
-              //   <Row style={{margin:"2px"}}>
-              //   {smileys.map((smile, idx) => (
-              //     <Col xs="3">
-              //     {
-              //       (this.state.chosen_smile == smile.id) &&
-              //       <Button style={{fontSize:"20px"}} theme={smile.type} className="mb-2 mr-1" onClick={()=>{
-              //         console.log("unchosing", smile.id);
-              //         this.setState({chosen_smile : -1});
-              //       }}>
-              //         {smile.smile}
-              //       </Button>
-              //     }
-              //     {
-              //       (this.state.chosen_smile != smile.id) &&
-              //       <Button outline style={{fontSize:"20px"}} theme={smile.type} className="mb-2 mr-1" onClick={()=>{
-              //         console.log("chosing", smile.id);
-              //         console.log("current", this.state.chosen_smile);
-              //         this.setState({chosen_smile : smile.id});
-              //       }}>
-              //         {smile.smile}
-              //       </Button>
-              //     }
-              //
-              //   </Col>))}
-              //   </Row>
-              //     <div className="mb-2 pb-1" style={{margin:"10px"}}>
-              //   <h7 style={{fontSize:"12px"}}>Choose a message to send</h7>
-              //   </div>
-              //   <Row style={{margin:"2px"}}>
-              //   {messages.map((message, idx) => (
-              //     <Col xs="8">
-              //     {
-              //       (this.state.chosen_message == message.id) &&
-              //       <Button style={{fontSize:"13px"}} className="mb-2 mr-1" onClick={()=>{
-              //         console.log("unchosing", message.id);
-              //         this.setState({chosen_message : -1});
-              //       }}>
-              //         {message.message}
-              //       </Button>
-              //     }
-              //     {
-              //       (this.state.chosen_message != message.id) &&
-              //       <Button outline style={{fontSize:"13px"}} className="mb-2 mr-1" onClick={()=>{
-              //         console.log("chosing", message.id);
-              //         console.log("current", this.state.chosen_message);
-              //         this.setState({chosen_message : message.id});
-              //       }}>
-              //         {message.message}
-              //       </Button>
-              //     }
-              //
-              //   </Col>))}
-              //   </Row>
-              // </ListGroup>
-            }
+            <Card small className="mb-4" >
+              <CardHeader className="border-bottom">
+                <h5 className="m-0">Send message to the teacher</h5>
+              </CardHeader>
+              <ListGroup flush>
+                  <div className="mb-2 pb-1" style={{margin:"10px"}}>
+                <h7 style={{fontSize:"17px"}}>Choose a message to send</h7>
+                </div>
+                <Row style={{margin:"2px"}}>
+                {messages.map((message, idx) => (
+                  <Col xs="8">
+                  {
+                    (this.state.chosen_message == message.id) &&
+                    <Button outline="none" style={{fontSize:"13px", borderColor:message.color ,color:message.color}} className="mb-2 mr-1" onClick={()=>{
+                      console.log("unchosing", message.id);
+                      this.setState({chosen_message : -1});
+                    }}>
+                      {message.message}
+                    </Button>
+                  }
+                  {
+                    (this.state.chosen_message != message.id) &&
+                    <Button outline style={{fontSize:"13px", borderColor:message.color ,color:message.color}} className="mb-2 mr-1" onClick={()=>{
+                      console.log("chosing", message.color);
+                      console.log("current", this.state.chosen_message);
+                      this.setState({chosen_message : message.id});
+                      axios.post(
+                      'https://api.emon-teach.com' + "/lesson/" + this.state.lesson_id + "/teacherMessages" ,
+                      {messageType: "MESSAGE", studentId:  this.state.student_id, content: message.enum},
+                      this.config)
+                    .then( (response) =>{
+                        this.setState({message: "Your message sent to your teacher!", success: true});
+                        window.scrollTo(0, 0)});
+                    }} >
+                      {message.message}
+                    </Button>
+                  }
+
+                </Col>))}
+                </Row>
+              </ListGroup>
+
             </Card>
 
           </Col>

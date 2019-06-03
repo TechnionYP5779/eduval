@@ -57,6 +57,8 @@ class CourseDetails extends React.Component {
     this.updateStudents = this.updateStudents.bind(this);
   }
 
+
+
   updateStudents(){
     let self = this;
     let students = this.state.new_students;
@@ -65,6 +67,7 @@ class CourseDetails extends React.Component {
     this.setState({disabled: true});
     server.addStudentsToCourse(function(response){
       console.log("added students");
+      console.log(response);
       window.location.reload();
     }, function(error){
       console.log("failed", error);
@@ -153,6 +156,12 @@ class CourseDetails extends React.Component {
       self.setState({students: response.data});
     }, function(error){
     }, this.props.match.params.id);
+
+    server.getActiveLesson(function(response){
+      console.log("res:", response);
+      if (response.data)
+        self.setState({activeLesson: response.data});
+    }, (err)=>{console.log("err", err);});
   }
 
   render(){
@@ -238,8 +247,12 @@ class CourseDetails extends React.Component {
                       </Col>
                     </Row>
                     <Button outline disabled={this.state.disabled} onClick={this.update} theme="accent">Update Course</Button>
-                    <Button theme="success" disabled={this.state.disabled} onClick={()=>{
+                    <Button theme="success" disabled={this.state.disabled || (this.state.activeLesson && this.state.activeLesson != this.props.match.params.id)} onClick={()=>{
                       this.setState({disabled: true});
+                      if(this.state.activeLesson == this.props.match.params.id){
+                        history.push("/lesson/" + this.props.match.params.id);
+                        return;
+                      }
                       let self = this;
                       console.log("======starting lesson?======");
                       server.changeLessonStatus(function(response){
@@ -247,7 +260,7 @@ class CourseDetails extends React.Component {
                       }, function(error){
                         self.setState({disabled: false, error: "An error has occured"});
                       }, this.props.match.params.id, "LESSON_START");
-                    }} style={{float:"right"}}>Start lesson</Button>
+                    }} style={{float:"right"}}>{(this.state.activeLesson != this.props.match.params.id && "Start lesson") || (this.state.activeLesson == this.props.match.params.id && "Resume lesson")}</Button>
                   </Form>
                 </Col>
               </Row>

@@ -31,12 +31,12 @@ class MyCourses extends React.Component {
         'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
     }
     let sub=new Buffer( localStorage.getItem('sub')).toString('base64');
-    axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/student/byToken/'+sub,
+    axios.get('https://api.emon-teach.com/student/byToken/'+sub,
      {headers: headers})
       .then(response =>localStorage.setItem('student_id', response.data.id) );
       let res=[];
 
-      axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/course/byStudent/'+localStorage.getItem('student_id'),
+      axios.get('https://api.emon-teach.com/course/byStudent/'+localStorage.getItem('student_id'),
      {headers: headers})
      .then((response) => {
      this.setState({PostsListThree: response.data});
@@ -77,7 +77,7 @@ class MyCourses extends React.Component {
 
     var j;
     for (j = 0; j < this.state.PostsListThree.length; j++) {
-      axios.get('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/lesson/'+ this.state.PostsListThree[j].id +'/status',
+      axios.get('https://api.emon-teach.com/lesson/'+ this.state.PostsListThree[j].id +'/status',
           {headers: headers})
           .then((response) => {
             console.log((response));
@@ -142,7 +142,7 @@ class MyCourses extends React.Component {
       if (deskNumber === null || deskNumber === "") {
         txt = "User cancelled the prompt.";
       } else {
-        axios.post('https://m7zourdxta.execute-api.eu-central-1.amazonaws.com/dev/lesson/'+ id +'/present',{
+        axios.post('https://api.emon-teach.com/lesson/'+ id +'/present',{
           id:  parseInt(localStorage.getItem('student_id')),
           desk: deskNumber}, config).then(function(response){
             history.push("/lesson/" + id);
