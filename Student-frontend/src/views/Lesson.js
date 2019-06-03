@@ -86,26 +86,31 @@ class Lesson extends React.Component {
       messages: [{
           message: "I have a question",
           enum: "MESSAGE_QUESTION",
+          color:"Tomato",
           id: 0
       },
       {
           message: "I didn't understand",
           enum: "MESSAGE_CONFUSED",
+          color:"Violet",
           id: 2
       },
       {
           message: "I need to leave the class",
-          enum: "NEED_TO_LEAVE",
+          enum: "MESSAGE_NEED_TO_LEAVE",
+          color:"Orange",
           id: 3
       },
       {
           message: "I know the answer!",
-          enum: "ANSWER",
+          enum: "MESSAGE_ANSWER",
+          color:"MediumSeaGreen",
           id: 4
       },
       {
-          message: "Speak louder,please",
-          enum: "LOUDER",
+          message: "Speak louder please",
+          enum: "MESSAGE_LOUDER",
+          color:"SlateBlue",
           id: 5
       }
     ],currentEmojis: [],
@@ -274,13 +279,13 @@ class Lesson extends React.Component {
 
             {this.state.error &&
     <Container fluid className="px-0" >
-      <TimeoutAlert className="mb-0" theme="danger" msg={this.state.message} time={10000} />
+      <TimeoutAlert className="mb-0" theme="danger" msg={this.state.message} time={3000} />
     </Container>
     }
 
            {this.state.success &&
     <Container fluid className="px-0">
-    <TimeoutAlert className="mb-0" theme="success" msg={this.state.message} time={10000} />
+    <TimeoutAlert className="mb-0" theme="success" msg={this.state.message} time={3000} />
     </Container>
     }
         {/* Page Header */}
@@ -324,22 +329,18 @@ class Lesson extends React.Component {
             {/* Sliders & Progress Bars */}
             <Card small className="mb-4" >
               <CardHeader className="border-bottom">
-                <h6 className="m-0">Send To Teacher</h6>
+                <h5 className="m-0">Send message to the teacher</h5>
               </CardHeader>
               <ListGroup flush>
-              <div className="mb-2 pb-1" style={{margin:"10px"}}>
-
-                </div>
-
                   <div className="mb-2 pb-1" style={{margin:"10px"}}>
-                <h7 style={{fontSize:"12px"}}>Choose a message to send</h7>
+                <h7 style={{fontSize:"17px"}}>Choose a message to send</h7>
                 </div>
                 <Row style={{margin:"2px"}}>
                 {messages.map((message, idx) => (
                   <Col xs="8">
                   {
                     (this.state.chosen_message == message.id) &&
-                    <Button style={{fontSize:"13px"}} className="mb-2 mr-1" onClick={()=>{
+                    <Button outline="none" style={{fontSize:"13px", borderColor:message.color ,color:message.color}} className="mb-2 mr-1" onClick={()=>{
                       console.log("unchosing", message.id);
                       this.setState({chosen_message : -1});
                     }}>
@@ -348,16 +349,18 @@ class Lesson extends React.Component {
                   }
                   {
                     (this.state.chosen_message != message.id) &&
-                    <Button outline style={{fontSize:"13px"}} className="mb-2 mr-1" onClick={()=>{
-                      console.log("chosing", message.id);
+                    <Button outline style={{fontSize:"13px", borderColor:message.color ,color:message.color}} className="mb-2 mr-1" onClick={()=>{
+                      console.log("chosing", message.color);
                       console.log("current", this.state.chosen_message);
                       this.setState({chosen_message : message.id});
                       axios.post(
                       'https://api.emon-teach.com' + "/lesson/" + this.state.lesson_id + "/teacherMessages" ,
                       {messageType: "MESSAGE", studentId:  this.state.student_id, content: message.enum},
                       this.config)
-                    .then(console.log("message sent!"));
-                    }}>
+                    .then( (response) =>{
+                        this.setState({message: "Your message sent to your teacher!", success: true});
+                        window.scrollTo(0, 0)});
+                    }} >
                       {message.message}
                     </Button>
                   }
