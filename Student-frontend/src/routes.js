@@ -16,7 +16,7 @@ import Callback from "./views/Callback";
 import CourseDetails from "./views/CourseDetails";
 import Lesson from "./views/Lesson";
 import CourseSummery from "./views/CourseSummary";
-
+import Store from "./views/Store";
 
 export default [
   {
@@ -76,5 +76,9 @@ export default [
     layout: DefaultLayout,
     component: CourseSummery
   },
-  
+  {
+    path: "/store/:id",
+    layout: ProtectedLayout,
+    component: Store
+  },
 ];
