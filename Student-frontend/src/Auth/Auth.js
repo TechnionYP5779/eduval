@@ -29,6 +29,7 @@ class Auth {
     this.getAccessToken = this.getAccessToken.bind(this);
     this.getIdToken = this.getIdToken.bind(this);
     this.renewSession = this.renewSession.bind(this);
+    this.registerstudent = this.registerstudent.bind(this);
     this.getUserInfo = this.getUserInfo.bind(this);
 
     let accessToken = localStorage.getItem('accessToken');
@@ -88,7 +89,7 @@ class Auth {
     localStorage.setItem('sub', authResult.idTokenPayload.sub);
 
     // navigate to the home route
-    history.replace('/');
+    this.registerstudent();
   }
 
   getUserInfo(callback){
@@ -97,6 +98,65 @@ class Auth {
       this.auth0.client.userInfo(access_token, callback);
     }
   }
+
+  registerstudent(){
+    console.log("==== registerstudent ====");
+    let config = {
+      headers: {'X-Api-Key': SERVER_CONFIG.xApiKey}
+    };
+    let student_id = localStorage.getItem('student_id');
+    if (student_id != null){
+      console.log("student id exists", student_id);
+      history.replace('/');
+      return;
+    }
+
+    let sub = this.sub;
+    if(sub == null){
+      console.log("sub is null");
+      history.replace('/');
+      return;
+    }
+    axios.get(SERVER_CONFIG.domain + '/student/byToken/'+new Buffer(sub).toString('base64'), config)
+    .then(function(response){
+      console.log("student found", response.data.id);
+      console.log(response);
+      localStorage.setItem('student_id', response.data.id);
+      history.replace('/');
+    })
+    .catch(function(error){
+      console.log("error");
+      if (!error.response || error.response.status !== 404){
+        console.log(error);
+        history.replace('/');
+        return;
+      }
+      // lazy registration to EMON DB
+      auth.getUserInfo(function(error, profile){
+        if (error) {
+          console.log(error);
+          history.replace('/');
+          return;
+        }
+        console.log("got user info");
+        axios.post(SERVER_CONFIG.domain + '/student', {authIdToken: new Buffer(sub).toString('base64'),
+          name: profile.nickname,
+          email: profile.email,
+          phoneNum: profile[SERVER_CONFIG.phone_number]}, config)
+        .then(function(response){
+          console.log("registered student");
+          localStorage.setItem('student_id', response.data);
+          console.log(response);
+          history.replace('/');
+        })
+        .catch(function(error) {
+          console.log(error.response);
+          history.replace('/');
+        });
+      });
+    });
+  }
+
 
   renewSession() {
     this.auth0.checkSession({}, (err, authResult) => {
