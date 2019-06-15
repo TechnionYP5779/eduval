@@ -51,7 +51,7 @@ const getCourseRegistered = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR getting registered students: ${JSON.stringify(err)}`);
+			console.log(`ERROR getting registered students: ${err}`);
 			return callback(createError.InternalServerError('Error getting registered students.'));
 		});
 };

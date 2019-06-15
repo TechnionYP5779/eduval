@@ -45,7 +45,7 @@ const removeCourseRegistered = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR unregistering student: ${JSON.stringify(err)}`);
+			console.log(`ERROR unregistering student: ${err}`);
 			return callback(createError.InternalServerError('Error unregistering student.'));
 		});
 };

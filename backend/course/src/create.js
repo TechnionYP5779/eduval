@@ -43,7 +43,7 @@ const addCourse = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR adding course: ${JSON.stringify(err)}`);
+			console.log(`ERROR adding course: ${err}`);
 			return callback(createError.InternalServerError('Error adding course.'));
 		});
 };

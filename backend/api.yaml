@@ -30,6 +30,8 @@ tags:
       
       IMPORTANT: Please note there is no leading slash (``/``) at the beginning of topic names.  
       Also remember that you can use wildcards.
+  - name: shop
+    description: stuff related to the item shop
 paths:
   /teacher:
     put:
@@ -880,6 +882,39 @@ paths:
           content: {}
       security:
         - api_key: []
+    delete:
+      tags:
+        - lesson
+      summary: Clear a student's messages
+      description: At the end of the lesson, clear all messages from the student's table. This is so next lesson they can have a clear slate.
+      parameters:
+        - name: courseId
+          in: path
+          description: The ID of the lesson's course
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: studentId
+          in: path
+          description: ID of the student
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+        '400':
+          description: Validation exception. Invalid ID(s).
+          content: {}
+      security:
+        - api_key: []
+
 
   '/lesson/{courseId}/present':
     get:
@@ -1012,8 +1047,204 @@ paths:
           content: {}
       security:
         - api_key: []
-
+    delete:
+      tags:
+        - lesson
+      summary: Clear the teacher's messages
+      description: At the end of the lesson, clear all messages the teacher got. This is so next lesson they can have a clear slate.
+      parameters:
+        - name: courseId
+          in: path
+          description: The ID of the lesson's course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+        '400':
+          description: Validation exception. Invalid ID.
+          content: {}
+      security:
+        - api_key: []
  
+  
+  '/shop/{courseId}/items':
+    get:
+      tags:
+        - shop
+      summary: Get the items in a course's shop
+      description: Returns all the itemsin the shop of a certain lesson.
+      parameters:
+        - name: courseId
+          in: path
+          description: ID of the shop's course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ShopItem'
+        '400':
+          description: Validation exception. Invalid ID.
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+      security:
+        - api_key: []
+    post:
+      tags:
+        - shop
+      summary: Add an item to a shop
+      parameters:
+        - name: courseId
+          in: path
+          description: The ID of the shop's course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The item to add.
+        content:
+          application/javascript:
+            schema:
+              $ref: '#/components/schemas/ShopItem'
+        required: true
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+        '400':
+          description: Validation exception. Invalid ID/JSON.
+          content: {}
+      security:
+        - api_key: []
+    put:
+      tags:
+        - shop
+      summary: Update an existing item
+      parameters:
+        - name: courseId
+          in: path
+          description: The ID of the shop's course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: >-
+          Item object that needs to be updated. ID is required, rest is
+          optional.
+        content:
+          application/json:
+            schema:
+                $ref: '#/components/schemas/ShopItem'
+        required: true
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '404':
+          description: Item not found
+          content: {}
+        '400':
+          description: Validation exception. Invalid JSON.
+          content: {}
+      security:
+        - api_key: []
+  '/shop/{courseId}/item/{itemId}':  
+    delete:
+      tags:
+        - shop
+      summary: Remove an item from a shop
+      description: Remove an item from a course's shop.
+      parameters:
+        - name: courseId
+          in: path
+          description: The ID of the shop's course
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: itemId
+          in: path
+          description: The ID of the item to remove
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+        '400':
+          description: Validation exception. Invalid ID.
+          content: {}
+      security:
+        - api_key: []
+  '/shop/{courseId}/order':
+    post:
+      tags:
+        - shop
+      summary: Order an item
+      parameters:
+        - name: courseId
+          in: path
+          description: The ID of the shop's course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The item to purchase and its amount.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                studentId:
+                  type: integer
+                  format: int64
+                itemId:
+                  type: integer
+                  format: int64
+                amount:
+                  type: integer
+                  format: int64
+        required: true
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+        '400':
+          description: Validation exception. Invalid ID/JSON.
+          content: {}
+      security:
+        - api_key: []
+  
   
 components:
   schemas:
@@ -1162,13 +1393,31 @@ components:
             time:
               type: string
               format: date-time
-            messageReason:
-              type: string
-              description: unused currently. used to point out the reason for awarding money.
             value:
               type: integer
               format: int64
               description: The amount of emon given.
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            studentId:
+              type: integer
+              format: int64
+            item:
+              type: integer
+              format: int64
+            messageType:
+              type: string
+              enum: ["PURCHASE"]
+            time:
+              type: string
+              format: date-time
+            cost:
+              type: integer
+              format: int64
+              description: The amount of emon spent.
         - type: object
           properties:
             id:
@@ -1190,6 +1439,26 @@ components:
               type: string
               description: what emoji was sent
               enum: ["EMOJI_HAPPY", "EMOJI_THUMBS_UP", "EMOJI_ANGEL", "EMOJI_GRIN", "EMOJI_SHUSH", "EMOJI_ZZZ", "EMOJI_ANGRY", "EMOJI_THUMBS_DOWN"]
+    
+    ShopItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        cost:
+          type: integer
+        amountAvailable:
+          type: integer
+        sellByDate:
+          type: string
+          format: date
+      additionalProperties: false
+    
  
   securitySchemes:
     api_key:

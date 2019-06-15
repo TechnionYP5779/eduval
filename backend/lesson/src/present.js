@@ -53,7 +53,7 @@ const getPresentStudents = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR getting present students: ${JSON.stringify(err)}`);
+			console.log(`ERROR getting present students: ${err}`);
 			return callback(createError.InternalServerError('Error getting present students.'));
 		});
 };
@@ -104,7 +104,7 @@ const updatePresentStudents = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR updating present students: ${JSON.stringify(err)}`);
+			console.log(`ERROR updating present students: ${err}`);
 			return callback(createError.InternalServerError('Error updating present students.'));
 		});
 };

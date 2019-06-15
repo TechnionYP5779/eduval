@@ -55,7 +55,7 @@ const getStudentById = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR updating student: ${JSON.stringify(err)}`);
+			console.log(`ERROR updating student: ${err}`);
 			return callback(createError.InternalServerError('Error getting student.'));
 		});
 };
@@ -92,7 +92,7 @@ const getStudentByToken = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR updating student: ${JSON.stringify(err)}`);
+			console.log(`ERROR updating student: ${err}`);
 			return callback(createError.InternalServerError('Error getting student.'));
 		});
 };
@@ -132,7 +132,7 @@ const getEmons = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR getting balance: ${JSON.stringify(err)}`);
+			console.log(`ERROR getting balance: ${err}`);
 			return callback(createError.InternalServerError('Error getting balance.'));
 		});
 };
@@ -181,7 +181,7 @@ const getActiveLesson = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR getting active lessons: ${JSON.stringify(err)}`);
+			console.log(`ERROR getting active lessons: ${err}`);
 			return callback(createError.InternalServerError('Error getting active lessons.'));
 		});
 };
