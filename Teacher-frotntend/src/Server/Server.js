@@ -267,26 +267,46 @@ class Server {
   }
 
   /*
-  =================== Get Students ====================
+  =================== Get Products ====================
   @params:
     - callback: function to do in case of success that has one paramater - the response
-      + response is {data: [course objects]}
+      + response is {data: [product objects]}
     - callbackError: function to do in case of error that has one paramater - the error
       + error is {response: {data: {error object}}}
     - courseId: the course id
   @use conditions:
     - User should be logged in when called.
   */
-  async getStudents(callback, callbackError, courseId){
-    console.log("getCourse");
+  getProducts(callback, callbackError, courseId){
     let teacher_id = localStorage.getItem('teacher_id');
-    console.log(teacher_id);
     if (teacher_id == null || !auth.isAuthenticated()){
       let error = {response: {data: {error: "not logged in"}}};
       callbackError(error);
       return;
     }
-    console.log("got here?");
+    axios.get(SERVER_CONFIG.domain + "/shop/" + courseId + "/items", this.config)
+    .then(callback)
+    .catch(callbackError);
+  }
+
+  /*
+  =================== Get Students ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+      + response is {data: [student objects]}
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - courseId: the course id
+  @use conditions:
+    - User should be logged in when called.
+  */
+  getStudents(callback, callbackError, courseId){
+    let teacher_id = localStorage.getItem('teacher_id');
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
     axios.get(SERVER_CONFIG.domain + "/course/" + courseId + "/registered", this.config)
     .then(callback)
     .catch(callbackError);
@@ -341,6 +361,81 @@ class Server {
       return;
     }
     axios.get(SERVER_CONFIG.domain + "/course/byTeacher/" + teacher_id, this.config)
+    .then(callback)
+    .catch(callbackError);
+  }
+
+  /*
+  =================== Delete Item from course store ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - itemId: the item Id.
+    - courseId: the course id.
+  @use conditions:
+    - User should be logged in when called.
+  @effects:
+    - Will delete the desired item from the DB or return an appropriate error
+  */
+  deleteItem(callback, callbackError, itemId, courseId){
+    let teacher_id = localStorage.getItem('teacher_id');
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    axios.delete(SERVER_CONFIG.domain + '/shop/' + courseId + "/item/" + itemId, this.config)
+    .then(callback)
+    .catch(callbackError);
+  }
+
+  /*
+  =================== Add New Item to course store ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - item: item object to selling.
+    = courseId: the course Id.
+  @use conditions:
+    - User should be logged in when called.
+  @effects:
+    - Will add the desired item to the DB or return an appropriate error
+  */
+  createNewItem(callback, callbackError, item, courseId){
+    let teacher_id = localStorage.getItem('teacher_id');
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    axios.post(SERVER_CONFIG.domain + '/shop/' + courseId + "/items", item, this.config)
+    .then(callback)
+    .catch(callbackError);
+  }
+
+  /*
+  =================== Update Item to course store ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - item: item object to selling.
+    = courseId: the course Id.
+  @use conditions:
+    - User should be logged in when called.
+  @effects:
+    - Will update the desired item in the DB or return an appropriate error
+  */
+  updateItem(callback, callbackError, item, courseId){
+    let teacher_id = localStorage.getItem('teacher_id');
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    axios.put(SERVER_CONFIG.domain + '/shop/' + courseId + "/items", item, this.config)
     .then(callback)
     .catch(callbackError);
   }

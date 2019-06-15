@@ -49,73 +49,30 @@ class CourseStore extends React.Component {
       course: {
       },
 
+      disabled: false,
+
       current_item: {},
 
       titleModal: "",
 
-      showItemModal: true,
+      modalIsOpen: false,
 
-      products: [
-        {
-          id: 1,
-          name: "Pass Test",
-          price: 100,
-          amount: 10,
-          last_date: "03-08-2019"
-        },
-        {
-          id: 2,
-          name: "Skip Lesson",
-          price: 50,
-          amount: 10,
-          last_date: "03-08-2019"
-        },
-        {
-          id: 3,
-          name: "Skip Homework",
-          price: 80,
-          amount: 5,
-          last_date: "03-08-2019"
-        },
-        {
-          id: 4,
-          name: "Notebook",
-          price: 10,
-          amount: 10,
-          last_date: "03-08-2019"
-        },
-        {
-          id: 5,
-          name: "Formulas Page",
-          price: 5,
-          amount: 10,
-          last_date: "03-08-2019"
-        },
-        {
-          id: 6,
-          name: "Riddles",
-          price: 80000,
-          amount: 1,
-          last_date: "03-08-2019"
-        },
-        {
-          id: 7,
-          name: "The world",
-          price: 9999999999,
-          amount: 0,
-          last_date: "03-08-2019"
-        }
-      ]
+      modalDeleteIsOpen: false,
+
+      products: []
 
     };
 
     this.showNewItemModal = this.showNewItemModal.bind(this);
     this.closeItemModal = this.closeItemModal.bind(this);
     this.handleNameInput = this.handleNameInput.bind(this);
+    this.handleDescriptionInput = this.handleDescriptionInput.bind(this);
     this.handlePriceInput = this.handlePriceInput.bind(this);
     this.handleAmountInput = this.handleAmountInput.bind(this);
     this.handleLastDateInput = this.handleLastDateInput.bind(this);
     this.showEditItemModal = this.showEditItemModal.bind(this);
+    this.showDeleteItemModal = this.showDeleteItemModal.bind(this);
+    this.closeDeleteModal = this.closeDeleteModal.bind(this);
   }
 
   handleNameInput(input){
@@ -126,19 +83,25 @@ class CourseStore extends React.Component {
 
   handlePriceInput(input){
     let item = this.state.current_item;
-    item.price = input.target.value;
+    item.cost = input.target.value;
     this.setState({current_item: item})
   }
 
   handleAmountInput(input){
     let item = this.state.current_item;
-    item.amount = input.target.value;
+    item.amountAvailable = input.target.value;
     this.setState({current_item: item})
   }
 
   handleLastDateInput(input){
     let item = this.state.current_item;
-    item.last_date = input.target.value;
+    item.sellByDate = input.target.value;
+    this.setState({current_item: item})
+  }
+
+  handleDescriptionInput(input){
+    let item = this.state.current_item;
+    item.description = input.target.value;
     this.setState({current_item: item})
   }
 
@@ -146,22 +109,33 @@ class CourseStore extends React.Component {
     this.setState({modalIsOpen: true, titleModal: "Add new item to " + this.state.course.name + " store", current_item: {
       id: -1,
       name: "",
-      price: 0,
-      amount: 0,
-      last_date: this.state.course.endDate
+      description: "",
+      cost: 0,
+      amountAvailable: 0,
+      sellByDate: this.state.course.endDate
     }});
   }
 
   showEditItemModal(item) {
     let edit_item = {};
     Object.assign(edit_item, item);
+    edit_item.sellByDate = edit_item.sellByDate.substring(0,10);
     this.setState({modalIsOpen: true,
       titleModal: "Add new item to " + this.state.course.name + " store",
       current_item: edit_item});
   }
 
+  showDeleteItemModal(item) {
+    this.setState({modalDeleteIsOpen: true,
+      current_item: item});
+  }
+
   closeItemModal() {
     this.setState({modalIsOpen: false});
+  }
+
+  closeDeleteModal() {
+    this.setState({modalDeleteIsOpen: false});
   }
 
   componentDidMount() {
@@ -169,7 +143,9 @@ class CourseStore extends React.Component {
     server.getCourse(function(response){
       self.setState({course: response.data});
     }, (err)=>{}, this.props.match.params.id);
-    // TODO: get all products
+    server.getProducts((response)=>{
+      self.setState({products: response.data}); console.log("no error!"); console.log(response.data);
+    }, (err)=>{console.log("error!"); console.log(err);}, this.props.match.params.id);
   }
 
   stringToColour(str) {
@@ -219,9 +195,28 @@ class CourseStore extends React.Component {
     let getCorrectTextColor = this.getCorrectTextColor;
     let showEditItemModal = this.showEditItemModal;
     let closeItemModal = this.closeItemModal;
+    let showDeleteItemModal = this.showDeleteItemModal;
+    let closeDeleteModal = this.closeDeleteModal;
+    let self = this;
 
     return (
       <div>
+      <Modal
+        isOpen={this.state.modalDeleteIsOpen}
+        onRequestClose={this.closeDeleteModal}
+        style={customStyles}
+      >
+      <h3>Are you sure you want to delete {this.state.current_item.name}?</h3>
+
+      <Button disabled={this.state.disabled} theme="success" onClick={()=>{
+        self.setState({disabled: true});
+        server.deleteItem((response)=>{window.location.reload();},
+        (err)=>{self.setState({disabled: false, error: "An error has occured"});},
+        self.state.current_item.id, self.props.match.params.id);
+      }}>Yes</Button>
+      <Button theme="danger" disabled={this.state.disabled} style={{float: "right"}} onClick={closeDeleteModal}>No</Button>
+      </Modal>
+
       <Modal
         isOpen={this.state.modalIsOpen}
         onRequestClose={this.closeItemModal}
@@ -232,26 +227,47 @@ class CourseStore extends React.Component {
       <Form>
         <FormGroup>
           <label htmlFor="itemName">Item Name</label>
-          <FormInput id="itemName" placeholder="Describe your item for sale" value={this.state.current_item.name} onChange={this.handleNameInput}/>
+          <FormInput id="itemName" placeholder="What are you selling" value={this.state.current_item.name} onChange={this.handleNameInput}/>
         </FormGroup>
 
         <FormGroup>
-          <label htmlFor="itemName">Item Price</label>
-          <FormInput id="itemName" type="number" value={this.state.current_item.price} onChange={this.handlePriceInput}/>
+          <label htmlFor="itemName">Item Description</label>
+          <FormInput id="itemName" placeholder="Describe your item for sale" value={this.state.current_item.description} onChange={this.handleDescriptionInput}/>
         </FormGroup>
 
-        <FormGroup>
-          <label htmlFor="itemName">Amount</label>
-          <FormInput id="itemName" type="number" value={this.state.current_item.amount} onChange={this.handleAmountInput}/>
-        </FormGroup>
+        <Row form>
+          <Col md="6" className="form-group">
+            <label htmlFor="itemName">Amount</label>
+            <FormInput id="itemName" type="number" value={this.state.current_item.amountAvailable} onChange={this.handleAmountInput}/>
+          </Col>
+          <Col md="6">
+            <label htmlFor="itemName">Item Price</label>
+            <FormInput id="itemName" type="number" value={this.state.current_item.cost} onChange={this.handlePriceInput}/>
+          </Col>
+        </Row>
 
         <FormGroup>
           <label htmlFor="itemName">End Date</label>
-          <FormInput id="itemName" type="date"  value={this.state.current_item.last_date} onChange={this.handleLastDateInput}/>
+          <FormInput id="itemName" type="date"  value={this.state.current_item.sellByDate} onChange={this.handleLastDateInput}/>
         </FormGroup>
-        </Form>
-        <Button theme="success">Save</Button>
-        <Button theme="danger" style={{float: "right"}} onClick={closeItemModal}>Cancel</Button>
+      </Form>
+      <Button disabled={this.state.disabled} theme="success" onClick={()=>{
+        let action;
+        self.setState({disabled: true});
+        if (self.state.current_item.id < 0){
+          //adding new item
+          server.createNewItem((response)=>{
+            window.location.reload();
+          }, (err)=>{self.setState({disabled: false, error: "An error has occured"}); window.scrollTo(0, 0);}, self.state.current_item, self.props.match.params.id);
+        }
+        else{
+          server.updateItem((response)=>{
+            window.location.reload();
+          }, (err)=>{self.setState({disabled: false, error: "An error has occured"}); window.scrollTo(0, 0);}, self.state.current_item, self.props.match.params.id);
+          //updating existing item
+        }
+      }}>Save</Button>
+      <Button theme="danger" disabled={this.state.disabled} style={{float: "right"}} onClick={closeItemModal}>Cancel</Button>
       </Modal>
       {this.state.error &&
       <TimeoutAlert className="mb-0" theme="danger" msg={this.state.error} time={10000}/>
@@ -272,7 +288,7 @@ class CourseStore extends React.Component {
             <h6 className="m-0">Items</h6>
             </Col>
             <Col sm="3">
-            <Button theme="white" style={{width:"100%"}} onClick={this.showNewItemModal}>
+            <Button theme="white" style={{width:"100%"}} disabled={this.state.disabled} onClick={this.showNewItemModal}>
               <span className="text-success" >
                 <i className="material-icons">check</i>
               </span>{" "}
@@ -294,26 +310,27 @@ class CourseStore extends React.Component {
                   <Row style={{width: "100%"}}> <Col sm="9">
                   <div data-letters={initials} style={{"--background-color" : color, "--font-color" : fontColor}} className="blog-comments__meta text-mutes">
                     {product.name}
-                    <span className="text-mutes"> - until {product.last_date}</span>
+                    <span className="text-mutes"> - until {product.sellByDate.substring(0,10)}</span>
                   </div>
 
                   {/* Content :: Body */}
                   <div style={{marginLeft:"3.5em"}}>
-                  <p className="m-0 my-1 mb-2 text-muted">Price: {product.price}</p>
-                  <p className="m-0 my-1 mb-2 text-muted">Items left: {product.amount}</p>
+                  <p className="m-0 my-1 mb-2 text-muted">{product.description}</p>
+                  <p className="m-0 my-1 mb-2 text-muted">Price: {product.cost}</p>
+                  <p className="m-0 my-1 mb-2 text-muted">Items left: {product.amountAvailable}</p>
                   </div>
                   </Col>
                   <Col sm="3">
                   {/* Content :: Actions */}
                   <div className="blog-comments__actions">
                     <ButtonGroup vertical style={{width:"100%"}} className="mr-2">
-                    <Button theme="white" onClick={()=>showEditItemModal(product)}>
-                      <span className="text-light">
-                        <i className="material-icons">more_vert</i>
-                      </span>{" "}
-                      Edit
-                    </Button>
-                      <Button theme="white">
+                      <Button disabled={this.state.disabled} theme="white" onClick={()=>showEditItemModal(product)}>
+                        <span className="text-light">
+                          <i className="material-icons">more_vert</i>
+                        </span>{" "}
+                        Edit
+                      </Button>
+                      <Button disabled={this.state.disabled} theme="white" onClick={()=>showDeleteItemModal(product)}>
                         <span className="text-danger">
                           <i className="material-icons">clear</i>
                         </span>{" "}
