@@ -103,7 +103,7 @@ functions:
                 cors: true
     getEmons:
         handler: src/get.emons
-        description: Get blaaaaaaaaaaaaaaa
+        description: Get a student's emon balance
         events:
             - http:
                 path: /{studentId}/emonBalance/byCourse/{courseId}
@@ -114,3 +114,16 @@ functions:
                         paths:
                             courseId: true
                             studentId: true
+    getStudentInventory:
+        handler: src/get.inventory
+        description: Get the inventory of a student
+        events:
+            - http:
+                path: /{studentId}/courseInventory/{courseId}
+                method: get
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            studentId: true
+                            courseId: true
