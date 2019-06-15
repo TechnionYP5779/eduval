@@ -143,7 +143,7 @@ class CourseDetails extends React.Component {
                 </tr>
               </thead>
               <tbody>
-              {PostsListThree.map((post, idx) => (
+              {  Array.from(this.state.PostsListThree).map((post, idx) => (
 
                 <tr>
                   <td>{new Date(post.time).getDate().toString().padStart(2,'0') + '/' + new Date(post.time).getMonth().toString().padStart(2,'0') + '/' + new Date(post.time).getFullYear() }</td>
