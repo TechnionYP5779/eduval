@@ -93,7 +93,7 @@ class Store extends React.Component {
       return;
     }
     if(post.amountAvailable == 0){
-      this.setState({message: "The items is sold ", error: true});
+      this.setState({message: "The items is sold out ", error: true});
       return;
     }
 
@@ -101,9 +101,9 @@ class Store extends React.Component {
         'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
     };
     axios.post('https://api.emon-teach.com/shop/'+this.props.match.params.id+ '/order',
-    {itemId: post.id , amount : 1},
+    {studentId: localStorage.getItem('student_id') ,itemId: post.id , amount : 1},
      {headers: headers})
-      .then(response =>{console.log(response.data);this.setState({PostsListThree: response.data}); } );
+      .then(response =>{this.setState({message: "The items is successfully bought", success: true}); } );
 
       //getting emon balance of student in the course
     axios.get('https://api.emon-teach.com/student/'+ localStorage.getItem('student_id')
@@ -168,7 +168,7 @@ class Store extends React.Component {
         {/* First Row of Posts */}
         <Row>
           {
-            PostsListThree.map((post, idx) => (
+            Array.from(this.state.PostsListThree).map((post, idx) => (
             <Col lg="4" key={idx}>
               <Card small className="card-post mb-4">
                 <CardBody>
