@@ -33,6 +33,8 @@ class CourseDetails extends React.Component {
 
       new_students: [],
 
+      tag : '',
+
       course: {id: "", name: "", location: "", description: "", startDate: "", endDate: ""},
 
       // Third list of posts.
@@ -54,14 +56,21 @@ class CourseDetails extends React.Component {
     this.update = this.update.bind(this);
 
     this.handleStudentsChange = this.handleStudentsChange.bind(this);
+    this.handleChangeTagInput = this.handleChangeTagInput.bind(this);
     this.updateStudents = this.updateStudents.bind(this);
   }
 
-
+  handleChangeTagInput(tag){
+    this.setState({tag: tag});
+  }
 
   updateStudents(){
     let self = this;
     let students = this.state.new_students;
+    //TODO add last
+    if (this.state.tag && this.state.tag.trim() != ''){
+      students += [this.state.tag];
+    }
     if (students.length === 0)
       return;
     this.setState({disabled: true});
@@ -314,6 +323,8 @@ class CourseDetails extends React.Component {
                 inputProps={{placeholder: "Add students by Email"}}
                 addKeys={[9, 13, 32, 186, 188]}
                 value={this.state.new_students}
+                inputValue={this.state.tag}
+                onChangeInput={this.handleChangeTagInput}
                 onChange={this.handleStudentsChange} />
                 </CardBody>
               </Card>

@@ -15,6 +15,7 @@ import Tables from "./views/Tables";
 import MyCourses from "./views/MyCourses";
 import Callback from "./views/Callback";
 import CourseDetails from "./views/CourseDetails";
+import CourseStore from "./views/CourseStore";
 import Lesson from "./views/Lesson";
 
 
@@ -40,6 +41,11 @@ export default [
     path: "/course-details/:id",
     layout: DefaultLayout,
     component: CourseDetails
+  },
+  {
+    path: "/manage-store/:id",
+    layout: DefaultLayout,
+    component: CourseStore
   },
   {
     path: "/user-profile-lite",
