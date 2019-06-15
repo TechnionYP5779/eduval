@@ -87,16 +87,23 @@ class MyCourses extends React.Component {
                   <h4 className="card-title">{course.name}</h4>
                   <p className="card-text text-muted">{course.description}</p>
                 </CardBody>
-                <CardFooter className="border-top d-flex">
+                <CardFooter className="border-top d-flex" style={{padding: "16px"}}>
                   <div className="card-post__author d-flex">
-                    <div className="d-flex flex-column justify-content-center ml-3">
-                    <a href={"/course-details/" + course.id}><Button disabled={this.state.disabled} size="sm" theme="white">
-                      <i className="far fa-edit mr-1" /> View more
+                    <div className="d-flex flex-column justify-content-center ml-1">
+                    <a href={"/course-details/" + course.id}><Button disabled={this.state.disabled} size="sm" theme="white" style={{padding: "6px"}}>
+                      <i className="far fa-edit mr-1" /> <br/>View more
+                    </Button></a>
+                    </div>
+                  </div>
+                  <div className="card-post__author d-flex">
+                    <div className="d-flex flex-column justify-content-center ml-1">
+                    <a href={"/manage-store/" + course.id}><Button disabled={this.state.disabled} size="sm" theme="white" style={{padding: "6px"}}>
+                      <i className="material-icons mr-1">store</i> <br/>Manage Store
                     </Button></a>
                     </div>
                   </div>
                   <div className="my-auto ml-auto">
-                    <Button disabled={this.state.disabled || (this.state.activeLesson && this.state.activeLesson != course.id)} size="sm" theme={(this.state.activeLesson != course.id && "white") || (this.state.activeLesson == course.id && "primary")}
+                    <Button disabled={this.state.disabled || (this.state.activeLesson && this.state.activeLesson != course.id)} style={{padding: "6px"}} size="sm" theme={(this.state.activeLesson != course.id && "white") || (this.state.activeLesson == course.id && "primary")}
                       onClick={()=>{
                         console.log("click!");
                         this.setState({disabled: true});
@@ -112,7 +119,7 @@ class MyCourses extends React.Component {
                           self.setState({disabled: false, error: "An error has occured"});
                         }, course.id, "LESSON_START");
                       }}>
-                      <i className="far fa-bookmark mr-1" /> {this.state.activeLesson != course.id && "Start lesson"} {this.state.activeLesson == course.id && "Resume lesson"}
+                      <i className="far fa-bookmark mr-1" /> <br/>{this.state.activeLesson != course.id && "Start lesson"} {this.state.activeLesson == course.id && "Resume lesson"}
                     </Button>
                   </div>
                 </CardFooter>
