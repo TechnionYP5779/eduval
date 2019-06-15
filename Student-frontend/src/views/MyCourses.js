@@ -195,7 +195,7 @@ class MyCourses extends React.Component {
                   <div className="my-auto ml-auto">
 
                     <Button  size="sm" theme="white" href={"/store/" + post.id}>
-                      <i className="far fa-bookmark mr-1" /> Shop
+                      <i className="fas fa-dollar-sign mr-1" /> Shop
                     </Button>
 
                   </div>

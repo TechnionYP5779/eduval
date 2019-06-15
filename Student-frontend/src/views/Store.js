@@ -93,7 +93,7 @@ class Store extends React.Component {
       return;
     }
     if(post.amountAvailable == 0){
-      this.setState({message: "The items is sold out ", error: true});
+      this.setState({message: "The item is sold out ", error: true});
       return;
     }
 
