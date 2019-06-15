@@ -137,7 +137,6 @@ const getEmons = async (event, context, callback) => {
 		});
 };
 
-
 // GET student/{studentId}/activeLesson
 const getActiveLesson = async (event, context, callback) => {
 	if (!event.pathParameters.studentId) {
@@ -186,6 +185,56 @@ const getActiveLesson = async (event, context, callback) => {
 		});
 };
 
+function ownedItemsTransform(obj) {
+	const retObj = { ...obj };
+	delete retObj.itemId;
+	delete retObj.studentId;
+	delete retObj.courseId;
+	delete retObj.cost;
+	delete retObj.amountAvailable;
+	delete retObj.sellByDate;
+	retObj.isActive = obj.active;
+	delete retObj.active;
+
+	return retObj;
+}
+
+// GET student/{studentId}/inventory/{courseId}
+const getInventory = async (event, context, callback) => {
+	if (!event.pathParameters.studentId || !event.pathParameters.courseId) {
+		return callback(createError.BadRequest("Student's and course's IDs required."));
+	}
+	if (!isAnInteger(event.pathParameters.studentId) || !isAnInteger(event.pathParameters.courseId)) {
+		return callback(createError.BadRequest('IDs should be integers.'));
+	}
+
+	// Connect
+	const knexConnection = knex(dbConfig);
+
+	return knexConnection('OwnedItems')
+		.where({
+			studentId: event.pathParameters.studentId,
+			courseId: event.pathParameters.courseId,
+		})
+		.select()
+		.join('ShopItems', 'ShopItems.itemId', 'OwnedItems.itemId')
+		.then((result) => {
+			knexConnection.client.destroy();
+
+			callback(null, {
+				statusCode: 200,
+				body: JSON.stringify(result.map(ownedItemsTransform)),
+			});
+		})
+		.catch((err) => {
+			// Disconnect
+			knexConnection.client.destroy();
+			// eslint-disable-next-line no-console
+			console.log(`ERROR getting inventory: ${err}`);
+			return callback(createError.InternalServerError('Error getting inventory.'));
+		});
+};
+
 const byId = middy(getStudentById)
 	.use(httpEventNormalizer())
 	.use(httpErrorHandler())
@@ -206,7 +255,11 @@ const activeLesson = middy(getActiveLesson)
 	.use(httpErrorHandler())
 	.use(cors(corsConfig));
 
+const inventory = middy(getInventory)
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
 
 module.exports = {
-	byId, byToken, emons, activeLesson,
+	byId, byToken, emons, activeLesson, inventory,
 };

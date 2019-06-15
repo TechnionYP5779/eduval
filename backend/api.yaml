@@ -261,7 +261,7 @@ paths:
     get:
       tags:
         - student
-      summary: Find teacher by ID
+      summary: Find student by ID
       description: Returns a single student
       parameters:
         - name: studentId
@@ -307,6 +307,45 @@ paths:
           content: {}
         '404':
           description: Student not found
+          content: {}
+      security:
+        - api_key: []
+  
+  '/student/{studentId}/courseInventory/{courseId}':
+    get:
+      tags:
+        - student
+      summary: Get the course items a student owns
+      description: Returns a list of all shop items a student has purchased in a single course.
+      parameters:
+        - name: studentId
+          in: path
+          description: ID of student
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: courseId
+          in: path
+          description: ID of course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ItemAndAmount'
+        '400':
+          description: Validation exception. Invalid ID.
+          content: {}
+        '404':
+          description: Teacher not found
           content: {}
       security:
         - api_key: []
@@ -866,7 +905,7 @@ paths:
       requestBody:
         description: The message to send.
         content:
-          application/javascript:
+          application/json:
             schema:
               $ref: '#/components/schemas/Message'
         required: true
@@ -1031,7 +1070,7 @@ paths:
       requestBody:
         description: The message to send.
         content:
-          application/javascript:
+          application/json:
             schema:
               $ref: '#/components/schemas/TeacherMessage'
         required: true
@@ -1120,7 +1159,7 @@ paths:
       requestBody:
         description: The item to add.
         content:
-          application/javascript:
+          application/json:
             schema:
               $ref: '#/components/schemas/ShopItem'
         required: true
@@ -1457,6 +1496,19 @@ components:
         sellByDate:
           type: string
           format: date
+      additionalProperties: false
+      
+    ItemAndAmount:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        amount:
+          type: integer
+        isActive:
+          type: bool
       additionalProperties: false
     
  
