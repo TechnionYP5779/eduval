@@ -191,6 +191,15 @@ class MyCourses extends React.Component {
                     </Button></a>
                     </div>
                   </div>
+
+                  <div className="my-auto ml-auto">
+
+                    <Button  size="sm" theme="white" href={"/store/" + post.id}>
+                      <i className="fas fa-dollar-sign mr-1" /> Shop
+                    </Button>
+
+                  </div>
+
                   <div className="my-auto ml-auto">
 
                     <Button disabled = {this.state.lessons_status[post.id]} size="sm" theme="white" onClick={() => {this.insertDeskNumber(post.id)}}>
