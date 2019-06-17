@@ -48,6 +48,12 @@ class CourseDetails extends React.Component {
           PostsListThree: [
 
           ],
+
+          ItemsListThree: [
+
+          ],
+
+          
         };
         let config = {
           headers: {'X-Api-Key' : 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'}
@@ -78,17 +84,14 @@ class CourseDetails extends React.Component {
           + student+'/byCourse/'+course,
               {headers: headers})
               .then((response) => {
-                this.setState({PostsListThree: response.data});
-              console.log(response);
+                 this.setState({ItemsListThree: response.data.filter((elem) => elem.messageType === "PURCHASE")});
+                 this.setState ({PostsListThree: response.data.filter((elem) => elem.messageType != "PURCHASE")});
             });
 
 
 
       }
     render(){
-        const{
-        PostsListThree
-        } = this.state;
         return(
             <Container fluid className="main-content-container px-4 pb-4">
         {/* Page Header */}
@@ -98,8 +101,10 @@ class CourseDetails extends React.Component {
 
 
         <Row>
+          <Col>
+      <Row>    
           {/* Editor */}
-  <Card style = {{height:"100%",width:"50%",marginLeft:"16px"}} className="mb-3">
+  <Card style = {{height:"100%",width:"100%",marginLeft:"16px"}} className="mb-3">
     <CardHeader className="border-bottom">
       <h6 className="m-0">Details</h6>
     </CardHeader>
@@ -118,7 +123,44 @@ class CourseDetails extends React.Component {
       </ListGroupItem>
     </ListGroup>
   </Card>
+</Row>
+<Row>
+  <Card style = {{height:"100%",width:"100%",marginLeft:"16px"}} className="mb-3">
+    <CardHeader className="border-bottom">
+      <h6 className="m-0">Items bought</h6>
+    </CardHeader>
+    <CardBody className="p-0 pb-3">
+            <table className="table mb-0">
+              <thead className="bg-light">
 
+                <tr>
+
+                  <th scope="col" className="border-0">
+                    Item
+                  </th>
+                  <th scope="col" className="border-0">
+                    Purchase date
+                  </th>
+                  <th scope="col" className="border-0">
+                    Price
+                  </th>
+
+                </tr>
+              </thead>
+              <tbody>
+              {  Array.from(this.state.ItemsListThree).map((post, idx) => (
+
+                <tr>
+                  <td>{post.item.name}</td>
+                  <td>{new Date(post.item.sellByDate).getDate().toString().padStart(2,'0') + '/' + new Date(post.item.sellByDate).getMonth().toString().padStart(2,'0') + '/' + new Date(post.item.sellByDate).getFullYear() }</td>
+                  <td>{post.item.cost}</td>
+                </tr>))}
+              </tbody>
+            </table>
+          </CardBody>
+  </Card>
+</Row>
+</Col>
       <Col>
         <Card small className="mb-4">
           <CardHeader className="border-bottom">
