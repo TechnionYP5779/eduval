@@ -28,7 +28,8 @@ class Store extends React.Component {
       balance:555,
       // Third list of posts.
       PostsListThree: [],
-      lessons_status: {}
+      lessons_status: {},
+
     };
     console.log("props for Store is ", this.props.match.params.id);
     var headers = {
@@ -47,13 +48,13 @@ class Store extends React.Component {
 
 //adding a fake item to the course
       // axios.post('https://api.emon-teach.com/shop/'+this.props.match.params.id+ '/items',
-      // {id:0, name:"Cool Item", description:"cool",cost:10,amountAvailable:4,sellByDate: "2019-06-12"},
+      // {id:0, name:"Cool Item", description:"cool",cost:1,amountAvailable:4,sellByDate: "2019-06-12"},
       //  {headers: headers})
       //   .then(response =>{console.log(response.data); } );
 
         axios.get('https://api.emon-teach.com/shop/'+this.props.match.params.id+ '/items',
          {headers: headers})
-          .then(response =>{console.log(response.data);this.setState({PostsListThree: response.data}); } );
+         .then(response =>{var data = Array.from(response.data); console.log(data);this.setState({PostsListThree: data.filter(elem => elem.amountAvailable>0) }); } );
 
 
 
@@ -87,13 +88,58 @@ class Store extends React.Component {
 
 
   }
+   sleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
+}
+
+  stringToColour(str) {
+    var hash = 0;
+    for (var i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    var colour = '#';
+    for (var i = 0; i < 3; i++) {
+        var value = (hash >> (i * 8)) & 0xFF;
+        colour += ('00' + value.toString(16)).substr(-2);
+    }
+    return colour;
+  }
+
+  stringToInitials(str){
+    return str.split(" ").map((n)=>n[0].toUpperCase()).join("");
+  }
+
+  getCorrectTextColor(hex){
+
+    const threshold = 130;
+
+
+    function hexToR(h) {return parseInt((cutHex(h)).substring(0,2),16)}
+    function hexToG(h) {return parseInt((cutHex(h)).substring(2,4),16)}
+    function hexToB(h) {return parseInt((cutHex(h)).substring(4,6),16)}
+    function cutHex(h) {return (h.charAt(0)=="#") ? h.substring(1,7):h}
+
+    hex = cutHex(hex);
+    let hRed = hexToR(hex);
+    let hGreen = hexToG(hex);
+    let hBlue = hexToB(hex);
+
+    let cBrightness = ((hRed * 299) + (hGreen * 587) + (hBlue * 114)) / 1000;
+      if (cBrightness > threshold){return "#000000";} else { return "#ffffff";}
+  }
+
   postbuy(post){
     if(this.state.balance< post.cost){
-      this.setState({message: "you dont have enough Emons to buy this item ", error: true});
+      this.setState({message: "you dont have enough Emons to buy this item ", error: true ,success :false});
       return;
     }
     if(post.amountAvailable == 0){
-      this.setState({message: "The item is sold out ", error: true});
+      this.setState({message: "The item is sold out ", error: true,success :false});
       return;
     }
 
@@ -103,23 +149,33 @@ class Store extends React.Component {
     axios.post('https://api.emon-teach.com/shop/'+this.props.match.params.id+ '/order',
     {studentId: localStorage.getItem('student_id') ,itemId: post.id , amount : 1},
      {headers: headers})
-      .then(response =>{this.setState({message: "The items is successfully bought", success: true}); } );
+      .then(response =>{this.setState({message: "The items is successfully bought", success: true, error:false}); } );
 
+      this.sleep(500);
       //getting emon balance of student in the course
     axios.get('https://api.emon-teach.com/student/'+ localStorage.getItem('student_id')
     + '/emonBalance/byCourse/'+this.props.match.params.id,
      {headers: headers})
-      .then(response =>{console.log(response.data); this.setState({balance: response.data ? response.data : 0});} );
+      .then(response =>{console.log("balance now: "+ response.data); this.setState({balance: response.data ? response.data : 0});} );
 
 
     axios.get('https://api.emon-teach.com/shop/'+this.props.match.params.id+ '/items',
      {headers: headers})
-      .then(response =>{console.log(response.data);this.setState({PostsListThree: response.data}); } );
+      .then(response =>{this.setState({PostsListThree: response.data.filter(elem => elem.amountAvailable>0) }); } );
 
 
 
 
   }
+   getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+
 
 
 
@@ -131,6 +187,7 @@ class Store extends React.Component {
       PostsListThree,
       PostsListFour
     } = this.state;
+    var rand;
 
 
 
@@ -172,10 +229,13 @@ class Store extends React.Component {
             <Col lg="4" key={idx}>
               <Card small className="card-post mb-4">
                 <CardBody>
-                  <h4 className="card-title">{post.name}</h4>
-                  <p className="card-text text-muted"><b>Description: </b>{" "+ post.description}</p>
-                  <p className="card-text text-muted"><b>Cost: </b>{" "+post.cost}</p>
-                  <p className="card-text text-muted"><b>Amount Left: </b>{" "+post.amountAvailable}</p>
+
+
+
+                  <h4 className="card-title" style={{ color:  this.getRandomColor() }}>{post.name}</h4>
+                  <p className="card-text text-muted" style={{ color:  this.getRandomColor() }}><b>Description: </b>{" "+ post.description}</p>
+                  <p className="card-text text-muted" style={{ color:  this.getRandomColor() }}><b>Cost: </b>{" "+post.cost}</p>
+                  <p className="card-text text-muted" style={{ color:  this.getRandomColor() }}><b>Amount Left: </b>{" "+post.amountAvailable}</p>
 
                 </CardBody>
                 <CardFooter className="border-top d-flex">
