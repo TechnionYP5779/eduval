@@ -6,7 +6,7 @@ service:        teacher
 provider:
     name:       aws
     runtime:    nodejs8.10
-    stage:      prod
+    stage:      dev
     region:     eu-central-1
     
     # defines environment variables for connecting to DB
@@ -29,11 +29,15 @@ plugins:
 custom:
     # contains the credentials needed to connect to the DB
     secrets:    ${file(secrets.json)}
+    customDomainEnabled:
+        dev: false
+        prod: true
     customDomain:
         domainName: 'api.emon-teach.com'
         basePath: 'teacher' # This will be prefixed to all routes
         stage: ${self:provider.stage}
         createRoute53Record: true
+        enabled: ${self:custom.customDomainEnabled.${self:provider.stage}}
 
 #TODO: Implement a more strict CORS policy
 functions:
@@ -45,6 +49,8 @@ functions:
                 path: byToken/{authToken}
                 method: get
                 cors: true
+                authorizer:
+                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
                 request:
                     parameters:
                         paths:
@@ -57,6 +63,8 @@ functions:
                 path: /{teacherId}
                 method: get
                 cors: true
+                authorizer:
+                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
                 request:
                     parameters:
                         paths:
@@ -69,6 +77,8 @@ functions:
                 path: /{teacherId}/activeLesson
                 method: get
                 cors: true
+                authorizer:
+                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
                 request:
                     parameters:
                         paths:
@@ -81,6 +91,8 @@ functions:
                 path: /{teacherId}
                 method: delete
                 cors: true
+                authorizer:
+                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
                 request:
                     parameters:
                         paths:
@@ -93,6 +105,8 @@ functions:
                 path: /
                 method: put
                 cors: true
+                authorizer:
+                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
     addTeacher:
         handler: src/create.handler
         description: Create a new teacher.
@@ -101,3 +115,5 @@ functions:
                 path: /
                 method: post
                 cors: true
+                authorizer:
+                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth

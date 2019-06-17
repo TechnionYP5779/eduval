@@ -6,7 +6,7 @@ service:        log
 provider:
     name:       aws
     runtime:    nodejs8.10
-    stage:      prod
+    stage:      dev
     region:     eu-central-1
 
     # defines environment variables for connecting to DB
@@ -29,11 +29,15 @@ plugins:
 custom:
     # contains the credentials needed to connect to the DB
     secrets:    ${file(secrets.json)}
+    customDomainEnabled:
+        dev: false
+        prod: true
     customDomain:
         domainName: 'api.emon-teach.com'
         basePath: 'log' # This will be prefixed to all routes
         stage: ${self:provider.stage}
         createRoute53Record: true
+        enabled: ${self:custom.customDomainEnabled.${self:provider.stage}}
 
 #TODO: Implement a more strict CORS policy
 functions:
@@ -45,6 +49,8 @@ functions:
                 path: ofStudent/{studentId}/byCourse/{courseId}/
                 method: get
                 cors: true
+                authorizer:
+                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
                 request:
                     parameters:
                         paths:

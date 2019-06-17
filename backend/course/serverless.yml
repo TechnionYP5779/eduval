@@ -6,7 +6,7 @@ service:        course
 provider:
     name:       aws
     runtime:    nodejs8.10
-    stage:      prod
+    stage:      dev
     region:     eu-central-1
 
     # defines environment variables for connecting to DB
@@ -29,11 +29,15 @@ plugins:
 custom:
     # contains the credentials needed to connect to the DB
     secrets:    ${file(secrets.json)}
+    customDomainEnabled:
+        dev: false
+        prod: true
     customDomain:
         domainName: 'api.emon-teach.com'
         basePath: 'course' # This will be prefixed to all routes
         stage: ${self:provider.stage}
         createRoute53Record: true
+        enabled: ${self:custom.customDomainEnabled.${self:provider.stage}}
 
 #TODO: Implement a more strict CORS policy
 functions:
@@ -46,6 +50,8 @@ functions:
                 path: /
                 method: put
                 cors: true
+                authorizer:
+                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
     addCourse:
         handler: src/create.handler
         description: Create a new course.
@@ -54,6 +60,8 @@ functions:
                 path: /
                 method: post
                 cors: true
+                authorizer:
+                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
     getCourseById:
         handler: src/get.byId
         description: Get information about a course by their ID.
@@ -62,6 +70,8 @@ functions:
                 path: /{courseId}
                 method: get
                 cors: true
+                authorizer:
+                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
                 request:
                     parameters:
                         paths:
@@ -74,6 +84,8 @@ functions:
                 path: byTeacher/{teacherId}
                 method: get
                 cors: true
+                authorizer:
+                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
                 request:
                     parameters:
                         paths:
@@ -86,6 +98,8 @@ functions:
                 path: byStudent/{studentId}
                 method: get
                 cors: true
+                authorizer:
+                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
                 request:
                     parameters:
                         paths:
@@ -98,6 +112,8 @@ functions:
                 path: /{courseId}
                 method: delete
                 cors: true
+                authorizer:
+                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
                 request:
                     parameters:
                         paths:
@@ -110,6 +126,8 @@ functions:
                 path: /{courseId}/registered
                 method: get
                 cors: true
+                authorizer:
+                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
                 request:
                     parameters:
                         paths:
@@ -122,6 +140,8 @@ functions:
                 path: /{courseId}/registered
                 method: post
                 cors: true
+                authorizer:
+                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
                 request:
                     parameters:
                         paths:
@@ -134,6 +154,8 @@ functions:
                 path: /{courseId}/registered/{studentId}
                 method: post
                 cors: true
+                authorizer:
+                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
                 request:
                     parameters:
                         paths:
