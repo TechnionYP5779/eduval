@@ -5,9 +5,19 @@ const axios = require('axios');
 
 class Server {
 
-  config = {
-    headers: {'X-Api-Key': SERVER_CONFIG.xApiKey}
-  };
+  // config = {
+  //   headers: {'X-Api-Key': SERVER_CONFIG.xApiKey}
+  // };
+
+  getConfig(){
+    let authorization = "Bearer " + localStorage.getItem('idToken');
+    return {
+      headers: {
+        'X-Api-Key': SERVER_CONFIG.xApiKey,
+        'Authorization': authorization
+      }
+    };
+  }
 
 
   /*
@@ -27,7 +37,7 @@ class Server {
       callbackError(error);
       return;
     }
-    axios.put(SERVER_CONFIG.domain + '/teacher', teacherDetails ,this.config)
+    axios.put(SERVER_CONFIG.domain + '/teacher', teacherDetails ,this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -50,7 +60,7 @@ class Server {
       callbackError(error);
       return;
     }
-    axios.post(SERVER_CONFIG.domain + '/course/' + courseId + "/registered", students ,this.config)
+    axios.post(SERVER_CONFIG.domain + '/course/' + courseId + "/registered", students ,this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -80,7 +90,7 @@ class Server {
       axios.post(
         SERVER_CONFIG.domain + "/lesson/" + course_id + "/messages/" + students_id[student_id],
         {messageType: "EMON", messageReason: reason, value: amount},
-        this.config)
+        this.getConfig())
       .then(callback)
       .catch(callbackError);
     }
@@ -104,7 +114,7 @@ class Server {
       callbackError(error);
       return;
     }
-    axios.post(SERVER_CONFIG.domain + "/lesson/" + course_id + "/status", status, this.config)
+    axios.post(SERVER_CONFIG.domain + "/lesson/" + course_id + "/status", status, this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -133,7 +143,7 @@ class Server {
       axios.post(
         SERVER_CONFIG.domain + "/lesson/" + course_id + "/messages/" + students_id[student_id],
         {messageType: "EMOJI", emojiType: emoji_type},
-        this.config)
+        this.getConfig())
       .then(callback)
       .catch(callbackError);
     }
@@ -157,7 +167,7 @@ class Server {
       callbackError(error);
       return;
     }
-    axios.put(SERVER_CONFIG.domain + "/course", courseDetails, this.config)
+    axios.put(SERVER_CONFIG.domain + "/course", courseDetails, this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -181,7 +191,7 @@ class Server {
       callbackError(error);
       return;
     }
-    axios.get(SERVER_CONFIG.domain + "/lesson/" + courseId + "/present", this.config)
+    axios.get(SERVER_CONFIG.domain + "/lesson/" + courseId + "/present", this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -205,7 +215,7 @@ class Server {
       callbackError(error);
       return;
     }
-    axios.get(SERVER_CONFIG.domain + "/lesson/" + courseId + "/teacherMessages", this.config)
+    axios.get(SERVER_CONFIG.domain + "/lesson/" + courseId + "/teacherMessages", this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -230,7 +240,7 @@ class Server {
       callbackError(error);
       return;
     }
-    axios.delete(SERVER_CONFIG.domain + "/course/" + courseId + "/registered/" + studentId, this.config)
+    axios.delete(SERVER_CONFIG.domain + "/course/" + courseId + "/registered/" + studentId, this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -253,7 +263,7 @@ class Server {
       callbackError(error);
       return;
     }
-    axios.delete(SERVER_CONFIG.domain + "/course/" + courseId, this.config)
+    axios.delete(SERVER_CONFIG.domain + "/course/" + courseId, this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -277,7 +287,7 @@ class Server {
       callbackError(error);
       return;
     }
-    axios.delete(SERVER_CONFIG.domain + "/lesson/" + courseId + "/teacherMessages", this.config)
+    axios.delete(SERVER_CONFIG.domain + "/lesson/" + courseId + "/teacherMessages", this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -299,7 +309,7 @@ class Server {
       callbackError(error);
       return;
     }
-    axios.get(SERVER_CONFIG.domain + "/teacher/" + teacher_id + "/activeLesson", this.config)
+    axios.get(SERVER_CONFIG.domain + "/teacher/" + teacher_id + "/activeLesson", this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -322,7 +332,7 @@ class Server {
       callbackError(error);
       return;
     }
-    axios.get(SERVER_CONFIG.domain + "/shop/" + courseId + "/items", this.config)
+    axios.get(SERVER_CONFIG.domain + "/shop/" + courseId + "/items", this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -345,7 +355,7 @@ class Server {
       callbackError(error);
       return;
     }
-    axios.get(SERVER_CONFIG.domain + "/course/" + courseId + "/registered", this.config)
+    axios.get(SERVER_CONFIG.domain + "/course/" + courseId + "/registered", this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -368,7 +378,7 @@ class Server {
       callbackError(error);
       return;
     }
-    axios.get(SERVER_CONFIG.domain + "/course/" + courseId, this.config)
+    axios.get(SERVER_CONFIG.domain + "/course/" + courseId, this.getConfig())
     .then(function(response){
       response.data.startDate = response.data.startDate.substring(0,10);
       response.data.endDate = response.data.endDate.substring(0,10);
@@ -394,7 +404,7 @@ class Server {
       callbackError(error);
       return;
     }
-    axios.get(SERVER_CONFIG.domain + "/course/byTeacher/" + teacher_id, this.config)
+    axios.get(SERVER_CONFIG.domain + "/course/byTeacher/" + teacher_id, this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -419,7 +429,7 @@ class Server {
       callbackError(error);
       return;
     }
-    axios.delete(SERVER_CONFIG.domain + '/shop/' + courseId + "/item/" + itemId, this.config)
+    axios.delete(SERVER_CONFIG.domain + '/shop/' + courseId + "/item/" + itemId, this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -444,7 +454,7 @@ class Server {
       callbackError(error);
       return;
     }
-    axios.post(SERVER_CONFIG.domain + '/shop/' + courseId + "/items", item, this.config)
+    axios.post(SERVER_CONFIG.domain + '/shop/' + courseId + "/items", item, this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -469,7 +479,7 @@ class Server {
       callbackError(error);
       return;
     }
-    axios.put(SERVER_CONFIG.domain + '/shop/' + courseId + "/items", item, this.config)
+    axios.put(SERVER_CONFIG.domain + '/shop/' + courseId + "/items", item, this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -496,7 +506,7 @@ class Server {
     }
     courseDetails['id'] = 0;
     courseDetails['teacherId'] = parseInt(teacher_id);
-    axios.post(SERVER_CONFIG.domain + '/course', courseDetails, this.config)
+    axios.post(SERVER_CONFIG.domain + '/course', courseDetails, this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -514,7 +524,7 @@ class Server {
     - if auth0 account is not in the EMON DB, it will register the teacher
   */
   async getTeacherProfile(callback, callbackError){
-    let config = this.config;
+    let config = this.getConfig();
     let teacher_id = localStorage.getItem('teacher_id');
     if (teacher_id != null){
       axios.get(SERVER_CONFIG.domain + '/teacher/' + teacher_id, config)
