@@ -128,8 +128,8 @@ class CourseSummery extends React.Component {
                 <ListGroupItem className="p-0 px-3 pt-3">
               <CardHeader className="border-bottom">
                 <h5 className="m-0">All the Emojis from this lesson</h5><br/>
-                <ul className='rows'>
-                {this.state.Emojis.map((emoji) => (<li className='row'>{emoji}</li>))}
+                <ul className='rows' style={{textAlign:'center', padding:'0'}}>
+                {this.state.Emojis.map((emoji) => (<li style={{display:'inline', margin:'5px', fontSize:'1.6em'}} className='row'>{emoji}</li>))}
                 </ul>
 
               </CardHeader>
