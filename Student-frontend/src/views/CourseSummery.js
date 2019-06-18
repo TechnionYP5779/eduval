@@ -78,14 +78,14 @@ class CourseSummery extends React.Component {
             <Container fluid className="main-content-container px-4 pb-4">
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title={this.state.course_name} subtitle="Course Summery" className="text-sm-left" />
+          <PageTitle sm="4" title={this.state.course_name} subtitle="Course Summary" className="text-sm-left" />
         </Row>
 
         <Row>
           {/* Editor */}
   <Card style = {{height:"100%",width:"60%",marginLeft:"16px"}} className="mb-4">
     <CardHeader className="border-bottom">
-      <h6 className="m-0">Summery</h6>
+      <h6 className="m-0">Summary</h6>
     </CardHeader>
     <ListGroup flush>
       <ListGroupItem className="p-3">
@@ -94,42 +94,23 @@ class CourseSummery extends React.Component {
             <Form>
               <Row form>
                 {/* Course Name */}
-                <Col md="6" className="form-group">
                   <p>Class Name: {this.state.course_name}</p>
-                </Col>
                 </Row>
 
                 <Row form>
                 {/* Lesson description */}
-                <Col md="6" className="form-group">
                   <p>Lesson's description: {this.state.course_description}</p>
-                </Col>
                 </Row>
 
-                <Row form>
-                {/* Start date */}
-                <Col md="6" className="form-group">
-                  <p>Start date: {this.state.course_start_date}</p>
-                </Col>
-                </Row>
-                <Row form>
-                {/* End date */}
-                <Col md="6" className="form-group">
-                  <p>End date: {this.state.course_end_date}</p>
-                </Col>
-                </Row>
-               <Row form>
+              
+              <Row form>
                  {/* Course Location */}
-                <Col md="6" className="form-group">
                   <p>Location: {this.state.course_location}</p>
-                </Col>
                 </Row>
 
                 <Row form>
                  {/* E-Mony earned */}
-                <Col md="6" className="form-group">
                   <p>Total E-Mony: {this.state.total_reward_money}</p>
-                </Col>
                 </Row>
 
               <a href={"/Overview"}>
