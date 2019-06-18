@@ -1,5 +1,4 @@
 /* eslint jsx-a11y/anchor-is-valid: 0 */
-import history from '../history';
 import React from "react";
 import {
   Container,
@@ -23,7 +22,7 @@ import Modal from 'react-modal';
 import server from "../Server/Server";
 
 import PageTitle from "../components/common/PageTitle";
-import TimeoutAlert from "../components/common/TimeoutAlert"
+import TimeoutAlert from "../components/common/TimeoutAlert";
 
 Modal.setAppElement('#root');
 
@@ -144,8 +143,8 @@ class CourseStore extends React.Component {
       self.setState({course: response.data});
     }, (err)=>{}, this.props.match.params.id);
     server.getProducts((response)=>{
-      self.setState({products: response.data}); console.log("no error!"); console.log(response.data);
-    }, (err)=>{console.log("error!"); console.log(err);}, this.props.match.params.id);
+      self.setState({products: response.data});
+    }, (err)=>{console.log(err);}, this.props.match.params.id);
   }
 
   stringToColour(str) {

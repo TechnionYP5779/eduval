@@ -52,10 +52,7 @@ class Auth {
   }
 
   handleAuthentication() {
-    console.log("==== handleAuthentication ====");
     this.auth0.parseHash((err, authResult) => {
-      console.log("auth result:");
-      console.log(authResult);
       if (authResult && authResult.accessToken && authResult.idToken) {
         this.setSession(authResult);
       } else if (err) {
@@ -100,32 +97,26 @@ class Auth {
   }
 
   registerTeacher(){
-    console.log("==== registerTeacher ====");
     let config = {
       headers: {'X-Api-Key': SERVER_CONFIG.xApiKey}
     };
     let teacher_id = localStorage.getItem('teacher_id');
     if (teacher_id != null){
-      console.log("teacher id exists", teacher_id);
       history.replace('/');
       return;
     }
 
     let sub = this.sub;
     if(sub == null){
-      console.log("sub is null");
       history.replace('/');
       return;
     }
     axios.get(SERVER_CONFIG.domain + '/teacher/byToken/'+new Buffer(sub).toString('base64'), config)
     .then(function(response){
-      console.log("teacher found", response.data.id);
-      console.log(response);
       localStorage.setItem('teacher_id', response.data.id);
       history.replace('/');
     })
     .catch(function(error){
-      console.log("error");
       if (!error.response || error.response.status !== 404){
         console.log(error);
         history.replace('/');
@@ -138,19 +129,16 @@ class Auth {
           history.replace('/');
           return;
         }
-        console.log("got user info");
         axios.post(SERVER_CONFIG.domain + '/teacher', {authIdToken: new Buffer(sub).toString('base64'),
           name: profile.nickname,
           email: profile.email,
           phoneNum: profile[SERVER_CONFIG.phone_number]}, config)
         .then(function(response){
-          console.log("registered teacher");
           localStorage.setItem('teacher_id', response.data);
-          console.log(response);
           history.replace('/');
         })
         .catch(function(error) {
-          console.log(error.response);
+          console.log(error);
           history.replace('/');
         });
       });

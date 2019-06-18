@@ -24,13 +24,10 @@ class iotClient {
     let self = this;
     axios.get(IOT_CONFIG.domain)
     .then(function(response){
-      console.log("========getKeys - success========");
-      console.log(response);
       self.iotKeys = response.data; // save the keys
       callback(response);
     })
     .catch(function(error){
-      console.log("========getKeys - error========");
       console.log(error);
       callbackError(error);
     });
@@ -38,8 +35,6 @@ class iotClient {
 
   connect(courseId, connectCallback, messageCallback, offlineCallback){
     this.iotTopic = this.iotTopic(courseId);
-    console.log("=========connect========");
-    console.log(this.iotTopic);
     this.client = awsIot.device({
       region: this.iotKeys.region,
       protocol: 'wss',
@@ -51,13 +46,11 @@ class iotClient {
     });
     const onConnect = () => {
         this.client.subscribe(this.iotTopic);
-        console.log('Connected to ', this.iotTopic);
         connectCallback();
     };
 
     const onMessage = (topic, message) => {
         message = new TextDecoder("utf-8").decode(message);
-        console.log("recieved on topic", topic, "message", message);
         messageCallback();
     };
 
@@ -66,16 +59,13 @@ class iotClient {
       offlineCallback();
     };
     const onReconnect = () => {
-      console.log("reconnecting");
       connectCallback();
     };
     const onOffline = () => {
-      console.log("offline now");
       offlineCallback();
     };
 
     const onClose = () => {
-        console.log('Connection failed');
     };
 
 

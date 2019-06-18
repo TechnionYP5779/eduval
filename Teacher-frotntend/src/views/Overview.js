@@ -1,17 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Container, Row, Col } from "shards-react";
+import { Container, Row } from "shards-react";
 
 import PageTitle from "./../components/common/PageTitle";
-import SmallStats from "./../components/common/SmallStats";
 import BasicCard from "./../components/common/BasicCard";
-import UsersOverview from "./../components/blog/UsersOverview";
-import UsersByDevice from "./../components/blog/UsersByDevice";
-import NewDraft from "./../components/blog/NewDraft";
-import Discussions from "./../components/blog/Discussions";
-import TopReferrals from "./../components/common/TopReferrals";
-
-import auth from "../Auth/Auth"
 
 const Overview = ({ smallStats }) => (
   <Container fluid className="main-content-container px-4">
@@ -20,7 +12,7 @@ const Overview = ({ smallStats }) => (
       <PageTitle title="EMon Overview" subtitle="Your home page" className="text-sm-left mb-3" />
     </Row>
 
-    {/* Small Stats Blocks 
+    {/* Small Stats Blocks
 
     {auth.isAuthenticated() &&
       <Row>

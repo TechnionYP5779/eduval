@@ -1,6 +1,5 @@
 import React from "react";
-import { Container, Button } from "shards-react";
-import auth from "../Auth/Auth"
+import { Container } from "shards-react";
 
 const ErrorNotLogin = () => (
   <Container fluid className="main-content-container px-4 pb-4">

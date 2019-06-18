@@ -7,10 +7,7 @@ import {
   Form,
   FormInput,
   FormGroup,
-  FormCheckbox,
-  FormSelect,
-  Button,
-  Alert
+  Button
 } from "shards-react";
 import server from "../../Server/Server";
 
@@ -61,7 +58,6 @@ export default class NewCourseForm extends React.Component {
 
     let self = this;
     this.setState({disabled: true});
-    console.log('Your input value is: ', this.state)
     let handler  =   this.props.handler;
     if (checkFilled(this.state.name) || checkFilled(this.state.description) ||
       checkFilled(this.state.location) || checkFilled(this.state.startDate) ||
@@ -71,7 +67,6 @@ export default class NewCourseForm extends React.Component {
       return;
     }
     server.createNewCourse(function(response){
-      console.log("ok");
       handler(null);
       self.setState({disabled: false});
     }, function(error){
@@ -95,7 +90,6 @@ export default class NewCourseForm extends React.Component {
               <Form>
                 <FormGroup>
                   <label htmlFor="feInputAddress">Course Name</label>
-                  {console.log("==============", this, "=================")}
                   <FormInput id="feInputAddress" placeholder="A name that your students will recognize" value={this.state.name} onChange={this.updateName} />
                 </FormGroup>
 

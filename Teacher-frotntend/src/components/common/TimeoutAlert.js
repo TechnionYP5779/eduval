@@ -1,8 +1,5 @@
 import React from "react";
-import PropTypes from "prop-types";
-import classNames from "classnames";
-import shortid from "shortid";
-import { Container, CardBody, CardHeader, CardTitle, Badge, Row, Col, Alert } from "shards-react";
+import { Container, Alert } from "shards-react";
 
 class TimeoutAlert extends React.Component {
 
