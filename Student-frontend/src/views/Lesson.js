@@ -340,7 +340,7 @@ class Lesson extends React.Component {
                   <Col xs="8">
                   {
                     (this.state.chosen_message == message.id) &&
-                    <Button outline="none" style={{fontSize:"13px", borderColor:message.color ,color:message.color}} className="mb-2 mr-1" onClick={()=>{
+                    <Button outline="none" style={{fontSize:"13px", borderColor:message.color ,color:message.color, background:'white'}} className="mb-2 mr-1" onClick={()=>{
                       console.log("unchosing", message.id);
                       this.setState({chosen_message : -1});
                     }}>
@@ -349,7 +349,7 @@ class Lesson extends React.Component {
                   }
                   {
                     (this.state.chosen_message != message.id) &&
-                    <Button outline style={{fontSize:"13px", borderColor:message.color ,color:message.color}} className="mb-2 mr-1" onClick={()=>{
+                    <Button outline style={{fontSize:"13px", borderColor:message.color ,color:message.color, background:'white'}} className="mb-2 mr-1" onClick={()=>{
                       console.log("chosing", message.color);
                       console.log("current", this.state.chosen_message);
                       this.setState({chosen_message : message.id});
