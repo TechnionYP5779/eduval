@@ -16,6 +16,8 @@ import {
 import PageTitle from "../components/common/PageTitle";
 import TimeoutAlert from "../components/common/TimeoutAlert";
 import awsIot  from 'aws-iot-device-sdk';
+import CoinImage from "../images/midEcoin.png"
+
 
 
 class Store extends React.Component {
@@ -214,7 +216,7 @@ class Store extends React.Component {
         </Row>
         <Row >
               <Col >
-                <div style={{fontSize: 20}}><p>You have {this.state.balance} Emons in this course</p></div>
+                <div style={{fontSize: 20}}><p>You have {this.state.balance} <img alt="Emons" style={{width:"1.5em", marginLeft:"0.2em", marginBottom:"0.2em"}} src={CoinImage} /> in this course</p></div>
               </Col>
         </Row>
 
