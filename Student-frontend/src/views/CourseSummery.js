@@ -67,7 +67,6 @@ class CourseSummery extends React.Component {
               this.setState(
                 {course_name: response.data.name ,course_description : response.data.description,course_location: response.data.location, course_start_date: response.data.startDate.substring(0,10), course_end_date: response.data.endDate.substring(0,10)});
 
-              console.log(this.state.name);
             })
             .catch((error)=>{
               console.log(error);

@@ -56,8 +56,6 @@ update(){
   let config = {
     headers: {'X-Api-Key' : 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'}
   };
-
-  console.log("Hello");
   axios.put('https://api.emon-teach.com/student', {
     id:  this.state.details.id,
     // authIdToken: this.state.details.authIdToken,
@@ -65,7 +63,7 @@ update(){
     // email: this.state.details.email,
     phoneNum: this.state.details.phoneNum
   }, config)
-  .then((response) => {console.log("worked", response);
+  .then((response) => {
       self.setState({error: false, success: true, disabled: false});
       window.scrollTo(0, 0);})
       .catch((error) => {console.log("failed", error);
@@ -87,12 +85,12 @@ updatePhoneNumber(evnt){
 componentDidMount() {
   var self = this;
   server.getStudentProfile(function(response){
-    console.log(response);
+    
     self.setState({details: response.data});
   }, function(error){
   });
 
-  console.log(self.state)
+  
 }
 
 render()

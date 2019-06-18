@@ -37,7 +37,6 @@ export default class UserActions extends React.Component {
     var self = this;
     server.getStudentProfile(function(response){
         self.setState({username: response.data.name});
-        console.log(response.data);
       }, function(error){
     });
     this.toggleUserActions = this.toggleUserActions.bind(this);

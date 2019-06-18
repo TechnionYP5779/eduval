@@ -31,20 +31,20 @@ class Store extends React.Component {
       lessons_status: {},
 
     };
-    console.log("props for Store is ", this.props.match.params.id);
+    
     var headers = {
         'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
     };
     //getting data on the course
     axios.get('https://api.emon-teach.com/course/'+this.props.match.params.id,
      {headers: headers})
-      .then(response =>{console.log(response.data); this.setState({course: response.data});} );
+      .then(response =>{this.setState({course: response.data});} );
 
 //getting emon balance of student in the course
     axios.get('https://api.emon-teach.com/student/'+ localStorage.getItem('student_id')
     + '/emonBalance/byCourse/'+this.props.match.params.id,
      {headers: headers})
-      .then(response =>{console.log(response.data); this.setState({balance: response.data ? response.data : 0});} );
+      .then(response =>{this.setState({balance: response.data ? response.data : 0});} );
 
 //adding a fake item to the course
       // axios.post('https://api.emon-teach.com/shop/'+this.props.match.params.id+ '/items',
@@ -54,7 +54,7 @@ class Store extends React.Component {
 
         axios.get('https://api.emon-teach.com/shop/'+this.props.match.params.id+ '/items',
          {headers: headers})
-         .then(response =>{var data = Array.from(response.data); console.log(data);this.setState({PostsListThree: data.filter(elem => elem.amountAvailable>0) }); } );
+         .then(response =>{var data = Array.from(response.data); this.setState({PostsListThree: data.filter(elem => elem.amountAvailable>0) }); } );
 
 
 
@@ -156,7 +156,7 @@ class Store extends React.Component {
     axios.get('https://api.emon-teach.com/student/'+ localStorage.getItem('student_id')
     + '/emonBalance/byCourse/'+this.props.match.params.id,
      {headers: headers})
-      .then(response =>{console.log("balance now: "+ response.data); this.setState({balance: response.data ? response.data : 0}); post.amountAvailable-- });
+      .then(response =>{this.setState({balance: response.data ? response.data : 0}); post.amountAvailable-- });
 
 
     axios.get('https://api.emon-teach.com/shop/'+this.props.match.params.id+ '/items',
@@ -253,7 +253,7 @@ class Store extends React.Component {
                 <CardFooter className="border-top d-flex">
                   <div className="card-post__author d-flex">
                     <div className="d-flex flex-column justify-content-center ml-3">
-                    <a ><Button ssize="sm"   theme="white" onClick={() => {console.log("Pushed on item "+ post.id);this.postbuy(post)}}>
+                    <a ><Button ssize="sm"   theme="white" onClick={() => {this.postbuy(post)}}>
                       <i className="far  mr-1" /> Buy
                     </Button></a>
                     </div>

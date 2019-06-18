@@ -134,17 +134,14 @@ class Lesson extends React.Component {
       for(var res of data){
         //if got an emoji
         if(res.messageType != "EMON"){
-            console.log("emoji: " + EmojiEnum[res.emojiType])
             this.setState(prevState => ({
             currentEmojis : [...this.state.currentEmojis, EmojiEnum[res.emojiType]]
           }));
         }else
         {
           //if got an emoji
-          console.log("got: " + res.value)
           var updated_reward_money = this.state.reward_money ? this.state.reward_money : 0;
           updated_reward_money +=res.value
-          console.log("value: " + this.state.reward_money)
 
           this.setState(prevState => ({
           reward_money : updated_reward_money
@@ -203,7 +200,6 @@ class Lesson extends React.Component {
       getHistory();
 
       const onReconnect = () => {
-        console.log("reconnecting");
         getHistory();
       };
       client.on('reconnect', onReconnect);
@@ -212,9 +208,7 @@ class Lesson extends React.Component {
 
       client.on('message', (topic, message) => {
         if(topic === LessonsMessageURL){
-            console.log("techer message " );
             var res=JSON.parse(message);
-            console.log("message: " + res.messageType)
             if(res.messageType === "EMOJI"){
                 this.setState(prevState => ({
                 currentEmojis : [...this.state.currentEmojis, EmojiEnum[res.emojiType]]
@@ -222,7 +216,6 @@ class Lesson extends React.Component {
               this.setState({message: "You got an Emoji from your teacher: "+ EmojiEnum[res.emojiType], success: true});
               window.scrollTo(0, 0);
             }else{
-              console.log("value: " + res.value)
               let updated_reward_money = +this.state.reward_money + +res.value
               this.setState(prevState => ({
               reward_money : updated_reward_money
@@ -234,8 +227,7 @@ class Lesson extends React.Component {
         }else{
 
               axios.delete('https://api.emon-teach.com/'+LessonsMessageURL,
-               {headers: headers})
-               .then((response) =>console.log("deleted from DB"));
+               {headers: headers});
 
               this.setState({message: "The lesson ended", success: false});
               window.scrollTo(0, 0);
@@ -255,8 +247,6 @@ class Lesson extends React.Component {
     .then((response) => {
     this.setState(
       {name: response.data.name ,description : response.data.description,location: response.data.location});
-
-    console.log(this.state.name);
   })
   .catch((error)=>{
     console.log(error);
@@ -339,7 +329,6 @@ class Lesson extends React.Component {
                   {
                     (this.state.chosen_message == message.id) &&
                     <Button outline="none" style={{fontSize:"13px", borderColor:message.color ,color:message.color, background:'white'}} className="mb-2 mr-1" onClick={()=>{
-                      console.log("unchosing", message.id);
                       this.setState({chosen_message : -1});
                     }}>
                       {message.message}
@@ -347,9 +336,7 @@ class Lesson extends React.Component {
                   }
                   {
                     (this.state.chosen_message != message.id) &&
-                    <Button outline style={{fontSize:"13px", borderColor:message.color ,color:message.color, background:'white'}} className="mb-2 mr-1" onClick={()=>{
-                      console.log("chosing", message.color);
-                      console.log("current", this.state.chosen_message);
+                    <Button outline style={{fontSize:"13px", borderColor:message.color ,color:message.color, background:'white'}} className="mb-2 mr-1" onClick={()=>{;
                       this.setState({chosen_message : message.id});
                       axios.post(
                       'https://api.emon-teach.com' + "/lesson/" + this.state.lesson_id + "/teacherMessages" ,

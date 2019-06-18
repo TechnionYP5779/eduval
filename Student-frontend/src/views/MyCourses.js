@@ -120,7 +120,7 @@ class MyCourses extends React.Component {
                    var Student_id = parseInt(localStorage.getItem('student_id'));
                     for (var student of response.data){
                       if(student.id == Student_id){
-                        console.log("IN THE LESSON!!!");
+                        
                         insert_student_status[current_id] = true;
                         this.setState({lessons_student_status: insert_student_status});
                         break;
@@ -173,7 +173,6 @@ class MyCourses extends React.Component {
   insertDeskNumber() {
     var Student_id = parseInt(localStorage.getItem('student_id'));
     var lesson_id = this.state.post_id;
-    console.log(localStorage.getItem('student_id'));
       let config = {
           headers: {'X-Api-Key' : 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'}
       };
