@@ -55,7 +55,7 @@ const getTeacherById = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR getting teacher: ${JSON.stringify(err)}`);
+			console.log(`ERROR getting teacher: ${err}`);
 			return callback(createError.InternalServerError('Error getting teacher.'));
 		});
 };
@@ -92,7 +92,7 @@ const getTeacherByToken = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR updating teacher: ${JSON.stringify(err)}`);
+			console.log(`ERROR updating teacher: ${err}`);
 			return callback(createError.InternalServerError('Error getting teacher.'));
 		});
 };
@@ -136,7 +136,7 @@ const getActiveLesson = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR getting active lessons: ${JSON.stringify(err)}`);
+			console.log(`ERROR getting active lessons: ${err}`);
 			return callback(createError.InternalServerError('Error getting active lessons.'));
 		});
 };

@@ -46,7 +46,7 @@ const deleteTeacher = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR deleting teacher: ${JSON.stringify(err)}`);
+			console.log(`ERROR deleting teacher: ${err}`);
 			return callback(createError.InternalServerError('Error deleting teacher.'));
 		});
 };

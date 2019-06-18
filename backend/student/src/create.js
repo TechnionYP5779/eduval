@@ -43,7 +43,7 @@ const addStudent = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR adding student: ${JSON.stringify(err)}`);
+			console.log(`ERROR adding student: ${err}`);
 			return callback(createError.InternalServerError('Error adding student.'));
 		});
 };

@@ -57,7 +57,7 @@ const getCourseById = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR getting course: ${JSON.stringify(err)}`);
+			console.log(`ERROR getting course: ${err}`);
 			return callback(createError.InternalServerError('Error getting course.'));
 		});
 };
@@ -95,7 +95,7 @@ const getCoursesByTeacher = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR getting courses by teacher: ${JSON.stringify(err)}`);
+			console.log(`ERROR getting courses by teacher: ${err}`);
 			return callback(createError.InternalServerError('Error getting courses by teacher.'));
 		});
 };
@@ -130,7 +130,7 @@ const getCoursesByStudent = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR getting courses of student: ${JSON.stringify(err)}`);
+			console.log(`ERROR getting courses of student: ${err}`);
 			return callback(createError.InternalServerError('Error getting courses of student.'));
 		});
 };
