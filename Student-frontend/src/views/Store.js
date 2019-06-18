@@ -35,7 +35,7 @@ class Store extends React.Component {
     };
     
     var headers = {
-        'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
+        'Authorization': 'Bearer ' + localStorage.getItem('idToken')
     };
     //getting data on the course
     axios.get('https://api.emon-teach.com/course/'+this.props.match.params.id,
@@ -146,7 +146,7 @@ class Store extends React.Component {
     }
 
     var headers = {
-        'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
+        'Authorization': 'Bearer ' + localStorage.getItem('idToken')
     };
     axios.post('https://api.emon-teach.com/shop/'+this.props.match.params.id+ '/order',
     {studentId: localStorage.getItem('student_id') ,itemId: post.id , amount : 1},

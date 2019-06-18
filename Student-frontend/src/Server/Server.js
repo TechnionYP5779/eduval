@@ -6,7 +6,7 @@ const axios = require('axios');
 class Server {
 
   config = {
-    headers: {'X-Api-Key': SERVER_CONFIG.xApiKey}
+    headers: {'Authorization': 'Bearer ' + localStorage.getItem('idToken')}
   };
 
   /*

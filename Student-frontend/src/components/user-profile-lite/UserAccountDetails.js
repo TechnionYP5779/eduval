@@ -54,7 +54,7 @@ updateName(evnt){
 update(){
   let self = this;
   let config = {
-    headers: {'X-Api-Key' : 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'}
+    headers: {'Authorization': 'Bearer ' + localStorage.getItem('idToken')}
   };
   axios.put('https://api.emon-teach.com/student', {
     id:  this.state.details.id,

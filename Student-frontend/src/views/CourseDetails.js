@@ -68,10 +68,10 @@ class CourseDetails extends React.Component {
           
         };
         let config = {
-          headers: {'X-Api-Key' : 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'}
+          headers: {'Authorization': 'Bearer ' + localStorage.getItem('idToken')}
         };
         let headers = {
-            'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
+            'Authorization': 'Bearer ' + localStorage.getItem('idToken')
         }
         var student=localStorage.getItem('student_id');
         var course =this.props.match.params.id;
@@ -117,7 +117,7 @@ class CourseDetails extends React.Component {
           <Col>
       <Row>    
           {/* Editor */}
-  <Card style = {{height:"100%",width:"100%",marginLeft:"16px"}} className="mb-3">
+  <Card style = {{height:"100%",width:"100%",marginLeft:"16px"}} className="mb-4">
     <CardHeader className="border-bottom">
       <h6 className="m-0">Details</h6>
     </CardHeader>
@@ -138,7 +138,7 @@ class CourseDetails extends React.Component {
   </Card>
 </Row>
 <Row>
-  <Card style = {{height:"100%",width:"100%",marginLeft:"16px"}} className="mb-3">
+  <Card style = {{height:"100%",width:"100%",marginLeft:"16px"}} className="mb-4">
     <CardHeader className="border-bottom">
       <h6 className="m-0">Items bought</h6>
     </CardHeader>

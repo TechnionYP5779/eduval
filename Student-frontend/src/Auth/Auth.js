@@ -98,7 +98,7 @@ class Auth {
 
   registerstudent(){
     let config = {
-      headers: {'X-Api-Key': SERVER_CONFIG.xApiKey}
+      headers: {'Authorization': 'Bearer ' + localStorage.getItem('idToken')}
     };
     let student_id = localStorage.getItem('student_id');
     if (student_id != null){
