@@ -55,7 +55,7 @@ const getStudentById = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR updating student: ${JSON.stringify(err)}`);
+			console.log(`ERROR updating student: ${err}`);
 			return callback(createError.InternalServerError('Error getting student.'));
 		});
 };
@@ -92,7 +92,7 @@ const getStudentByToken = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR updating student: ${JSON.stringify(err)}`);
+			console.log(`ERROR updating student: ${err}`);
 			return callback(createError.InternalServerError('Error getting student.'));
 		});
 };
@@ -132,11 +132,10 @@ const getEmons = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR getting balance: ${JSON.stringify(err)}`);
+			console.log(`ERROR getting balance: ${err}`);
 			return callback(createError.InternalServerError('Error getting balance.'));
 		});
 };
-
 
 // GET student/{studentId}/activeLesson
 const getActiveLesson = async (event, context, callback) => {
@@ -181,8 +180,58 @@ const getActiveLesson = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR getting active lessons: ${JSON.stringify(err)}`);
+			console.log(`ERROR getting active lessons: ${err}`);
 			return callback(createError.InternalServerError('Error getting active lessons.'));
+		});
+};
+
+function ownedItemsTransform(obj) {
+	const retObj = { ...obj };
+	delete retObj.itemId;
+	delete retObj.studentId;
+	delete retObj.courseId;
+	delete retObj.cost;
+	delete retObj.amountAvailable;
+	delete retObj.sellByDate;
+	retObj.isActive = obj.active;
+	delete retObj.active;
+
+	return retObj;
+}
+
+// GET student/{studentId}/inventory/{courseId}
+const getInventory = async (event, context, callback) => {
+	if (!event.pathParameters.studentId || !event.pathParameters.courseId) {
+		return callback(createError.BadRequest("Student's and course's IDs required."));
+	}
+	if (!isAnInteger(event.pathParameters.studentId) || !isAnInteger(event.pathParameters.courseId)) {
+		return callback(createError.BadRequest('IDs should be integers.'));
+	}
+
+	// Connect
+	const knexConnection = knex(dbConfig);
+
+	return knexConnection('OwnedItems')
+		.where({
+			studentId: event.pathParameters.studentId,
+			courseId: event.pathParameters.courseId,
+		})
+		.select()
+		.join('ShopItems', 'ShopItems.itemId', 'OwnedItems.itemId')
+		.then((result) => {
+			knexConnection.client.destroy();
+
+			callback(null, {
+				statusCode: 200,
+				body: JSON.stringify(result.map(ownedItemsTransform)),
+			});
+		})
+		.catch((err) => {
+			// Disconnect
+			knexConnection.client.destroy();
+			// eslint-disable-next-line no-console
+			console.log(`ERROR getting inventory: ${err}`);
+			return callback(createError.InternalServerError('Error getting inventory.'));
 		});
 };
 
@@ -206,7 +255,11 @@ const activeLesson = middy(getActiveLesson)
 	.use(httpErrorHandler())
 	.use(cors(corsConfig));
 
+const inventory = middy(getInventory)
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
 
 module.exports = {
-	byId, byToken, emons, activeLesson,
+	byId, byToken, emons, activeLesson, inventory,
 };

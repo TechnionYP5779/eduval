@@ -157,7 +157,7 @@ const getStudentMessages = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR getting student messages: ${JSON.stringify(err)}`);
+			console.log(`ERROR getting student messages: ${err}`);
 			return callback(createError.InternalServerError('Error getting student messages.'));
 		});
 };
@@ -196,7 +196,7 @@ const postStudentMessages = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR posting message: ${JSON.stringify(err)}`);
+			console.log(`ERROR posting message: ${err}`);
 			return callback(createError.InternalServerError('Error posting message.'));
 		});
 };
@@ -232,7 +232,7 @@ const clearStudentMessages = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR clearing messages: ${JSON.stringify(err)}`);
+			console.log(`ERROR clearing messages: ${err}`);
 			return callback(createError.InternalServerError('Error clearing messages.'));
 		});
 };

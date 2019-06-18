@@ -43,7 +43,7 @@ const addTeacher = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR adding teacher: ${JSON.stringify(err)}`);
+			console.log(`ERROR adding teacher: ${err}`);
 			return callback(createError.InternalServerError('Error adding teacher.'));
 		});
 };

@@ -7,11 +7,12 @@ const createError = require('http-errors');
 const dbConfig = require('../db');
 const corsConfig = require('../cors');
 
-function dbRowToProperObject(obj) {
+async function dbRowToProperObject(obj) {
 	const retObj = { ...obj };		// shallow copy
 	retObj.time = obj.dtime;
 	delete retObj.dtime;
 	delete retObj.live;
+	let promise = null;
 	switch (obj.msgType) {
 	case 0:
 		delete retObj.msgType;
@@ -21,6 +22,23 @@ function dbRowToProperObject(obj) {
 		retObj.value = obj.val;
 		delete retObj.val;
 		delete retObj.live;
+
+		if (retObj.value < 0) {
+			delete retObj.messageReason;
+			retObj.value = -obj.val;
+			const knexConnection = knex(dbConfig);
+
+			promise = knexConnection('ShopItems')
+				.select()
+				.where({
+					itemId: obj.msgReason,
+				})
+				.then((result) => {
+					knexConnection.client.destroy();
+					return result[0];
+				});
+			retObj.messageType = 'PURCHASE';
+		}
 
 		break;
 	case 1:
@@ -61,6 +79,12 @@ function dbRowToProperObject(obj) {
 	default:
 		retObj.messageType = 'INVALID_MESSAGE';
 	}
+	if (promise) {
+		return promise.then((item) => {
+			retObj.item = item;
+			return retObj;
+		});
+	}
 	return retObj;
 }
 
@@ -86,19 +110,19 @@ const getStudentLog = async (event, context, callback) => {
 			studentId: event.pathParameters.studentId,
 		})
 		.select()
-		.then((result) => {
+		.then(async (result) => {
 			knexConnection.client.destroy();
 
 			callback(null, {
 				statusCode: 200,
-				body: JSON.stringify(result.map(dbRowToProperObject)),
+				body: JSON.stringify(await Promise.all(result.map(dbRowToProperObject))),
 			});
 		})
 		.catch((err) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR getting log: ${JSON.stringify(err)}`);
+			console.log(`ERROR getting log: ${err}`);
 			return callback(createError.InternalServerError('Error getting log.'));
 		});
 };

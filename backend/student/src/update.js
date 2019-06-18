@@ -50,7 +50,7 @@ const updateStudent = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR updating teacher: ${JSON.stringify(err)}`);
+			console.log(`ERROR updating teacher: ${err}`);
 			return callback(createError.InternalServerError('Error updating student.'));
 		});
 };

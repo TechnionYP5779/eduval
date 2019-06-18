@@ -28,6 +28,12 @@ function dbRowToProperObject(obj) {
 		case 2:
 			retObj.content = 'MESSAGE_NEED_TO_LEAVE';
 			break;
+		case 3:
+			retObj.content = 'MESSAGE_ANSWER';
+			break;
+		case 4:
+			retObj.content = 'MESSAGE_LOUDER';
+			break;
 		default:
 			retObj.content = 'INVALID_MESSAGE';
 		}
@@ -94,6 +100,12 @@ function objToDBRow(obj, courseId) {
 			break;
 		case 'MESSAGE_NEED_TO_LEAVE':
 			retObj.val = 2;
+			break;
+		case 'MESSAGE_ANSWER':
+			retObj.val = 3;
+			break;
+		case 'MESSAGE_LOUDER':
+			retObj.val = 4;
 			break;
 		default:
 			retObj.val = -1;
@@ -174,7 +186,7 @@ const getTeacherMessages = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR getting student messages: ${JSON.stringify(err)}`);
+			console.log(`ERROR getting student messages: ${err}`);
 			return callback(createError.InternalServerError('Error getting student messages.'));
 		});
 };
@@ -212,7 +224,7 @@ const postTeacherMessages = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR posting message: ${JSON.stringify(err)}`);
+			console.log(`ERROR posting message: ${err}`);
 			return callback(createError.InternalServerError('Error posting message.'));
 		});
 };
@@ -247,7 +259,7 @@ const clearTeacherMessages = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR clearing messages: ${JSON.stringify(err)}`);
+			console.log(`ERROR clearing messages: ${err}`);
 			return callback(createError.InternalServerError('Error clearing messages.'));
 		});
 };

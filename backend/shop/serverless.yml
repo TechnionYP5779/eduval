@@ -1,0 +1,100 @@
+# For full config options, check the docs:
+#    docs.serverless.com
+
+service:        shop
+
+provider:
+    name:       aws
+    runtime:    nodejs8.10
+    stage:      prod
+    region:     eu-central-1
+
+    # defines environment variables for connecting to DB
+    environment:
+        DB_NAME:        ${self:custom.secrets.DB_NAME}
+        DB_USER:        ${self:custom.secrets.DB_USER}
+        DB_PASSWORD:    ${self:custom.secrets.DB_PASSWORD}
+        DB_HOST:        ${self:custom.secrets.DB_HOST}
+        DB_PORT:        ${self:custom.secrets.DB_PORT}
+        LAMBDA_ENDPOINT:        ${self:custom.secrets.LAMBDA_ENDPOINT}
+        LAMBDA_APIKEY:        ${self:custom.secrets.LAMBDA_APIKEY}
+
+#package:
+#    individually: true
+
+plugins:
+    - serverless-offline
+    - serverless-domain-manager
+
+custom:
+    # contains the credentials needed to connect to the DB
+    secrets:    ${file(secrets.json)}
+    customDomain:
+        domainName: 'api.emon-teach.com'
+        basePath: 'shop' # This will be prefixed to all routes
+        stage: ${self:provider.stage}
+        createRoute53Record: true
+
+#TODO: Implement a more strict CORS policy
+functions:
+    getShopItems:
+        handler: src/items.get
+        description: Get items in shop
+        events:
+            - http:
+                path: '{courseId}/items'
+                method: get
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    addShopItem:
+        handler: src/items.post
+        description: Add item to shop
+        events:
+            - http:
+                path: '{courseId}/items'
+                method: post
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    updateShopItem:
+        handler: src/items.put
+        description: Update item from shop
+        events:
+            - http:
+                path: '{courseId}/items'
+                method: put
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    deleteShopItem:
+        handler: src/items.del
+        description: Delete item from shop
+        events:
+            - http:
+                path: '{courseId}/item/{itemId}'
+                method: delete
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+                            itemId: true
+    orderItem:
+        handler: src/order.handler
+        description: Order an item
+        events:
+            - http:
+                path: '{courseId}/order'
+                method: post
+                cors: true
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
