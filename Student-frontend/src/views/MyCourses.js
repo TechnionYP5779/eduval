@@ -156,16 +156,17 @@ class MyCourses extends React.Component {
 
   insertDeskNumber() {
     var Student_id = parseInt(localStorage.getItem('student_id'));
+    var lesson_id = this.state.post_id;
     console.log(localStorage.getItem('student_id'));
       let config = {
           headers: {'X-Api-Key' : 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'}
       };
       var txt;
       this.showModal();
-        axios.post('https://api.emon-teach.com/lesson/'+ this.state.post_id +'/present',{
+        axios.post('https://api.emon-teach.com/lesson/'+ lesson_id +'/present',{
           id:  Student_id,
           desk: this.state.deskNum}, config).then(function(response){
-            history.push("/lesson/" + Student_id);
+            history.push("/lesson/" + lesson_id);
           });
       
      }
