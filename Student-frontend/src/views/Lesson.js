@@ -47,7 +47,7 @@ import awsIot  from 'aws-iot-device-sdk';
 import "./Lesson.css";
 
 const headers = {
-    'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
+    'Authorization': 'Bearer ' + localStorage.getItem('idToken')
 };
 const EmojiEnum = {
       "EMOJI_HAPPY": "🙂",

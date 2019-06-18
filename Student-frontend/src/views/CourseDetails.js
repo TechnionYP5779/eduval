@@ -21,6 +21,8 @@ import {
   CardBody
 } from "shards-react";
 import PageTitle from "../components/common/PageTitle";
+
+import CoinImage from "../images/midEcoin.png"
 import "./CourseDetails.css"
 const EmojiEnum = {
       "EMOJI_HAPPY": "🙂",
@@ -32,6 +34,16 @@ const EmojiEnum = {
       "EMOJI_ANGRY":"😠",
       "EMOJI_THUMBS_DOWN":"👎"
     };
+
+   function TableEntry(props) {
+        console.log("AASFASFASASfas");
+        const messageType = props.messageType;
+        if(messageType === "EMON") {
+          return <div>{props.value} <img alt="Emons" style={{width:"1.5em", marginLeft:"0.2em", marginBottom:"0.2em"}} src={CoinImage} /></div>;
+        }else {
+          return <div style={{fontSize:'1.3em'}}>{EmojiEnum[props.emojiType]}</div>
+        }
+      }
 class CourseDetails extends React.Component {
     constructor(props) {
         super(props);
@@ -56,10 +68,10 @@ class CourseDetails extends React.Component {
           
         };
         let config = {
-          headers: {'X-Api-Key' : 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'}
+          headers: {'Authorization': 'Bearer ' + localStorage.getItem('idToken')}
         };
         let headers = {
-            'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
+            'Authorization': 'Bearer ' + localStorage.getItem('idToken')
         }
         var student=localStorage.getItem('student_id');
         var course =this.props.match.params.id;
@@ -91,6 +103,7 @@ class CourseDetails extends React.Component {
 
 
       }
+      
     render(){
         return(
             <Container fluid className="main-content-container px-4 pb-4">
@@ -104,7 +117,7 @@ class CourseDetails extends React.Component {
           <Col>
       <Row>    
           {/* Editor */}
-  <Card style = {{height:"100%",width:"100%",marginLeft:"16px"}} className="mb-3">
+  <Card style = {{height:"100%",width:"100%",marginLeft:"16px"}} className="mb-4">
     <CardHeader className="border-bottom">
       <h6 className="m-0">Details</h6>
     </CardHeader>
@@ -113,7 +126,7 @@ class CourseDetails extends React.Component {
         <Row>
             <Col >
             <div style={{fontWeight: 600}}>
-            You have a Balance of <span style={{fontWeight: 800}}>{this.state.balance} Emons</span> in this course.<br /><br />
+            You have a Balance of <span style={{fontWeight: 800}}>{this.state.balance}<img alt="Emons" style={{width:"1.5em", marginLeft:"0.2em", marginBottom:"0.2em"}} src={CoinImage} /></span> in this course.<br /><br />
             Keep up the good work!
             </div>
             </Col>
@@ -125,7 +138,7 @@ class CourseDetails extends React.Component {
   </Card>
 </Row>
 <Row>
-  <Card style = {{height:"100%",width:"100%",marginLeft:"16px"}} className="mb-3">
+  <Card style = {{height:"100%",width:"100%",marginLeft:"16px"}} className="mb-4">
     <CardHeader className="border-bottom">
       <h6 className="m-0">Items bought</h6>
     </CardHeader>
@@ -190,7 +203,7 @@ class CourseDetails extends React.Component {
                 <tr>
                   <td>{new Date(post.time).getDate().toString().padStart(2,'0') + '/' + new Date(post.time).getMonth().toString().padStart(2,'0') + '/' + new Date(post.time).getFullYear() }</td>
                   <td>{new Date(post.time).getHours().toString().padStart(2,'0') + ':' + new Date(post.time).getMinutes().toString().padStart(2,'0')}</td>
-                  <td>{post.messageType === "EMON" ? post.value + ' Emons' : EmojiEnum[post.emojiType]}</td>
+                  <td><TableEntry messageType={post.messageType} value={post.value} emojiType={post.emojiType}/></td>
                 </tr>))}
               </tbody>
             </table>

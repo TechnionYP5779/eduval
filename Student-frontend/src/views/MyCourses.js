@@ -55,7 +55,7 @@ class MyCourses extends React.Component {
 
 
     let headers = {
-        'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
+        'Authorization': 'Bearer ' + localStorage.getItem('idToken')
     }
     let sub=new Buffer( localStorage.getItem('sub')).toString('base64');
     axios.get('https://api.emon-teach.com/student/byToken/'+sub,
@@ -174,7 +174,7 @@ class MyCourses extends React.Component {
     var Student_id = parseInt(localStorage.getItem('student_id'));
     var lesson_id = this.state.post_id;
       let config = {
-          headers: {'X-Api-Key' : 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'}
+          headers: {'Authorization': 'Bearer ' + localStorage.getItem('idToken')}
       };
       var txt;
       this.showModal();
