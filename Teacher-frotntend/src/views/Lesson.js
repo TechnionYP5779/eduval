@@ -203,15 +203,8 @@ class Lesson extends React.Component {
 
     let onConnectMessages = ()=>{
       server.getMessagesFromStudents(function(response){
-        console.log("==============================================");
-        console.log("==============================================");
-        console.log("got messages");
-        console.log(response.data);
         self.setState({messages: response.data});
       }, (error)=>{
-        console.log("==============================================");
-        console.log("==============================================");
-        console.log("got error");
         console.log(error);
       }, courseId);
       if (!self.state.connected)
@@ -406,14 +399,11 @@ class Lesson extends React.Component {
                       if (this.state.chosen_students.length === 0)
                         return;
                       this.setState({disabled: true});
-                      console.log("chosing", smile.id);
-                      console.log(smile.name);
                       let counter = 0;
                       let success = true;
                       let error = false;
                       let self = this;
                       server.sendEmoji(function(response){
-                        console.log("sent");
                         counter ++;
                         if (counter === self.state.chosen_students.length){
                           self.setState({chosen_students: [], success: success, error: error, disabled: false});
@@ -429,7 +419,6 @@ class Lesson extends React.Component {
                         }
                         console.log("error", error);
                       }, smile.name, this.state.chosen_students, this.props.match.params.id);
-                      console.log(this.state.chosen_students);
                     }}>
                       {smile.smile}
                     </Button>
@@ -471,14 +460,11 @@ class Lesson extends React.Component {
                     if (this.state.chosen_students.length === 0)
                       return;
                     this.setState({disabled: true});
-                    console.log("AWARD!");
-                    console.log(this.state.reward_money);
                     let counter = 0;
                     let success = true;
                     let error = false;
                     let self = this;
                     server.sendEMoney(function(response){
-                      console.log("sent");
                       counter ++;
                       if (counter === self.state.chosen_students.length){
                         self.setState({chosen_students: [], success: success, error: error, disabled: false});
@@ -494,24 +480,18 @@ class Lesson extends React.Component {
                       }
                       console.log("error", error);
                     }, parseInt(this.state.reward_money), "participation", this.state.chosen_students, this.props.match.params.id);
-                    console.log(this.state.chosen_students);
                   }}>
                     Award!
                   </Button>
                   <Button theme="primary" disabled={this.state.disabled} style={{float:"right"}} className="mb-2 mr-1" onClick={()=>{
                     this.setState({disabled: true});
                     let self = this;
-                    console.log("clicked on end");
                     server.changeLessonStatus(function(response){
-                      console.log("lesson status changed");
                       server.deleteLessonMessages(()=>{
-                        console.log("lesson messages deleted");
                         history.replace('/');
                       }, ()=>{
-                        console.log("lesson messages error");
                       }, self.props.match.params.id);
                     }, function(error){
-                      console.log("lesson status error");
                       console.log(error);
                       self.setState({disabled: false, error: true});
                     }, this.props.match.params.id, "LESSON_END");

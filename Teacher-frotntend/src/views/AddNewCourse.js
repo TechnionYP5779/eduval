@@ -1,7 +1,6 @@
 import React from "react";
-import { Container, Row, Col, Card, CardHeader, Alert} from "shards-react";
+import { Container, Row, Card} from "shards-react";
 
-import CompleteFormExample from "../components/components-overview/CompleteFormExample";
 
 import PageTitle from "../components/common/PageTitle";
 import Editor from "../components/add-new-post/Editor";

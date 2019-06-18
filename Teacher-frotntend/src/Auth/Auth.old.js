@@ -78,12 +78,10 @@ class Auth {
 
   login() {
     // Call the show method to display the widget.
-    console.log("login");
     this.lock.show();
   }
 
   handleAuthentication() {
-    console.log("handleAuthentication");
     // Add a callback for Lock's `authenticated` event
     this.lock.on('authenticated', this.setSession.bind(this));
     // Add a callback for Lock's `authorization_error` event
@@ -95,13 +93,9 @@ class Auth {
   }
 
   async setSession(authResult) {
-    console.log("setSession");
     if (authResult && authResult.accessToken && authResult.idToken) {
-      console.log("authResult");
-      console.log(authResult);
       // Set the time that the access token will expire at
       let expiresAt = JSON.stringify((authResult.expiresIn * 1000) + new Date().getTime());
-      console.log("new expiresAt", expiresAt);
       localStorage.setItem('access_token', authResult.accessToken);
       localStorage.setItem('id_token', authResult.idToken);
       localStorage.setItem('expires_at', expiresAt);
@@ -134,7 +128,6 @@ class Auth {
     // Check whether the current time is past the
     // access token's expiry time
     let expiresAt = JSON.parse(localStorage.getItem('expires_at'));
-    console.log("expire at ", expiresAt);
     return new Date().getTime() < expiresAt;
   }
 
@@ -155,7 +148,6 @@ class Auth {
     }
     axios.get(SERVER_CONFIG.domain + '/teacher/byToken/'+new Buffer(sub).toString('base64'), config)
     .then(function(response){
-      console.log(response);
       localStorage.setItem('teacher_id', response.data.id);
       history.replace('/');
     })
@@ -178,11 +170,10 @@ class Auth {
           phoneNum: profile[SERVER_CONFIG.phone_number]}, config)
         .then(function(response){
           localStorage.setItem('teacher_id', response.data);
-          console.log(response);
           history.replace('/');
         })
         .catch(function(error) {
-          console.log(error.response);
+          console.log(error);
           history.replace('/');
         });
       });

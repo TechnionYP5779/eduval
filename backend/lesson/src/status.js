@@ -47,7 +47,7 @@ const getLessonStatus = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR getting course status: ${JSON.stringify(err)}`);
+			console.log(`ERROR getting course status: ${err}`);
 			return callback(createError.InternalServerError('Error getting course status.'));
 		});
 };
@@ -118,7 +118,7 @@ const updateLessonStatus = async (event, context, callback) => {
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
-			console.log(`ERROR updating status: ${JSON.stringify(err)}`);
+			console.log(`ERROR updating status: ${err}`);
 			return callback(createError.InternalServerError('Error updating status.'));
 		});
 };

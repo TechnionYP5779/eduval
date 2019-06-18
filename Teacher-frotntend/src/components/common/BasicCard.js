@@ -1,8 +1,5 @@
 import React from "react";
-import PropTypes from "prop-types";
-import classNames from "classnames";
-import shortid from "shortid";
-import { Card, CardBody, CardHeader, CardTitle, Badge, Row, Col } from "shards-react";
+import { Card, CardBody, Badge, Row, Col } from "shards-react";
 
 class BasicCard extends React.Component {
 

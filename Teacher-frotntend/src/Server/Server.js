@@ -20,9 +20,8 @@ class Server {
   @use conditions:
     - User should be logged in when called.
   */
-  async updateTeacher(callback, callbackError, teacherDetails){
+  updateTeacher(callback, callbackError, teacherDetails){
     let teacher_id = localStorage.getItem('teacher_id');
-    console.log(teacher_id);
     if (teacher_id == null || !auth.isAuthenticated()){
       let error = {response: {data: {error: "not logged in"}}};
       callbackError(error);
@@ -44,9 +43,8 @@ class Server {
   @use conditions:
     - User should be logged in when called.
   */
-  async addStudentsToCourse(callback, callbackError, students, courseId){
+  addStudentsToCourse(callback, callbackError, students, courseId){
     let teacher_id = localStorage.getItem('teacher_id');
-    console.log(teacher_id);
     if (teacher_id == null || !auth.isAuthenticated()){
       let error = {response: {data: {error: "not logged in"}}};
       callbackError(error);
@@ -73,7 +71,6 @@ class Server {
   */
   async sendEMoney(callback, callbackError, amount, reason, students_id, course_id){
     let teacher_id = localStorage.getItem('teacher_id');
-    console.log(teacher_id);
     if (teacher_id == null || !auth.isAuthenticated()){
       let error = {response: {data: {error: "not logged in"}}};
       callbackError(error);
@@ -102,7 +99,6 @@ class Server {
   */
   async changeLessonStatus(callback, callbackError, course_id, status){
     let teacher_id = localStorage.getItem('teacher_id');
-    console.log(teacher_id);
     if (teacher_id == null || !auth.isAuthenticated()){
       let error = {response: {data: {error: "not logged in"}}};
       callbackError(error);
@@ -128,7 +124,6 @@ class Server {
   */
   async sendEmoji(callback, callbackError, emoji_type, students_id, course_id){
     let teacher_id = localStorage.getItem('teacher_id');
-    console.log(teacher_id);
     if (teacher_id == null || !auth.isAuthenticated()){
       let error = {response: {data: {error: "not logged in"}}};
       callbackError(error);
@@ -157,7 +152,6 @@ class Server {
   */
   async updateCourse(callback, callbackError, courseDetails){
     let teacher_id = localStorage.getItem('teacher_id');
-    console.log(teacher_id);
     if (teacher_id == null || !auth.isAuthenticated()){
       let error = {response: {data: {error: "not logged in"}}};
       callbackError(error);
@@ -182,7 +176,6 @@ class Server {
   */
   async getAttendingStudents(callback, callbackError, courseId){
     let teacher_id = localStorage.getItem('teacher_id');
-    console.log(teacher_id);
     if (teacher_id == null || !auth.isAuthenticated()){
       let error = {response: {data: {error: "not logged in"}}};
       callbackError(error);
@@ -213,6 +206,54 @@ class Server {
       return;
     }
     axios.get(SERVER_CONFIG.domain + "/lesson/" + courseId + "/teacherMessages", this.config)
+    .then(callback)
+    .catch(callbackError);
+  }
+
+  /*
+  =================== Delete Student from Course ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - courseId: the course id
+    - studentId: the student's id
+  @use conditions:
+    - User should be logged in when called.
+    - Course exists.
+    - Student registered
+  */
+  deleteStudent(callback, callbackError, courseId, studentId){
+    let teacher_id = localStorage.getItem('teacher_id');
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    axios.delete(SERVER_CONFIG.domain + "/course/" + courseId + "/registered/" + studentId, this.config)
+    .then(callback)
+    .catch(callbackError);
+  }
+
+  /*
+  =================== Delete Course ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - courseId: the course id
+  @use conditions:
+    - User should be logged in when called.
+    - Course exists.
+  */
+  deleteCourse(callback, callbackError, courseId){
+    let teacher_id = localStorage.getItem('teacher_id');
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    axios.delete(SERVER_CONFIG.domain + "/course/" + courseId, this.config)
     .then(callback)
     .catch(callbackError);
   }
@@ -252,15 +293,12 @@ class Server {
     - User should be logged in when called.
   */
   getActiveLesson(callback, callbackError){
-    console.log("getCourse");
     let teacher_id = localStorage.getItem('teacher_id');
-    console.log(teacher_id);
     if (teacher_id == null || !auth.isAuthenticated()){
       let error = {response: {data: {error: "not logged in"}}};
       callbackError(error);
       return;
     }
-    console.log("got here?");
     axios.get(SERVER_CONFIG.domain + "/teacher/" + teacher_id + "/activeLesson", this.config)
     .then(callback)
     .catch(callbackError);
@@ -324,15 +362,12 @@ class Server {
     - User should be logged in when called.
   */
   async getCourse(callback, callbackError, courseId){
-    console.log("getCourse");
     let teacher_id = localStorage.getItem('teacher_id');
-    console.log(teacher_id);
     if (teacher_id == null || !auth.isAuthenticated()){
       let error = {response: {data: {error: "not logged in"}}};
       callbackError(error);
       return;
     }
-    console.log("got here?");
     axios.get(SERVER_CONFIG.domain + "/course/" + courseId, this.config)
     .then(function(response){
       response.data.startDate = response.data.startDate.substring(0,10);
@@ -354,7 +389,6 @@ class Server {
   */
   async getAllCourses(callback, callbackError){
     let teacher_id = localStorage.getItem('teacher_id');
-    console.log(teacher_id);
     if (teacher_id == null || !auth.isAuthenticated()){
       let error = {response: {data: {error: "not logged in"}}};
       callbackError(error);
@@ -462,7 +496,6 @@ class Server {
     }
     courseDetails['id'] = 0;
     courseDetails['teacherId'] = parseInt(teacher_id);
-    console.log(courseDetails);
     axios.post(SERVER_CONFIG.domain + '/course', courseDetails, this.config)
     .then(callback)
     .catch(callbackError);
@@ -483,7 +516,6 @@ class Server {
   async getTeacherProfile(callback, callbackError){
     let config = this.config;
     let teacher_id = localStorage.getItem('teacher_id');
-    console.log(teacher_id);
     if (teacher_id != null){
       axios.get(SERVER_CONFIG.domain + '/teacher/' + teacher_id, config)
       .then(callback)

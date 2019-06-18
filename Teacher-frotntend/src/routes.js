@@ -9,7 +9,6 @@ import Overview from "./views/Overview";
 import UserProfileLite from "./views/UserProfileLite";
 import AddNewCourse from "./views/AddNewCourse";
 import Errors from "./views/Errors";
-import ErrorNotLogin from "./views/ErrorNotLogin";
 import ComponentsOverview from "./views/ComponentsOverview";
 import Tables from "./views/Tables";
 import MyCourses from "./views/MyCourses";
