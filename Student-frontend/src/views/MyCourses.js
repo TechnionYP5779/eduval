@@ -148,7 +148,7 @@ class MyCourses extends React.Component {
         client.on('message', (topic, message) => {
           
         var current_id = ((topic).split('lesson')[1]).split('/')[1];
-         if(message === "LESSON_START"){
+         if(message == "LESSON_START"){
             var insert = this.state.lessons_status;
             insert[current_id] = false;
             this.setState({lessons_status: insert});
@@ -280,7 +280,7 @@ showModal(id) {
 
                   <div className="my-auto ml-auto">
 
-                    <Button disabled = {this.state.lessons_status[post.id]} size="sm" theme= {this.state.lessons_status[post.id] ? 'white' : 'success'}onClick={() => {this.showModal(post.id)}}>
+                    <Button disabled = {this.state.lessons_status[post.id]} size="sm" theme= {this.state.lessons_status[post.id] == false ? 'success' : 'white'}onClick={() => {this.showModal(post.id)}}>
                       <i className="far fa-bookmark mr-1" /> {this.state.lessons_student_status[post.id] ? "Resume" : "Join" }
                     </Button>
 
