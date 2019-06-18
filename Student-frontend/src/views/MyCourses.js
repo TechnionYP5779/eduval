@@ -42,6 +42,7 @@ class MyCourses extends React.Component {
       // Third list of posts.
       PostsListThree: [],
       lessons_status: {},
+      lessons_student_status: {},
       modalIsOpen: false,
       post_id:-1,
       deskNum: -1
@@ -110,12 +111,27 @@ class MyCourses extends React.Component {
             var current_id = ((response.request.responseURL).split('lesson')[1]).split('/')[1];
           if(response.data === "LESSON_START"){
             var insert = this.state.lessons_status;
+            var insert_student_status = this.state.lessons_student_status
             insert[current_id] = false;
             this.setState({lessons_status: insert});
+            axios.get('https://api.emon-teach.com/lesson/'+ current_id +'/present',
+                {headers: headers})
+                .then((response) => {
+                   var Student_id = parseInt(localStorage.getItem('student_id'));
+                    for (var student of response.data){
+                      if(student.id == Student_id){
+                        console.log("IN THE LESSON!!!");
+                        insert_student_status[current_id] = true;
+                        this.setState({lessons_student_status: insert_student_status});
+                        break;
+                      }
+                    }
+                });
+          
           }else{
-            var insert = this.state.lessons_status;
-              insert[current_id] = true;
-             this.setState({lessons_status: insert});
+            
+              this.state.lessons_status[current_id] = true;
+             this.setState({lessons_status: this.state.lessons_status});
           }
           
         }).catch((error)=>{
@@ -172,9 +188,12 @@ class MyCourses extends React.Component {
      }
 
 showModal(id) {
-  console.log("FUCK YEHHHH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+  if(this.state.lessons_student_status[id]){
+    history.push("/lesson/" + id);
+  }else{
     this.setState({modalIsOpen: true, titleModal: "Enter your desk number " , desk_num: "767"});
     this.setState({post_id: id}); 
+  }
   }
 
   closeModal() {
@@ -262,7 +281,7 @@ showModal(id) {
                   <div className="my-auto ml-auto">
 
                     <Button disabled = {this.state.lessons_status[post.id]} size="sm" theme="white" onClick={() => {this.showModal(post.id)}}>
-                      <i className="far fa-bookmark mr-1" /> Join lesson
+                      <i className="far fa-bookmark mr-1" /> {this.state.lessons_student_status[post.id] ? "Resume" : "Join" }
                     </Button>
 
                   </div>
