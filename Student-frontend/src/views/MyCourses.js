@@ -23,7 +23,7 @@ import Modal from 'react-modal';
 const customStyles = {
   content : {
     top                   : '50%',
-    left                  : '50%',
+    left                  : '40%',
     right                 : 'auto',
     bottom                : 'auto',
     marginRight           : '-50%',
@@ -223,7 +223,7 @@ showModal(id) {
         onRequestClose={this.closeModal}
         style={customStyles}
       >
-      <h3>Please enter your desk number</h3>
+      <h5>Please enter your desk number</h5>
       <Form>
         <FormGroup>
           <label htmlFor="deskNum">Desk number</label>
