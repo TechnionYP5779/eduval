@@ -152,7 +152,7 @@ functions:
         events:
             - http:
                 path: /{courseId}/registered/{studentId}
-                method: post
+                method: delete
                 cors: true
                 authorizer:
                     arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
