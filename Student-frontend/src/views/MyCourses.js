@@ -280,7 +280,7 @@ showModal(id) {
 
                   <div className="my-auto ml-auto">
 
-                    <Button disabled = {this.state.lessons_status[post.id]} size="sm" theme="white" onClick={() => {this.showModal(post.id)}}>
+                    <Button disabled = {this.state.lessons_status[post.id]} size="sm" theme= {this.state.lessons_status[post.id] ? 'white' : 'success'}onClick={() => {this.showModal(post.id)}}>
                       <i className="far fa-bookmark mr-1" /> {this.state.lessons_student_status[post.id] ? "Resume" : "Join" }
                     </Button>
 
