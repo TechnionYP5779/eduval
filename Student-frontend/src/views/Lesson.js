@@ -83,7 +83,7 @@ class Lesson extends React.Component {
     location: "string",
     description: "string",
 
-      messages: [{
+      messageRows: [[{
           message: "I have a question",
           enum: "MESSAGE_QUESTION",
           color:"Tomato",
@@ -94,9 +94,9 @@ class Lesson extends React.Component {
           enum: "MESSAGE_CONFUSED",
           color:"Violet",
           id: 2
-      },
-      {
-          message: "I need to leave the class",
+      }],
+      [{
+          message: "May I go out?",
           enum: "MESSAGE_NEED_TO_LEAVE",
           color:"Orange",
           id: 3
@@ -106,13 +106,13 @@ class Lesson extends React.Component {
           enum: "MESSAGE_ANSWER",
           color:"MediumSeaGreen",
           id: 4
-      },
-      {
+      }],
+      [{
           message: "Speak louder please",
           enum: "MESSAGE_LOUDER",
           color:"SlateBlue",
           id: 5
-      }
+      }]
     ],currentEmojis: [],
    };
    const getHistory=() =>{
@@ -271,7 +271,7 @@ class Lesson extends React.Component {
 
   render() {
 
-   const {messages, smileys} = this.state;
+   const {messageRows, smileys} = this.state;
 
 
     return (
@@ -335,9 +335,10 @@ class Lesson extends React.Component {
                   <div className="mb-2 pb-1" style={{margin:"10px"}}>
                 <h7 style={{fontSize:"17px"}}>Choose a message to send</h7>
                 </div>
+                {messageRows.map((messages, idx) => (
                 <Row style={{margin:"2px"}}>
                 {messages.map((message, idx) => (
-                  <Col xs="8">
+                  <Col>
                   {
                     (this.state.chosen_message == message.id) &&
                     <Button outline="none" style={{fontSize:"13px", borderColor:message.color ,color:message.color, background:'white'}} className="mb-2 mr-1" onClick={()=>{
@@ -367,6 +368,7 @@ class Lesson extends React.Component {
 
                 </Col>))}
                 </Row>
+                ))}
               </ListGroup>
 
             </Card>
