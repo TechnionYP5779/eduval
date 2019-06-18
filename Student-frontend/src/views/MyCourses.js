@@ -9,6 +9,9 @@ import {
   Card,
   CardBody,
   CardFooter,
+  Form,
+  FormGroup,
+  FormInput,
   Badge,
   Button
 } from "shards-react";
@@ -16,6 +19,20 @@ import {
 import PageTitle from "../components/common/PageTitle";
 import awsIot  from 'aws-iot-device-sdk';
 
+import Modal from 'react-modal';
+const customStyles = {
+  content : {
+    top                   : '50%',
+    left                  : '40%',
+    right                 : 'auto',
+    bottom                : 'auto',
+    marginRight           : '-50%',
+    transform             : 'translate(-40%, -40%)',
+    maxHeight            : '45vh'
+  }
+};
+
+Modal.setAppElement('#root');
 class MyCourses extends React.Component {
   constructor(props) {
     super(props);
@@ -24,9 +41,19 @@ class MyCourses extends React.Component {
       id: res,
       // Third list of posts.
       PostsListThree: [],
-      lessons_status: {}
+      lessons_status: {},
+      lessons_student_status: {},
+      modalIsOpen: false,
+      post_id:-1,
+      deskNum: -1
     };
-    console.log("props for MyCourses is ", this.props.match.params.id);
+
+    this.showModal = this.showModal.bind(this);
+    this.closeModal = this.closeModal.bind(this);
+    this.handleNameInput = this.handleNameInput.bind(this);
+
+
+
     let headers = {
         'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
     }
@@ -80,19 +107,33 @@ class MyCourses extends React.Component {
       axios.get('https://api.emon-teach.com/lesson/'+ this.state.PostsListThree[j].id +'/status',
           {headers: headers})
           .then((response) => {
-            console.log((response));
+            
             var current_id = ((response.request.responseURL).split('lesson')[1]).split('/')[1];
           if(response.data === "LESSON_START"){
             var insert = this.state.lessons_status;
+            var insert_student_status = this.state.lessons_student_status
             insert[current_id] = false;
             this.setState({lessons_status: insert});
+            axios.get('https://api.emon-teach.com/lesson/'+ current_id +'/present',
+                {headers: headers})
+                .then((response) => {
+                   var Student_id = parseInt(localStorage.getItem('student_id'));
+                    for (var student of response.data){
+                      if(student.id == Student_id){
+                        
+                        insert_student_status[current_id] = true;
+                        this.setState({lessons_student_status: insert_student_status});
+                        break;
+                      }
+                    }
+                });
+          
           }else{
-            var insert = this.state.lessons_status;
-              insert[current_id] = true;
-             this.setState({lessons_status: insert});
+            
+              this.state.lessons_status[current_id] = true;
+             this.setState({lessons_status: this.state.lessons_status});
           }
-          console.log("123123123213");
-          console.log(this.state.lessons_status);
+          
         }).catch((error)=>{
           console.log(error);
         });
@@ -100,16 +141,14 @@ class MyCourses extends React.Component {
 
      var i;
     for (i = 0; i < this.state.PostsListThree.length; i++) {
-      console.log("number" + i);
-      console.log(this.state.PostsListThree[i].id);
+      
       let LessonsStatusURL = 'lesson/'+ this.state.PostsListThree[i].id +'/status';
       connect().then(() => {
         client.subscribe(LessonsStatusURL);
         client.on('message', (topic, message) => {
-          console.log("dsfsdfsdfsdfsdfsdfsdfsdsdfsdf");
-        console.log("message" + message);
+          
         var current_id = ((topic).split('lesson')[1]).split('/')[1];
-         if(message === "LESSON_START"){
+         if(message == "LESSON_START"){
             var insert = this.state.lessons_status;
             insert[current_id] = false;
             this.setState({lessons_status: insert});
@@ -131,24 +170,38 @@ class MyCourses extends React.Component {
   }
 
 
-  insertDeskNumber(id) {
-    console.log("id" + id);
-    console.log(localStorage.getItem('student_id'));
+  insertDeskNumber() {
+    var Student_id = parseInt(localStorage.getItem('student_id'));
+    var lesson_id = this.state.post_id;
       let config = {
           headers: {'X-Api-Key' : 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'}
       };
       var txt;
-      var deskNumber = prompt("Please enter your desk number:", "");
-      if (deskNumber === null || deskNumber === "") {
-        txt = "User cancelled the prompt.";
-      } else {
-        axios.post('https://api.emon-teach.com/lesson/'+ id +'/present',{
-          id:  parseInt(localStorage.getItem('student_id')),
-          desk: deskNumber}, config).then(function(response){
-            history.push("/lesson/" + id);
+      this.showModal();
+        axios.post('https://api.emon-teach.com/lesson/'+ lesson_id +'/present',{
+          id:  Student_id,
+          desk: this.state.deskNum}, config).then(function(response){
+            history.push("/lesson/" + lesson_id);
           });
-      }
+      
      }
+
+showModal(id) {
+  if(this.state.lessons_student_status[id]){
+    history.push("/lesson/" + id);
+  }else{
+    this.setState({modalIsOpen: true, titleModal: "Enter your desk number " , desk_num: "767"});
+    this.setState({post_id: id}); 
+  }
+  }
+
+  closeModal() {
+    this.setState({modalIsOpen: false});
+  }
+
+  handleNameInput(input){
+    this.setState({deskNum: input.target.value});
+  }
 
   render() {
     const {
@@ -157,11 +210,35 @@ class MyCourses extends React.Component {
       PostsListThree,
       PostsListFour
     } = this.state;
-
+    let showModal = this.showModal;
+    let closeModal = this.closeModal;
 
 
     return (
+<div>
 
+  <Modal
+        isOpen={this.state.modalIsOpen}
+        onRequestClose={this.closeModal}
+        style={customStyles}
+      >
+      <h5>Please enter your desk number</h5>
+      <Form>
+        <FormGroup>
+          <label htmlFor="deskNum">Desk number</label>
+          <FormInput id="deskNum"  onChange={this.handleNameInput}/>
+        </FormGroup>
+        </Form>
+
+        <Button disabled={this.state.disabled} theme="success" onClick={()=>{
+        let action;
+        this.setState({disabled: true});
+        this.insertDeskNumber();
+      }}>Enter</Button>
+      <Button theme="danger" disabled={this.state.disabled} style={{float: "right"}} onClick={closeModal}>Cancel</Button>
+
+
+      </Modal>
 
       <Container fluid className="main-content-container px-4">
         {/* Page Header */}
@@ -202,8 +279,8 @@ class MyCourses extends React.Component {
 
                   <div className="my-auto ml-auto">
 
-                    <Button disabled = {this.state.lessons_status[post.id]} size="sm" theme="white" onClick={() => {this.insertDeskNumber(post.id)}}>
-                      <i className="far fa-bookmark mr-1" /> Join lesson
+                    <Button disabled = {this.state.lessons_status[post.id]} size="sm" theme= {this.state.lessons_status[post.id] == false ? 'success' : 'white'}onClick={() => {this.showModal(post.id)}}>
+                      <i className="far fa-bookmark mr-1" /> {this.state.lessons_student_status[post.id] ? "Resume" : "Join" }
                     </Button>
 
                   </div>
@@ -215,7 +292,7 @@ class MyCourses extends React.Component {
 
       </Container>
 
-
+</div>
     );
 
   }

@@ -52,10 +52,7 @@ class Auth {
   }
 
   handleAuthentication() {
-    console.log("==== handleAuthentication ====");
     this.auth0.parseHash((err, authResult) => {
-      console.log("auth result:");
-      console.log(authResult);
       if (authResult && authResult.accessToken && authResult.idToken) {
         this.setSession(authResult);
       } else if (err) {
@@ -100,27 +97,22 @@ class Auth {
   }
 
   registerstudent(){
-    console.log("==== registerstudent ====");
     let config = {
       headers: {'X-Api-Key': SERVER_CONFIG.xApiKey}
     };
     let student_id = localStorage.getItem('student_id');
     if (student_id != null){
-      console.log("student id exists", student_id);
       history.replace('/');
       return;
     }
 
     let sub = this.sub;
     if(sub == null){
-      console.log("sub is null");
       history.replace('/');
       return;
     }
     axios.get(SERVER_CONFIG.domain + '/student/byToken/'+new Buffer(sub).toString('base64'), config)
     .then(function(response){
-      console.log("student found", response.data.id);
-      console.log(response);
       localStorage.setItem('student_id', response.data.id);
       history.replace('/');
     })
@@ -138,15 +130,12 @@ class Auth {
           history.replace('/');
           return;
         }
-        console.log("got user info");
         axios.post(SERVER_CONFIG.domain + '/student', {authIdToken: new Buffer(sub).toString('base64'),
           name: profile.nickname,
           email: profile.email,
           phoneNum: profile[SERVER_CONFIG.phone_number]}, config)
         .then(function(response){
-          console.log("registered student");
           localStorage.setItem('student_id', response.data);
-          console.log(response);
           history.replace('/');
         })
         .catch(function(error) {

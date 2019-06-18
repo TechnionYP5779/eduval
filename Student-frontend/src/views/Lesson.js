@@ -39,7 +39,7 @@ import SeamlessInputGroups from "../components/components-overview/SeamlessInput
 import CustomFileUpload from "../components/components-overview/CustomFileUpload";
 import DropdownInputGroups from "../components/components-overview/DropdownInputGroups";
 import CustomSelect from "../components/components-overview/CustomSelect";
-
+import CoinImage from "../images/midEcoin.png"
 import PageTitle from "../components/common/PageTitle";
 
 
@@ -83,7 +83,7 @@ class Lesson extends React.Component {
     location: "string",
     description: "string",
 
-      messages: [{
+      messageRows: [[{
           message: "I have a question",
           enum: "MESSAGE_QUESTION",
           color:"Tomato",
@@ -94,9 +94,9 @@ class Lesson extends React.Component {
           enum: "MESSAGE_CONFUSED",
           color:"Violet",
           id: 2
-      },
-      {
-          message: "I need to leave the class",
+      }],
+      [{
+          message: "May I go out?",
           enum: "MESSAGE_NEED_TO_LEAVE",
           color:"Orange",
           id: 3
@@ -106,13 +106,13 @@ class Lesson extends React.Component {
           enum: "MESSAGE_ANSWER",
           color:"MediumSeaGreen",
           id: 4
-      },
-      {
+      }],
+      [{
           message: "Speak louder please",
           enum: "MESSAGE_LOUDER",
           color:"SlateBlue",
           id: 5
-      }
+      }]
     ],currentEmojis: [],
    };
    const getHistory=() =>{
@@ -134,17 +134,14 @@ class Lesson extends React.Component {
       for(var res of data){
         //if got an emoji
         if(res.messageType != "EMON"){
-            console.log("emoji: " + EmojiEnum[res.emojiType])
             this.setState(prevState => ({
             currentEmojis : [...this.state.currentEmojis, EmojiEnum[res.emojiType]]
           }));
         }else
         {
           //if got an emoji
-          console.log("got: " + res.value)
           var updated_reward_money = this.state.reward_money ? this.state.reward_money : 0;
           updated_reward_money +=res.value
-          console.log("value: " + this.state.reward_money)
 
           this.setState(prevState => ({
           reward_money : updated_reward_money
@@ -203,7 +200,6 @@ class Lesson extends React.Component {
       getHistory();
 
       const onReconnect = () => {
-        console.log("reconnecting");
         getHistory();
       };
       client.on('reconnect', onReconnect);
@@ -212,17 +208,14 @@ class Lesson extends React.Component {
 
       client.on('message', (topic, message) => {
         if(topic === LessonsMessageURL){
-            console.log("techer message " );
             var res=JSON.parse(message);
-            console.log("message: " + res.messageType)
             if(res.messageType === "EMOJI"){
                 this.setState(prevState => ({
                 currentEmojis : [...this.state.currentEmojis, EmojiEnum[res.emojiType]]
               }));
-              this.setState({message: "You got an Emoji from your teacher: "+EmojiEnum[res.emojiType], success: true});
+              this.setState({message: "You got an Emoji from your teacher: "+ EmojiEnum[res.emojiType], success: true});
               window.scrollTo(0, 0);
             }else{
-              console.log("value: " + res.value)
               let updated_reward_money = +this.state.reward_money + +res.value
               this.setState(prevState => ({
               reward_money : updated_reward_money
@@ -234,8 +227,7 @@ class Lesson extends React.Component {
         }else{
 
               axios.delete('https://api.emon-teach.com/'+LessonsMessageURL,
-               {headers: headers})
-               .then((response) =>console.log("deleted from DB"));
+               {headers: headers});
 
               this.setState({message: "The lesson ended", success: false});
               window.scrollTo(0, 0);
@@ -255,8 +247,6 @@ class Lesson extends React.Component {
     .then((response) => {
     this.setState(
       {name: response.data.name ,description : response.data.description,location: response.data.location});
-
-    console.log(this.state.name);
   })
   .catch((error)=>{
     console.log(error);
@@ -271,23 +261,26 @@ class Lesson extends React.Component {
 
   render() {
 
-   const {messages, smileys} = this.state;
+   const {messageRows, smileys} = this.state;
 
 
     return (
-      <Container fluid className="main-content-container px-4">
-
-            {this.state.error &&
+      <div>
+        {this.state.error &&
     <Container fluid className="px-0" >
       <TimeoutAlert className="mb-0" theme="danger" msg={this.state.message} time={3000} />
     </Container>
     }
-
-           {this.state.success &&
+    {this.state.success &&
     <Container fluid className="px-0">
     <TimeoutAlert className="mb-0" theme="success" msg={this.state.message} time={3000} />
     </Container>
     }
+      <Container fluid className="main-content-container px-4">
+
+            
+
+           
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
           <PageTitle sm="4" title={this.state.name} subtitle="Lesson View" className="text-sm-left" />
@@ -301,27 +294,21 @@ class Lesson extends React.Component {
 
                 <div className="mt-2">
                 <p></p>
-                  <p style={{fontSize:"20px" ,textAlign:"center"}}> Current E-Money Earned: {this.state.reward_money} </p>
+                  <p style={{fontSize:"20px" ,textAlign:"center"}}> Current E-Money Earned: {this.state.reward_money} <img style={{width:"2em", marginLeft:"0.2em", marginBottom:"0.2em"}} src={CoinImage} /></p>
                 </div>
               </CardHeader>
 
             </Card>
-            <Card small className="mb-4">
+            <Card small className="p-0 px-3 pt-3">
               <CardHeader className="border-bottom">
                 <h5 className="m-0">Teacher's Messages</h5>
                 <h7 style={{fontSize:"17px"}}>Emojis from Teacher:</h7><br /><br />
-                <ul className='rows'>
-                {this.state.currentEmojis.map((smile) => (<li className='row'>{smile}</li>))}
+                <ul className='rows' style={{textAlign:'center', padding:'0'}}>
+                {this.state.currentEmojis.map((smile) => (<li style={{display:'inline', margin:'5px', fontSize:'2em'}} className='row'>{smile}</li>))}
                 </ul>
               </CardHeader>
 
-              <ListGroup flush>
-                <ListGroupItem className="p-0 px-3 pt-3">
-                  <Row>
-
-                  </Row>
-                </ListGroupItem>
-              </ListGroup>
+              
             </Card>
           </Col>
 
@@ -335,13 +322,13 @@ class Lesson extends React.Component {
                   <div className="mb-2 pb-1" style={{margin:"10px"}}>
                 <h7 style={{fontSize:"17px"}}>Choose a message to send</h7>
                 </div>
+                {messageRows.map((messages, idx) => (
                 <Row style={{margin:"2px"}}>
                 {messages.map((message, idx) => (
-                  <Col xs="8">
+                  <Col>
                   {
                     (this.state.chosen_message == message.id) &&
-                    <Button outline="none" style={{fontSize:"13px", borderColor:message.color ,color:message.color}} className="mb-2 mr-1" onClick={()=>{
-                      console.log("unchosing", message.id);
+                    <Button outline="none" style={{fontSize:"13px", borderColor:message.color ,color:message.color, background:'white'}} className="mb-2 mr-1" onClick={()=>{
                       this.setState({chosen_message : -1});
                     }}>
                       {message.message}
@@ -349,9 +336,7 @@ class Lesson extends React.Component {
                   }
                   {
                     (this.state.chosen_message != message.id) &&
-                    <Button outline style={{fontSize:"13px", borderColor:message.color ,color:message.color}} className="mb-2 mr-1" onClick={()=>{
-                      console.log("chosing", message.color);
-                      console.log("current", this.state.chosen_message);
+                    <Button outline style={{fontSize:"13px", borderColor:message.color ,color:message.color, background:'white'}} className="mb-2 mr-1" onClick={()=>{;
                       this.setState({chosen_message : message.id});
                       axios.post(
                       'https://api.emon-teach.com' + "/lesson/" + this.state.lesson_id + "/teacherMessages" ,
@@ -367,6 +352,7 @@ class Lesson extends React.Component {
 
                 </Col>))}
                 </Row>
+                ))}
               </ListGroup>
 
             </Card>
@@ -375,6 +361,7 @@ class Lesson extends React.Component {
         </Row>
 
       </Container>
+      </div>
     );
   }
 }

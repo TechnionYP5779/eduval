@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
 import history from '../history';
 import {
   Card,
@@ -9,20 +8,33 @@ import {
   Row,
   Col,
   Form,
-  FormGroup,
   FormInput,
-  FormSelect,
   FormTextarea,
   Button,
   Container,
-  CardBody,
-  Badge,
-  Alert
+  CardBody
 } from "shards-react";
+
+import Modal from 'react-modal';
 import PageTitle from "../components/common/PageTitle";
-import TimeoutAlert from "../components/common/TimeoutAlert"
+import TimeoutAlert from "../components/common/TimeoutAlert";
 import server from "../Server/Server";
 import TagsInput from 'react-tagsinput';
+
+Modal.setAppElement('#root');
+
+const customStyles = {
+  content : {
+    top                   : '50%',
+    left                  : '50%',
+    right                 : 'auto',
+    bottom                : 'auto',
+    marginRight           : '-50%',
+    transform             : 'translate(-40%, -40%)',
+    maxHeight            : '85vh'
+  }
+};
+
 class CourseDetails extends React.Component {
   constructor(props) {
     super(props);
@@ -46,6 +58,11 @@ class CourseDetails extends React.Component {
           Phone:"123456789",
         }
       ],
+
+      modalDeleteIsOpen: false,
+
+      student: {},
+      showDeleteCourseModal: false
     };
 
     this.updateName = this.updateName.bind(this);
@@ -58,6 +75,11 @@ class CourseDetails extends React.Component {
     this.handleStudentsChange = this.handleStudentsChange.bind(this);
     this.handleChangeTagInput = this.handleChangeTagInput.bind(this);
     this.updateStudents = this.updateStudents.bind(this);
+
+    this.closeDeleteModal = this.closeDeleteModal.bind(this);
+    this.showDeleteItemModal = this.showDeleteItemModal.bind(this);
+    this.deleteCourseModal = this.deleteCourseModal.bind(this);
+    this.closeDeleteCourseModal = this.closeDeleteCourseModal.bind(this);
   }
 
   handleChangeTagInput(tag){
@@ -75,8 +97,6 @@ class CourseDetails extends React.Component {
       return;
     this.setState({disabled: true});
     server.addStudentsToCourse(function(response){
-      console.log("added students");
-      console.log(response);
       window.location.reload();
     }, function(error){
       console.log("failed", error);
@@ -102,11 +122,7 @@ class CourseDetails extends React.Component {
 
     delete course.status;
 
-    console.log("===========course============");
-    console.log(this.state.course);
-
     server.updateCourse(function(response){
-      console.log("worked", response);
       self.setState({error: false, success: true, disabled: false});
       window.scrollTo(0, 0);
     }, function(error){
@@ -155,30 +171,81 @@ class CourseDetails extends React.Component {
   componentDidMount() {
     var self = this;
     server.getCourse(function(response){
-      console.log(response);
       self.setState({course: response.data});
     }, function(error){
     }, this.props.match.params.id);
 
     server.getStudents(function(response){
-      console.log(response);
       self.setState({students: response.data});
     }, function(error){
     }, this.props.match.params.id);
 
     server.getActiveLesson(function(response){
-      console.log("res:", response);
       if (response.data)
         self.setState({activeLesson: response.data});
     }, (err)=>{console.log("err", err);});
   }
 
+  showDeleteItemModal(student) {
+    this.setState({modalDeleteIsOpen: true,
+      student: student});
+  }
+
+  closeDeleteModal() {
+    this.setState({modalDeleteIsOpen: false});
+  }
+  closeDeleteCourseModal() {
+    this.setState({showDeleteCourseModal: false});
+  }
+
+  deleteCourseModal(){
+    this.setState({showDeleteCourseModal: true});
+  }
+
   render(){
+    let self = this;
+    let showDeleteItemModal = this.showDeleteItemModal;
+    let closeDeleteModal = this.closeDeleteModal;
+    let closeDeleteCourseModal = this.closeDeleteCourseModal;
     const{
       students
     } = this.state;
     return(
       <div>
+
+      <Modal
+        isOpen={this.state.showDeleteCourseModal}
+        onRequestClose={this.closeDeleteCourseModal}
+        style={customStyles}
+      >
+      <p>Are you sure you want to delete the course "{this.state.course.name}"?</p>
+
+      <Button disabled={this.state.disabled} theme="success" onClick={()=>{
+        self.setState({disabled: true});
+        server.deleteCourse((response)=>{history.push("/my-courses");},
+        (err)=>{self.setState({disabled: false, error: "An error has occured"}); window.scrollTo(0, 0);},
+        self.props.match.params.id);
+      }}>Yes</Button>
+      <Button theme="danger" disabled={this.state.disabled} style={{float: "right"}} onClick={closeDeleteCourseModal}>No</Button>
+      </Modal>
+
+      <Modal
+        isOpen={this.state.modalDeleteIsOpen}
+        onRequestClose={this.closeDeleteModal}
+        style={customStyles}
+      >
+      <p>Are you sure you want to remove {this.state.student.name} from the course?</p>
+
+      <Button disabled={this.state.disabled} theme="success" onClick={()=>{
+        self.setState({disabled: true});
+        server.deleteStudent((response)=>{window.location.reload();},
+        (err)=>{self.setState({disabled: false, error: "An error has occured"}); window.scrollTo(0, 0);},
+        self.props.match.params.id,
+        self.state.student.id);
+      }}>Yes</Button>
+      <Button theme="danger" disabled={this.state.disabled} style={{float: "right"}} onClick={closeDeleteModal}>No</Button>
+      </Modal>
+
       {this.state.error &&
       <TimeoutAlert className="mb-0" theme="danger" msg={this.state.error} time={10000}/>
       }
@@ -197,7 +264,12 @@ class CourseDetails extends React.Component {
           {/* Editor */}
           <Card style = {{height:"auto",width:"100%",marginLeft:"16px"}} className="mb-4">
             <CardHeader className="border-bottom">
-            <h6 className="m-0">Details</h6>
+            <Row><Col><h6 className="m-0">Details</h6></Col>
+            {// <Col><Button outline style={{padding:"0px", float: "right"}} theme="danger" onClick={this.deleteCourseModal}>
+            //   <i className="material-icons" style={{fontSize:"2em"}}>delete</i>
+            // </Button></Col>
+          }
+            </Row>
             </CardHeader>
             <ListGroup flush>
             <ListGroupItem className="p-3">
@@ -263,11 +335,10 @@ class CourseDetails extends React.Component {
                         return;
                       }
                       let self = this;
-                      console.log("======starting lesson?======");
                       server.changeLessonStatus(function(response){
                         history.push("/lesson/" + self.props.match.params.id);
                       }, function(error){
-                        self.setState({disabled: false, error: "An error has occured"});
+                        self.setState({disabled: false, error: "An error has occured"}); window.scrollTo(0, 0);
                       }, this.props.match.params.id, "LESSON_START");
                     }} style={{float:"right"}}>{(this.state.activeLesson != this.props.match.params.id && "Start lesson") || (this.state.activeLesson == this.props.match.params.id && "Resume lesson")}</Button>
                   </Form>
@@ -298,6 +369,8 @@ class CourseDetails extends React.Component {
                       <th scope="col" className="border-0">
                       Phone
                       </th>
+                      <th scope="col" className="border-0">
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -307,6 +380,9 @@ class CourseDetails extends React.Component {
                       <td>{student.name}</td>
                       <td>{student.email}</td>
                       <td>{student.phoneNum}</td>
+                      <td><Button pill outline style={{padding:"0px"}} theme="danger" onClick={()=>{showDeleteItemModal(student);}}>
+                        <i className="material-icons" style={{fontSize:"26px"}}>clear</i>
+                      </Button></td>
                     </tr>))}
                   </tbody>
                 </table>

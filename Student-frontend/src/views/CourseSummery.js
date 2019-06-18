@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import axios from 'axios';
 import {
   Card,
   CardHeader,
@@ -20,166 +21,70 @@ import PageTitle from "../components/common/PageTitle";
 import "./CourseSummery.css"
 class CourseSummery extends React.Component {
     constructor(props) {
-        super(props);
+      super(props);
+        const EmojiEnum = {
+              "EMOJI_HAPPY": "🙂",
+              "EMOJI_THUMBS_UP" : "👍",
+              "EMOJI_ANGEL": "👼",
+              "EMOJI_GRIN":"😄",
+              "EMOJI_SHUSH":"🤐",
+              "EMOJI_ZZZ":"😴",
+              "EMOJI_ANGRY":"😠",
+              "EMOJI_THUMBS_DOWN":"👎"
+    };
 
+
+
+        var res=JSON.parse(this.props.match.params.id);
         this.state = {
 
-          smileys: [{
-              smile: "🙂",
-              type: "success",
-              id: 1
-            },
-            {
-              smile: "👍",
-              type: "success",
-              id: 2
-            },
-            {
-              smile: "😇",
-              type: "success",
-              id: 3
-            },
-            {
-              smile: "😁",
-              type: "success",
-              id: 4
-            },
-            {
-              smile: "🤐",
-              type: "warning",
-              id: 5
-            },
-            {
-              smile: "😴",
-              type: "warning",
-              id: 6
-            },
-            {
-              smile: "😠",
-              type: "danger",
-              id: 7
-            },
-            {
-              smile: "👎",
-              type: "danger",
-              id: 8
-            }
-          ],
+          total_reward_money : 0,
+          lesson_id : -1,
+          course_name: "",
+          course_location: "",
+          course_start_date: "",
+          course_end_date: "",
+          course_description: "",
+          student_id : localStorage.getItem('student_id'),
+          chosen_smile : -1,
+          chosen_message : -1,
 
-          // Third list of posts.
-          PostsListThree: [
-            {
-              id:"1",
-              LastName:"Sixth grade",
-              Sum:"2",
-              Smileys: [
-                   "🙂",
-                   "👍",
-              ]
-            },
-            {
-                id:"2",
-                LastName:"Sixth grade",
-                Sum:"5",
-                Smileys: [
-                     "🙂",
-                     "👍",
-                ]
-            },
-            {
-                id:"3",
-                LastName:"Sixth grade",
-                Sum:"7",
-                Smileys: [
-                     "🙂",
-                     "👍",
-                ]
-            },
-            {
-                id:"4",
-                LastName:"Sixth grade",
-                Sum:"0",
-                Smileys: [
-                     "🙂",
-                     "👍",
-                ]
-            },
-            {
-                id:"5",
-                LastName:"Sixth grade",
-                Sum:"7",
-                Smileys: [
-                     "🙂",
-                     "👍",
-                ]
+          Emojis: []
 
-            },
-            {
-                id:"6",
-                LastName:"Sixth grade",
-                Sum:"6",
-                Smileys: [
-                     "🙂",
-                     "👍",
-                ]
-            },
-            {
-                id:"1",
-                LastName:"Sixth grade",
-                Sum:"4",
-                Smileys: [
-                     "🙂",
-                     "👍",
-                ]
-              },
-              {
-                  id:"2",
-                  LastName:"Sixth grade",
-                  Sum:"5",
-                  Smileys: [
-                       "🙂",
-                       "👍",
-                  ]
 
-              },
-              {
-                  id:"3",
-                  LastName:"Sixth grade",
-                  Sum:"0",
-                  Smileys: [
-                       "🙂",
-                       "👍",
-                  ]
-              },
-              {
-                  id:"4",
-                  LastName:"Sixth grade",
-                  Sum:"5",
-                  Smileys: [
-                       "🙂",
-                       "👍",
-                  ]
-              }
-
-          ],
         };
+          this.state.total_reward_money = res.reward_money;
+          this.state.lesson_id = res.id;
+          this.state.Emojis = [...res.emojis];
+
+
+          let headers = {
+            'X-Api-Key': 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'
+            };
+            axios.get('https://api.emon-teach.com/course/'+this.state.lesson_id,
+              {headers: headers})
+              .then((response) => {
+              this.setState(
+                {course_name: response.data.name ,course_description : response.data.description,course_location: response.data.location, course_start_date: response.data.startDate.substring(0,10), course_end_date: response.data.endDate.substring(0,10)});
+
+            })
+            .catch((error)=>{
+              console.log(error);
+            });
       }
     render(){
-        const{
-        PostsListThree
-        } = this.state;
         return(
             <Container fluid className="main-content-container px-4 pb-4">
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title={"Physics " + this.props.match.params.id + " - 114051"} subtitle="Course Summery" className="text-sm-left" />
+          <PageTitle sm="4" title={this.state.course_name} subtitle="Course Summary" className="text-sm-left" />
         </Row>
 
         <Row>
           {/* Editor */}
   <Card style = {{height:"100%",width:"60%",marginLeft:"16px"}} className="mb-4">
     <CardHeader className="border-bottom">
-      <h6 className="m-0">Summery</h6>
+      <h6 className="m-0">Summary</h6>
     </CardHeader>
     <ListGroup flush>
       <ListGroupItem className="p-3">
@@ -188,39 +93,25 @@ class CourseSummery extends React.Component {
             <Form>
               <Row form>
                 {/* Course Name */}
-                <Col md="6" className="form-group">
-                  <p>Class Name: name</p>
-                </Col>
+                  <p>Class Name: {this.state.course_name}</p>
                 </Row>
 
                 <Row form>
-                {/* Topic Name */}
-                <Col md="6" className="form-group">
-                  <p>Lesson's Topic: topic</p>
-                </Col>
+                {/* Lesson description */}
+                  <p>Lesson's description: {this.state.course_description}</p>
                 </Row>
 
-                <Row form>
-                {/* Date */}
-                <Col md="6" className="form-group">
-                  <p>Date: date</p>
-                </Col>
-                </Row>
-
-               <Row form>
+              
+              <Row form>
                  {/* Course Location */}
-                <Col md="6" className="form-group">
-                  <p>Location: location</p>
-                </Col>
+                  <p>Location: {this.state.course_location}</p>
                 </Row>
 
                 <Row form>
                  {/* E-Mony earned */}
-                <Col md="6" className="form-group">
-                  <p>Total E-Mony: 200</p>
-                </Col>
+                  <p>Total E-Mony: {this.state.total_reward_money}</p>
                 </Row>
-                
+
               <a href={"/Overview"}>
               <Button theme="success" onClick={()=>{}} style={{float:"left"}}>Finish</Button>
               </a>
@@ -232,34 +123,19 @@ class CourseSummery extends React.Component {
   </Card>
 
       <Col>
-        <Card small className="mb-4">
-          <CardHeader className="border-bottom">
-            <h6 className="m-0">Lesson Summery</h6>
-          </CardHeader>
-          <CardBody className="p-0 pb-3">
-            <table className="table mb-0">
-              <thead className="bg-light">
+         <Card small className="mb-4">
+           <ListGroup flush>
+                <ListGroupItem className="p-0 px-3 pt-3">
+              <CardHeader className="border-bottom">
+                <h5 className="m-0">All the Emojis from this lesson</h5><br/>
+                <ul className='rows' style={{textAlign:'center', padding:'0'}}>
+                {this.state.Emojis.map((emoji) => (<li style={{display:'inline', margin:'5px', fontSize:'1.6em'}} className='row'>{emoji}</li>))}
+                </ul>
 
-                <tr>
-                  <th scope="col" className="border-0">
-                    Emon Earned
-                  </th>
-                  <th scope="col" className="border-0">
-                    Emojis Earned
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-              {PostsListThree.map((post, idx) => (
-                <tr>
-                  <td>{post.Sum}</td>
-                  <td><ul >{post.Smileys.map((smile,type ,id) => (<li>{smile}</li>))}</ul></td>
-
-                </tr>))}
-              </tbody>
-            </table>
-          </CardBody>
-        </Card>
+              </CardHeader>
+            </ListGroupItem>
+         </ListGroup>
+       </Card>
       </Col>
     </Row>
       </Container>

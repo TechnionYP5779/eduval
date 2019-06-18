@@ -70,6 +70,29 @@ class Lesson extends React.Component {
       ],
       // ============================================
 
+      // =========== coins definitions ==============
+
+      coins: [
+        {
+          value: 1,
+          src: require("./../images/coins/1coin.png")
+        },
+        {
+          value: 2,
+          src: require("./../images/coins/2coin.png")
+        },
+        {
+          value: 5,
+          src: require("./../images/coins/5coin.png")
+        },
+        {
+          value: 10,
+          src: require("./../images/coins/10coin.png")
+        }
+      ],
+
+      // ============================================
+
       // ========= messages definitions =============
 
       smileys: [
@@ -203,15 +226,8 @@ class Lesson extends React.Component {
 
     let onConnectMessages = ()=>{
       server.getMessagesFromStudents(function(response){
-        console.log("==============================================");
-        console.log("==============================================");
-        console.log("got messages");
-        console.log(response.data);
         self.setState({messages: response.data});
       }, (error)=>{
-        console.log("==============================================");
-        console.log("==============================================");
-        console.log("got error");
         console.log(error);
       }, courseId);
       if (!self.state.connected)
@@ -402,18 +418,15 @@ class Lesson extends React.Component {
                 <Row style={{margin:"2px"}}>
                 {smileys.map((smile, idx) => (
                   <Col xs="3" key={idx}>
-                    <Button outline disabled={this.state.disabled} style={{fontSize:"20px"}} theme={smile.type} className="mb-2 mr-1" onClick={()=>{
+                    <Button outline disabled={this.state.disabled} style={{fontSize:"1.3em"}} theme={smile.type} className="mb-2 mr-1" onClick={()=>{
                       if (this.state.chosen_students.length === 0)
                         return;
                       this.setState({disabled: true});
-                      console.log("chosing", smile.id);
-                      console.log(smile.name);
                       let counter = 0;
                       let success = true;
                       let error = false;
                       let self = this;
                       server.sendEmoji(function(response){
-                        console.log("sent");
                         counter ++;
                         if (counter === self.state.chosen_students.length){
                           self.setState({chosen_students: [], success: success, error: error, disabled: false});
@@ -429,7 +442,6 @@ class Lesson extends React.Component {
                         }
                         console.log("error", error);
                       }, smile.name, this.state.chosen_students, this.props.match.params.id);
-                      console.log(this.state.chosen_students);
                     }}>
                       {smile.smile}
                     </Button>
@@ -441,77 +453,71 @@ class Lesson extends React.Component {
                 <div className="mb-2 pb-1" style={{margin:"10px"}}>
                   <h6 style={{fontSize:"12px"}}>Or choose amount of E-Money to send</h6>
                   </div>
-              <div className="mb-2 pb-1" style={{margin:"10px"}}>
+                  <Row style={{margin:"2px"}}>
+                  {this.state.coins.map((coin, idx) => (
+                    <Col xs="3" key={idx}>
+                      <Button outline disabled={this.state.disabled} style={{padding:"0.5em"}} theme="warning" className="mb-2 mr-1" onClick={()=>{
+                        if (this.state.chosen_students.length === 0)
+                          return;
+                        this.setState({disabled: true});
+                        let counter = 0;
+                        let success = true;
+                        let error = false;
+                        let self = this;
+                        server.sendEMoney(function(response){
+                          counter ++;
+                          if (counter === self.state.chosen_students.length){
+                            self.setState({chosen_students: [], success: success, error: error, disabled: false});
+                            window.scrollTo(0, 0);
+                          }
+                        }, function(error){
+                          success = false;
+                          error = true;
+                          counter ++;
+                          if (counter === self.state.chosen_students.length){
+                            self.setState({chosen_students: [], success: success, error: error, disabled: false});
+                            window.scrollTo(0, 0);
+                          }
+                          console.log("error", error);
+                        }, coin.value, "participation", this.state.chosen_students, this.props.match.params.id);
+                      }}>
+                      <img
+                        className="user-avatar rounded-circle"
+                        style={{width: "3em", height: "3em", marginRight: "0"}}
+                        src={coin.src}
+                        alt={coin.value + " E-Money"}
+                      />
+                      </Button>
 
-                <Slider
-                  ref = {this.money_slide_ref}
-                  id="money_slider"
-                  theme="primary"
-                  className="my-4"
-                  connect={[true, false]}
-                  start={[this.state.reward_money]}
-                  value={[this.state.reward_money]}
-                  step={1}
-                  range={{ min: 0, max: 10 }}
-                  tooltips
-                  onChange={onSlideChange}
-                />
-              </div>
-              <div className="mb-2 pb-1" style={{margin:"10px"}}>
-                  <FormInput
-                    id = "money_input"
-                    type="number"
-                    value={this.state.reward_money}
-                    ref = {this.money_input_ref}
-                    onChange={onInputChange}
-                  />
-                  </div>
+                  </Col>))}
+                  </Row>
+              {// <div className="mb-2 pb-1" style={{margin:"10px"}}>
+              //
+              //   <Slider
+              //     ref = {this.money_slide_ref}
+              //     id="money_slider"
+              //     theme="primary"
+              //     className="my-4"
+              //     connect={[true, false]}
+              //     start={[this.state.reward_money]}
+              //     value={[this.state.reward_money]}
+              //     step={1}
+              //     range={{ min: 0, max: 10 }}
+              //     tooltips
+              //     onChange={onSlideChange}
+              //   />
+              // </div>
+            }
                     <div className="mb-2 pb-1" style={{margin:"10px"}}>
-                  <Button theme="primary" disabled={this.state.disabled} className="mb-2 mr-1" onClick={()=>{
-                    if (this.state.chosen_students.length === 0)
-                      return;
-                    this.setState({disabled: true});
-                    console.log("AWARD!");
-                    console.log(this.state.reward_money);
-                    let counter = 0;
-                    let success = true;
-                    let error = false;
-                    let self = this;
-                    server.sendEMoney(function(response){
-                      console.log("sent");
-                      counter ++;
-                      if (counter === self.state.chosen_students.length){
-                        self.setState({chosen_students: [], success: success, error: error, disabled: false});
-                        window.scrollTo(0, 0);
-                      }
-                    }, function(error){
-                      success = false;
-                      error = true;
-                      counter ++;
-                      if (counter === self.state.chosen_students.length){
-                        self.setState({chosen_students: [], success: success, error: error, disabled: false});
-                        window.scrollTo(0, 0);
-                      }
-                      console.log("error", error);
-                    }, parseInt(this.state.reward_money), "participation", this.state.chosen_students, this.props.match.params.id);
-                    console.log(this.state.chosen_students);
-                  }}>
-                    Award!
-                  </Button>
                   <Button theme="primary" disabled={this.state.disabled} style={{float:"right"}} className="mb-2 mr-1" onClick={()=>{
                     this.setState({disabled: true});
                     let self = this;
-                    console.log("clicked on end");
                     server.changeLessonStatus(function(response){
-                      console.log("lesson status changed");
                       server.deleteLessonMessages(()=>{
-                        console.log("lesson messages deleted");
                         history.replace('/');
                       }, ()=>{
-                        console.log("lesson messages error");
                       }, self.props.match.params.id);
                     }, function(error){
-                      console.log("lesson status error");
                       console.log(error);
                       self.setState({disabled: false, error: true});
                     }, this.props.match.params.id, "LESSON_END");

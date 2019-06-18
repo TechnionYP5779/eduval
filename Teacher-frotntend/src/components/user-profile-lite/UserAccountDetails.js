@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
 import {
   Card,
   CardHeader,
@@ -10,12 +9,7 @@ import {
   Form,
   FormGroup,
   FormInput,
-  FormSelect,
-  FormTextarea,
-  Button,
-  Container,
-  CardBody,
-  Alert
+  Button
 } from "shards-react";
 
 import server from "../../Server/Server"
@@ -50,14 +44,11 @@ class UserAccountDetails extends React.Component {
     let self = this;
     this.setState({disabled: true});
     //Theoretically we might want to check whether anything was changed at all?
-    console.log("Hello");
     server.updateTeacher(function(response)
     {
-      console.log("worked", response);
       self.setState({error: false, success: true, disabled: false});
       window.scrollTo(0, 0);
     }, function(error){
-      console.log("failed", error);
       self.setState({error: "An error has occured", success: false, disabled: false});
       window.scrollTo(0, 0);
     }, this.state.details);
@@ -88,12 +79,10 @@ class UserAccountDetails extends React.Component {
   componentDidMount() {
     var self = this;
     server.getTeacherProfile(function(response){
-      console.log(response);
       self.setState({details: response.data});
     }, function(error){
     });
 
-    console.log(self.state)
   }
 
 
@@ -161,24 +150,6 @@ class UserAccountDetails extends React.Component {
   );
 }
 }
-//   UserAccountDetails.propTypes = {
-//     /**
-//      * The component's title.
-//      */
-//     title: PropTypes.string
-//   };
-//
-//   UserAccountDetails.defaultProps = {
-//     title: "Account Details"
-//   };
-// }
-//
-// <Row form>
-//   {/* Description */}
-//   <Col md="12" className="form-group">
-//     <label htmlFor="feDescription">Description</label>
-//     <FormTextarea id="feDescription" rows="5" />
-//   </Col>
-// </Row>
+
 
 export default UserAccountDetails;
