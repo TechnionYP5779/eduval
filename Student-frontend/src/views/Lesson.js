@@ -275,19 +275,22 @@ class Lesson extends React.Component {
 
 
     return (
-      <Container fluid className="main-content-container px-4">
-
-            {this.state.error &&
+      <div>
+        {this.state.error &&
     <Container fluid className="px-0" >
       <TimeoutAlert className="mb-0" theme="danger" msg={this.state.message} time={3000} />
     </Container>
     }
-
-           {this.state.success &&
+    {this.state.success &&
     <Container fluid className="px-0">
     <TimeoutAlert className="mb-0" theme="success" msg={this.state.message} time={3000} />
     </Container>
     }
+      <Container fluid className="main-content-container px-4">
+
+            
+
+           
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
           <PageTitle sm="4" title={this.state.name} subtitle="Lesson View" className="text-sm-left" />
@@ -371,6 +374,7 @@ class Lesson extends React.Component {
         </Row>
 
       </Container>
+      </div>
     );
   }
 }
