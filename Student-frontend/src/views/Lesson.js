@@ -39,7 +39,7 @@ import SeamlessInputGroups from "../components/components-overview/SeamlessInput
 import CustomFileUpload from "../components/components-overview/CustomFileUpload";
 import DropdownInputGroups from "../components/components-overview/DropdownInputGroups";
 import CustomSelect from "../components/components-overview/CustomSelect";
-
+import CoinImage from "../images/midEcoin.png"
 import PageTitle from "../components/common/PageTitle";
 
 
@@ -219,7 +219,7 @@ class Lesson extends React.Component {
                 this.setState(prevState => ({
                 currentEmojis : [...this.state.currentEmojis, EmojiEnum[res.emojiType]]
               }));
-              this.setState({message: "You got an Emoji from your teacher: "+EmojiEnum[res.emojiType], success: true});
+              this.setState({message: "You got an Emoji from your teacher: "+ EmojiEnum[res.emojiType], success: true});
               window.scrollTo(0, 0);
             }else{
               console.log("value: " + res.value)
@@ -301,7 +301,7 @@ class Lesson extends React.Component {
 
                 <div className="mt-2">
                 <p></p>
-                  <p style={{fontSize:"20px" ,textAlign:"center"}}> Current E-Money Earned: {this.state.reward_money} </p>
+                  <p style={{fontSize:"20px" ,textAlign:"center"}}> Current E-Money Earned: {this.state.reward_money} <img style={{width:"2em", marginLeft:"0.2em", marginBottom:"0.2em"}} src={CoinImage} /></p>
                 </div>
               </CardHeader>
 
