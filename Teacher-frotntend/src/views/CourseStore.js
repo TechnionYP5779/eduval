@@ -144,6 +144,8 @@ class CourseStore extends React.Component {
     }, (err)=>{}, this.props.match.params.id);
     server.getProducts((response)=>{
       self.setState({products: response.data});
+      console.log("===== response ======");
+      console.log(response);
     }, (err)=>{console.log(err);}, this.props.match.params.id);
   }
 
@@ -161,7 +163,12 @@ class CourseStore extends React.Component {
   }
 
   stringToInitials(str){
-    return str.split(" ").map((n)=>n[0].toUpperCase()).join("");
+    str = str.trim();
+    let res = str.split(" ").map((n)=>n[0].toUpperCase()).join("");
+    if (res.length > 3){
+      res = res.substring(0,3);
+    }
+    return res;
   }
 
   getCorrectTextColor(hex){
@@ -289,7 +296,7 @@ class CourseStore extends React.Component {
             <Col sm="3">
             <Button theme="white" style={{width:"100%"}} disabled={this.state.disabled} onClick={this.showNewItemModal}>
               <span className="text-success" >
-                <i className="material-icons">check</i>
+                <i className="material-icons">add</i>
               </span>{" "}
               New Item
             </Button>
