@@ -306,22 +306,16 @@ class Lesson extends React.Component {
               </CardHeader>
 
             </Card>
-            <Card small className="mb-4">
+            <Card small className="p-0 px-3 pt-3">
               <CardHeader className="border-bottom">
                 <h5 className="m-0">Teacher's Messages</h5>
                 <h7 style={{fontSize:"17px"}}>Emojis from Teacher:</h7><br /><br />
-                <ul className='rows'>
-                {this.state.currentEmojis.map((smile) => (<li className='row'>{smile}</li>))}
+                <ul className='rows' style={{textAlign:'center', padding:'0'}}>
+                {this.state.currentEmojis.map((smile) => (<li style={{display:'inline', margin:'5px', fontSize:'2em'}} className='row'>{smile}</li>))}
                 </ul>
               </CardHeader>
 
-              <ListGroup flush>
-                <ListGroupItem className="p-0 px-3 pt-3">
-                  <Row>
-
-                  </Row>
-                </ListGroupItem>
-              </ListGroup>
+              
             </Card>
           </Col>
 
