@@ -229,10 +229,20 @@ class Store extends React.Component {
             <Col lg="4" key={idx}>
               <Card small className="card-post mb-4">
                 <CardBody>
+                <Row>
+                <Col md={{ span: 1, offset: 0}}>
+                <div data-letters={this.stringToInitials(post.name)} style={{"--background-color" :  this.stringToColour(post.name), "--font-color" : this.getCorrectTextColor(this.stringToColour(post.name))}} className="blog-comments__meta text-mutes">
+                {}
+                </div>
+                </Col>
+                <Col md={{ span: 1, offset: 1 }}>
+                <h4 className="card-title" style={{ color:  this.stringToColour(post.name) }}>{post.name}</h4>
+                </Col>
+                </Row>
 
 
 
-                  <h4 className="card-title" style={{ color:  this.getRandomColor() }}>{post.name}</h4>
+
                   <p className="card-text text-muted" style={{ color:  this.getRandomColor() }}><b>Description: </b>{" "+ post.description}</p>
                   <p className="card-text text-muted" style={{ color:  this.getRandomColor() }}><b>Cost: </b>{" "+post.cost}</p>
                   <p className="card-text text-muted" style={{ color:  this.getRandomColor() }}><b>Amount Left: </b>{" "+post.amountAvailable}</p>
