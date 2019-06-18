@@ -67,7 +67,6 @@ class CourseSummery extends React.Component {
               this.setState(
                 {course_name: response.data.name ,course_description : response.data.description,course_location: response.data.location, course_start_date: response.data.startDate.substring(0,10), course_end_date: response.data.endDate.substring(0,10)});
 
-              console.log(this.state.name);
             })
             .catch((error)=>{
               console.log(error);
@@ -78,14 +77,14 @@ class CourseSummery extends React.Component {
             <Container fluid className="main-content-container px-4 pb-4">
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title={this.state.course_name} subtitle="Course Summery" className="text-sm-left" />
+          <PageTitle sm="4" title={this.state.course_name} subtitle="Course Summary" className="text-sm-left" />
         </Row>
 
         <Row>
           {/* Editor */}
   <Card style = {{height:"100%",width:"60%",marginLeft:"16px"}} className="mb-4">
     <CardHeader className="border-bottom">
-      <h6 className="m-0">Summery</h6>
+      <h6 className="m-0">Summary</h6>
     </CardHeader>
     <ListGroup flush>
       <ListGroupItem className="p-3">
@@ -94,42 +93,23 @@ class CourseSummery extends React.Component {
             <Form>
               <Row form>
                 {/* Course Name */}
-                <Col md="6" className="form-group">
                   <p>Class Name: {this.state.course_name}</p>
-                </Col>
                 </Row>
 
                 <Row form>
                 {/* Lesson description */}
-                <Col md="6" className="form-group">
                   <p>Lesson's description: {this.state.course_description}</p>
-                </Col>
                 </Row>
 
-                <Row form>
-                {/* Start date */}
-                <Col md="6" className="form-group">
-                  <p>Start date: {this.state.course_start_date}</p>
-                </Col>
-                </Row>
-                <Row form>
-                {/* End date */}
-                <Col md="6" className="form-group">
-                  <p>End date: {this.state.course_end_date}</p>
-                </Col>
-                </Row>
-               <Row form>
+              
+              <Row form>
                  {/* Course Location */}
-                <Col md="6" className="form-group">
                   <p>Location: {this.state.course_location}</p>
-                </Col>
                 </Row>
 
                 <Row form>
                  {/* E-Mony earned */}
-                <Col md="6" className="form-group">
                   <p>Total E-Mony: {this.state.total_reward_money}</p>
-                </Col>
                 </Row>
 
               <a href={"/Overview"}>
@@ -148,8 +128,8 @@ class CourseSummery extends React.Component {
                 <ListGroupItem className="p-0 px-3 pt-3">
               <CardHeader className="border-bottom">
                 <h5 className="m-0">All the Emojis from this lesson</h5><br/>
-                <ul className='rows'>
-                {this.state.Emojis.map((emoji) => (<li className='row'>{emoji}</li>))}
+                <ul className='rows' style={{textAlign:'center', padding:'0'}}>
+                {this.state.Emojis.map((emoji) => (<li style={{display:'inline', margin:'5px', fontSize:'1.6em'}} className='row'>{emoji}</li>))}
                 </ul>
 
               </CardHeader>

@@ -23,7 +23,7 @@ import Modal from 'react-modal';
 const customStyles = {
   content : {
     top                   : '50%',
-    left                  : '50%',
+    left                  : '40%',
     right                 : 'auto',
     bottom                : 'auto',
     marginRight           : '-50%',
@@ -120,7 +120,7 @@ class MyCourses extends React.Component {
                    var Student_id = parseInt(localStorage.getItem('student_id'));
                     for (var student of response.data){
                       if(student.id == Student_id){
-                        console.log("IN THE LESSON!!!");
+                        
                         insert_student_status[current_id] = true;
                         this.setState({lessons_student_status: insert_student_status});
                         break;
@@ -148,7 +148,7 @@ class MyCourses extends React.Component {
         client.on('message', (topic, message) => {
           
         var current_id = ((topic).split('lesson')[1]).split('/')[1];
-         if(message === "LESSON_START"){
+         if(message == "LESSON_START"){
             var insert = this.state.lessons_status;
             insert[current_id] = false;
             this.setState({lessons_status: insert});
@@ -173,7 +173,6 @@ class MyCourses extends React.Component {
   insertDeskNumber() {
     var Student_id = parseInt(localStorage.getItem('student_id'));
     var lesson_id = this.state.post_id;
-    console.log(localStorage.getItem('student_id'));
       let config = {
           headers: {'X-Api-Key' : 'ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6'}
       };
@@ -223,7 +222,7 @@ showModal(id) {
         onRequestClose={this.closeModal}
         style={customStyles}
       >
-      <h3>Please enter your desk number</h3>
+      <h5>Please enter your desk number</h5>
       <Form>
         <FormGroup>
           <label htmlFor="deskNum">Desk number</label>
@@ -280,7 +279,7 @@ showModal(id) {
 
                   <div className="my-auto ml-auto">
 
-                    <Button disabled = {this.state.lessons_status[post.id]} size="sm" theme="white" onClick={() => {this.showModal(post.id)}}>
+                    <Button disabled = {this.state.lessons_status[post.id]} size="sm" theme= {this.state.lessons_status[post.id] == false ? 'success' : 'white'}onClick={() => {this.showModal(post.id)}}>
                       <i className="far fa-bookmark mr-1" /> {this.state.lessons_student_status[post.id] ? "Resume" : "Join" }
                     </Button>
 
