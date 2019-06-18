@@ -147,7 +147,7 @@ functions:
                         paths:
                             courseId: true
     removeCourseRegistered:
-        handler: src/registered/remove.handler
+        handler: src/registered/delete.handler
         description: Register students to a course.
         events:
             - http:
