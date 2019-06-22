@@ -11,23 +11,23 @@
   ```
   More info [here](https://github.com/serverless/serverless/blob/master/docs/providers/aws/guide/credentials.md).
 
-4. Inside the ``backend`` folder, create a file called ``secrets.json`` with the following format:
+4. Inside each microservice folder, create a file called ``secrets.json`` with the following format:
    ```json
    {
-     "DB_NAME": "db",
-     "DB_USER": "root",
-     "DB_PASSWORD": "password",
-     "DB_HOST": "someserver.amazonaws.com",
-     "DB_PORT": 12345,
-	 "LAMBDA_ENDPOINT": "something.amazonaws.com",
-	 "LAMBDA_API_KEY": "key"
+    "DB_NAME": "db",
+    "DB_USER": "root",
+    "DB_PASSWORD": "password",
+    "DB_HOST": "someserver.amazonaws.com",
+    "DB_PORT": 12345,
+    "LAMBDA_ENDPOINT": "something.amazonaws.com",
+    "LAMBDA_API_KEY": "key"
    }
    ```
    This will contain the credentials needed to connect to the database.
 
-5. Also inside ``backend``, run:
+5. Also inside those folders, run:
    ```bash
-   npm Install
+   npm i
    ```
 
 # Deployment

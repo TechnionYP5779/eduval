@@ -85,7 +85,7 @@ const updatePresentStudents = async (event, context, callback) => {
 				`${process.env.LAMBDA_ENDPOINT}/lesson/${event.pathParameters.courseId}/messages/${event.body.id}`,
 				{ messageType: 'EMON', messageReason: '1', value: 5 },
 				{
-					headers: { 'X-Api-Key': process.env.LAMBDA_APIKEY },
+					headers: { Authorization: event.headers.Authorization },
 				},
 			);
 		})
