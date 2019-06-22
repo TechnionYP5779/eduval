@@ -110,6 +110,7 @@ const getStudentLog = async (event, context, callback) => {
 			studentId: event.pathParameters.studentId,
 		})
 		.select()
+		.orderBy('dtime', 'desc')
 		.then(async (result) => {
 			knexConnection.client.destroy();
 
