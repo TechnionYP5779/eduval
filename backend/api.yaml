@@ -1,7 +1,6 @@
 openapi: 3.0.1
 info:
   title: EMon API
-  description: blablabla description.
   version: 1.0.0
 servers:
   - url: 'https://api.emon-teach.com'
@@ -32,6 +31,7 @@ tags:
       Also remember that you can use wildcards.
   - name: shop
     description: stuff related to the item shop
+
 paths:
   /teacher:
     put:
@@ -58,7 +58,7 @@ paths:
           description: Validation exception. Invalid JSON.
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
     post:
       tags:
         - teacher
@@ -84,7 +84,7 @@ paths:
           description: Validation exception. Invalid JSON.
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
   
   '/teacher/{teacherId}/activeLesson':
     get:
@@ -118,7 +118,7 @@ paths:
           description: Teacher not found
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
   
   '/teacher/{teacherId}':
     get:
@@ -148,7 +148,7 @@ paths:
           description: Teacher not found
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
     delete:
       tags:
         - teacher
@@ -172,7 +172,7 @@ paths:
           description: Teacher not found
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
   
   '/teacher/byToken/{authToken}':
     get:
@@ -201,7 +201,7 @@ paths:
           description: Teacher not found
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
 
   
   /student:
@@ -229,7 +229,7 @@ paths:
           description: Validation exception. Invalid JSON.
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
     post:
       tags:
         - student
@@ -255,7 +255,7 @@ paths:
           description: Validation exception. Invalid JSON.
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
   
   '/student/{studentId}':
     get:
@@ -285,7 +285,7 @@ paths:
           description: Teacher not found
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
     delete:
       tags:
         - student
@@ -309,7 +309,7 @@ paths:
           description: Student not found
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
   
   '/student/{studentId}/courseInventory/{courseId}':
     get:
@@ -340,7 +340,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ItemAndAmount'
+                  $ref: '#/components/schemas/OwnedItem'
         '400':
           description: Validation exception. Invalid ID.
           content: {}
@@ -348,7 +348,46 @@ paths:
           description: Teacher not found
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
+  '/student/{studentId}/courseInventory/{courseId}/useItem':
+    post:
+      tags:
+        - student
+      summary: Uses an item a student owns
+      description: Uses an item in a student's inventory.
+      parameters:
+        - name: studentId
+          in: path
+          description: ID of student
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: courseId
+          in: path
+          description: ID of course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: ID of the item to use.
+        content:
+          application/json:
+            schema:
+              type: integer
+      responses:
+        '200':
+          description: successful operation
+          content: {}
+        '400':
+          description: Validation exception. Invalid ID.
+          content: {}
+        '404':
+          description: Teacher not found
+          content: {}
+      security:
+        - auth0_token: []
   
   '/student/byToken/{authToken}':
     get:
@@ -377,7 +416,7 @@ paths:
           description: Student not found
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
   
   '/student/{teacherId}/activeLesson':
     get:
@@ -411,7 +450,7 @@ paths:
           description: Teacher not found
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
   
   '/student/{studentId}/emonBalance/byCourse/{courseId}':
     get:
@@ -450,7 +489,7 @@ paths:
           description: Course not found
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
 
   
   /course:
@@ -477,7 +516,7 @@ paths:
           description: Validation exception. Invalid JSON.
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
     post:
       tags:
         - course
@@ -503,7 +542,7 @@ paths:
           description: Validation exception. Invalid JSON.
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
   
   '/course/{courseId}':
     get:
@@ -533,7 +572,7 @@ paths:
           description: Course not found
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
     delete:
       tags:
         - course
@@ -557,7 +596,7 @@ paths:
           description: Course not found
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
   
   '/course/{courseId}/registered':
     get:
@@ -590,7 +629,7 @@ paths:
           description: No such course
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
     post:
       tags:
         - course
@@ -631,7 +670,7 @@ paths:
           description: Validation exception. Invalid ID/JSON.
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
   
   '/course/{courseId}/registered/{studentId}':
     delete:
@@ -666,7 +705,40 @@ paths:
           description: No such registration pair
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
+  
+  '/course/{courseId}/usedItems':
+    get:
+      tags:
+        - course
+      summary: Get the items that students used in this course
+      
+      description: Returns a list of all the items from this course that were used.
+      parameters:
+        - name: courseId
+          in: path
+          description: ID of the relevant course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: All OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ItemWithStudents'
+        '400':
+          description: Validation exception. Invalid ID.
+          content: {}
+        '404':
+          description: No such course
+          content: {}
+      security:
+        - auth0_token: []
   
   '/course/byTeacher/{teacherId}':
     get:
@@ -698,7 +770,7 @@ paths:
           description: Teacher not found
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
   
   '/course/byStudent/{studentId}':
     get:
@@ -730,7 +802,7 @@ paths:
           description: Student not found
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
 
   
   '/log/ofStudent/{studentId}/byCourse/{courseId}':
@@ -770,7 +842,7 @@ paths:
           description: Course not found
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
   
   
   '/lesson/{courseId}/status':
@@ -805,7 +877,7 @@ paths:
           description: Validation exception. Invalid ID.
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
     post:
       tags:
         - lesson
@@ -843,7 +915,7 @@ paths:
           description: Validation exception. Invalid ID/status.
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
   
   '/lesson/{courseId}/messages/{studentId}':
     get:
@@ -882,7 +954,7 @@ paths:
           description: Course not found
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
     post:
       tags:
         - lesson
@@ -920,7 +992,7 @@ paths:
           description: Validation exception. Invalid ID(s)/JSON.
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
     delete:
       tags:
         - lesson
@@ -952,7 +1024,7 @@ paths:
           description: Validation exception. Invalid ID(s).
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
 
 
   '/lesson/{courseId}/present':
@@ -984,7 +1056,7 @@ paths:
           description: Invalid ID
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
     post:
       tags:
         - lesson
@@ -1022,7 +1094,7 @@ paths:
           description: Invalid ID
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
   
   '/lesson/{courseId}/teacherMessages':
     get:
@@ -1054,7 +1126,7 @@ paths:
           description: Course not found
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
     post:
       tags:
         - lesson
@@ -1085,7 +1157,7 @@ paths:
           description: Validation exception. Invalid ID/JSON.
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
     delete:
       tags:
         - lesson
@@ -1110,7 +1182,7 @@ paths:
           description: Validation exception. Invalid ID.
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
  
   
   '/shop/{courseId}/items':
@@ -1143,7 +1215,7 @@ paths:
           description: Course not found
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
     post:
       tags:
         - shop
@@ -1174,7 +1246,7 @@ paths:
           description: Validation exception. Invalid ID/JSON.
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
     put:
       tags:
         - shop
@@ -1207,7 +1279,8 @@ paths:
           description: Validation exception. Invalid JSON.
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
+  
   '/shop/{courseId}/item/{itemId}':  
     delete:
       tags:
@@ -1240,7 +1313,7 @@ paths:
           description: Validation exception. Invalid ID.
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
   '/shop/{courseId}/order':
     post:
       tags:
@@ -1282,7 +1355,7 @@ paths:
           description: Validation exception. Invalid ID/JSON.
           content: {}
       security:
-        - api_key: []
+        - auth0_token: []
   
   
 components:
@@ -1498,7 +1571,7 @@ components:
           format: date
       additionalProperties: false
       
-    ItemAndAmount:
+    OwnedItem:
       type: object
       properties:
         name:
@@ -1507,13 +1580,43 @@ components:
           type: string
         amount:
           type: integer
+        amountUsed:
+          type: integer
         isActive:
-          type: bool
+          type: boolean
+      additionalProperties: false
+    ItemWithStudents:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        students:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                format: int64
+              name:
+                type: string
+              email:
+                type: string
+                format: email
+              phoneNum:
+                type: string
+              amountUsed:
+                type: integer
       additionalProperties: false
     
  
   securitySchemes:
-    api_key:
-      type: apiKey
-      name: x-api-key
-      in: header
+    auth0_token:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT 
