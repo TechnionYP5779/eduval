@@ -11,7 +11,7 @@ const generatePolicy = (principalId, effect, resource) => {
 		const statementOne = {};
 		statementOne.Action = 'execute-api:Invoke';
 		statementOne.Effect = effect;
-		statementOne.Resource = resource;
+		statementOne.Resource = '*';	// resource;
 		policyDocument.Statement[0] = statementOne;
 		authResponse.policyDocument = policyDocument;
 	}

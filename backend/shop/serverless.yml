@@ -6,11 +6,12 @@ service:        shop
 provider:
     name:       aws
     runtime:    nodejs8.10
-    stage:      dev
+    stage:      prod
     region:     eu-central-1
 
     # defines environment variables for connecting to DB
     environment:
+        AUTHORIZER_ARN:             ${self:custom.secrets.AUTHORIZER_ARN}
         DB_NAME:        ${self:custom.secrets.DB_NAME}
         DB_USER:        ${self:custom.secrets.DB_USER}
         DB_PASSWORD:    ${self:custom.secrets.DB_PASSWORD}
@@ -50,7 +51,7 @@ functions:
                 method: get
                 cors: true
                 authorizer:
-                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
+                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
                 request:
                     parameters:
                         paths:
@@ -64,7 +65,7 @@ functions:
                 method: post
                 cors: true
                 authorizer:
-                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
+                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
                 request:
                     parameters:
                         paths:
@@ -78,7 +79,7 @@ functions:
                 method: put
                 cors: true
                 authorizer:
-                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
+                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
                 request:
                     parameters:
                         paths:
@@ -92,7 +93,7 @@ functions:
                 method: delete
                 cors: true
                 authorizer:
-                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
+                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
                 request:
                     parameters:
                         paths:
@@ -107,8 +108,32 @@ functions:
                 method: post
                 cors: true
                 authorizer:
-                    arn: arn:aws:lambda:eu-central-1:731151862442:function:authorizer-dev-auth
+                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
                 request:
                     parameters:
                         paths:
                             courseId: true
+
+resources:
+    Resources:
+        # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
+        GatewayResponse:
+            Type: 'AWS::ApiGateway::GatewayResponse'
+            Properties:
+                ResponseParameters:
+                    gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+                    gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+                ResponseType: EXPIRED_TOKEN
+                RestApiId:
+                    Ref: 'ApiGatewayRestApi'
+                StatusCode: '401'
+        AuthFailureGatewayResponse:
+            Type: 'AWS::ApiGateway::GatewayResponse'
+            Properties:
+                ResponseParameters:
+                    gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+                    gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+                ResponseType: UNAUTHORIZED
+                RestApiId:
+                    Ref: 'ApiGatewayRestApi'
+                StatusCode: '401'
