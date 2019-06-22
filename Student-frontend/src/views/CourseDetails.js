@@ -51,7 +51,7 @@ class CourseDetails extends React.Component {
 
 
         this.state = {
-          balance:555,
+          balance:'',
           courseName:'',
 
 
