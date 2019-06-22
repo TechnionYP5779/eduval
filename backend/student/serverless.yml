@@ -148,6 +148,21 @@ functions:
                         paths:
                             studentId: true
                             courseId: true
+    useShopItem:
+        handler: src/get.useItem
+        description: Use an item from the inventory of a student
+        events:
+            - http:
+                path: /{studentId}/courseInventory/{courseId}/useItem
+                method: post
+                cors: true
+                authorizer:
+                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
+                request:
+                    parameters:
+                        paths:
+                            studentId: true
+                            courseId: true
 
 resources:
     Resources:

@@ -1,7 +1,7 @@
 const knex = require('knex');
 const middy = require('middy');
 const {
-	cors, httpErrorHandler, httpEventNormalizer,
+	cors, httpErrorHandler, httpEventNormalizer, jsonBodyParser, validator
 } = require('middy/middlewares');
 const createError = require('http-errors');
 const dbConfig = require('../db');
@@ -235,6 +235,42 @@ const getInventory = async (event, context, callback) => {
 		});
 };
 
+// POST student/{studentId}/inventory/{courseId}/useItem
+const useShopItem = async (event, context, callback) => {
+	if (!event.pathParameters.studentId || !event.pathParameters.courseId) {
+		return callback(createError.BadRequest("Student's and course's IDs required."));
+	}
+	if (!isAnInteger(event.pathParameters.studentId) || !isAnInteger(event.pathParameters.courseId)) {
+		return callback(createError.BadRequest('IDs should be integers.'));
+	}
+
+	// Connect
+	const knexConnection = knex(dbConfig);
+
+	return knexConnection('OwnedItems')
+		.where({
+			studentId: event.pathParameters.studentId,
+			courseId: event.pathParameters.courseId,
+			itemId: event.body,
+		})
+		.increment('amountUsed', 1)
+		.then((result) => {
+			knexConnection.client.destroy();
+
+			callback(null, {
+				statusCode: 200,
+				body: '',
+			});
+		})
+		.catch((err) => {
+			// Disconnect
+			knexConnection.client.destroy();
+			// eslint-disable-next-line no-console
+			console.log(`ERROR using item: ${err}`);
+			return callback(createError.InternalServerError('Error using item.'));
+		});
+};
+
 const byId = middy(getStudentById)
 	.use(httpEventNormalizer())
 	.use(httpErrorHandler())
@@ -260,6 +296,15 @@ const inventory = middy(getInventory)
 	.use(httpErrorHandler())
 	.use(cors(corsConfig));
 
+const useItem = middy(useShopItem)
+	.use(httpEventNormalizer())
+	.use(jsonBodyParser())
+	.validator({
+		type: 'integer',
+	})
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
+
 module.exports = {
-	byId, byToken, emons, activeLesson, inventory,
+	byId, byToken, emons, activeLesson, inventory, useItem,
 };
