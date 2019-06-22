@@ -58,7 +58,42 @@ class CourseStore extends React.Component {
 
       modalDeleteIsOpen: false,
 
-      products: []
+      products: [],
+
+      demi_products: [
+        {
+          id: 1,
+          name: "Test pass",
+          description: "skip the test on Monday",
+          cost: 100,
+          amountAvailable: 5,
+          sellByDate: "14-02-2019"
+        },
+        {
+          id: 2,
+          name: "Homework pass",
+          description: "one time pass to not turn in homework",
+          cost: 30,
+          amountAvailable: 25,
+          sellByDate: "11-02-2019"
+        },
+        {
+          id: 3,
+          name: "Late day",
+          description: "one time pass to come in late",
+          cost: 5,
+          amountAvailable: 25,
+          sellByDate: "11-02-2019"
+        },
+        {
+          id: 4,
+          name: "Notebook",
+          description: "Notebooks cupons",
+          cost: 15,
+          amountAvailable: 40,
+          sellByDate: "11-07-2019"
+        }
+      ]
 
     };
 
@@ -305,7 +340,7 @@ class CourseStore extends React.Component {
           </CardHeader>
 
           <CardBody className="p-0">
-            {this.state.products.map((product, idx) => {
+            {this.state.demi_products.map((product, idx) => {
               let initials = stringToInitials(product.name);
               let color = stringToColour(product.name);
               let fontColor = getCorrectTextColor(color);

@@ -11,6 +11,7 @@ class Server {
 
   getConfig(){
     let authorization = "Bearer " + localStorage.getItem('idToken');
+    console.log(authorization);
     return {
       headers: {
         'X-Api-Key': SERVER_CONFIG.xApiKey,
