@@ -135,6 +135,88 @@ const getCoursesByStudent = async (event, context, callback) => {
 		});
 };
 
+
+function processResult(result) {
+	const toRet = {};
+
+	for (let i = 0; i < result.length; i += 1) {
+		const r = result[i];
+		if (toRet[r.itemId]) {
+			toRet[r.itemId].students.push({
+				id: r.studentId,
+				name: r.studentName,
+				phoneNum: r.phoneNum,
+				amountUsed: r.amountUsed,
+				email: r.email,
+			});
+		} else {
+			toRet[r.itemId] = {
+				id: r.itemId,
+				name: r.itemName,
+				description: r.itemDesc,
+				students: [
+					{
+						id: r.studentId,
+						name: r.studentName,
+						phoneNum: r.phoneNum,
+						amountUsed: r.amountUsed,
+						email: r.email,
+					},
+				],
+			};
+		}
+	}
+
+	return Object.values(toRet);
+}
+
+// GET course/{courseId}/usedItems
+const getUsedItems = async (event, context, callback) => {
+	if (!event.pathParameters.courseId) {
+		return callback(createError.BadRequest("Course's ID required."));
+	}
+	if (!isAnInteger(event.pathParameters.courseId)) {
+		return callback(createError.BadRequest('ID should be an integer.'));
+	}
+
+	// Connect
+	const knexConnection = knex(dbConfig);
+
+	return knexConnection('ShopItems')
+		.where({
+			courseId: event.pathParameters.courseId,
+		})
+		.join('OwnedItems', 'ShopItems.itemId', 'OwnedItems.itemId')
+		.join('Students', 'OwnedItems.studentId', 'Students.studentId')
+		.select(
+			'ShopItems.name as itemName',
+			'ShopItems.description as itemDesc',
+			'ShopItems.itemId',
+			'OwnedItems.amountUsed',
+			'Students.name as studentName',
+			'Students.studentId',
+			'Students.email',
+			'Students.phoneNum',
+		)
+		.then((result) => {
+			knexConnection.client.destroy();
+
+			const data = processResult(result);
+
+			callback(null, {
+				statusCode: 200,
+				body: JSON.stringify(data),
+			});
+		})
+		.catch((err) => {
+			// Disconnect
+			knexConnection.client.destroy();
+			// eslint-disable-next-line no-console
+			console.log(`ERROR getting course: ${err}`);
+			return callback(createError.InternalServerError('Error getting course.'));
+		});
+};
+
 const byId = middy(getCourseById)
 	.use(httpEventNormalizer())
 	.use(httpErrorHandler())
@@ -150,4 +232,11 @@ const byStudentId = middy(getCoursesByStudent)
 	.use(httpErrorHandler())
 	.use(cors(corsConfig));
 
-module.exports = { byId, byTeacherId, byStudentId };
+const usedItems = middy(getUsedItems)
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
+
+module.exports = {
+	byId, byTeacherId, byStudentId, usedItems,
+};
