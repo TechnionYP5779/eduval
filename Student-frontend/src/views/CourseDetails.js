@@ -51,7 +51,7 @@ class CourseDetails extends React.Component {
 
 
         this.state = {
-          balance:555,
+          balance:'',
           courseName:'',
 
 
@@ -65,7 +65,7 @@ class CourseDetails extends React.Component {
 
           ],
 
-          
+
         };
         let config = {
           headers: {'Authorization': 'Bearer ' + localStorage.getItem('idToken')}
@@ -103,7 +103,7 @@ class CourseDetails extends React.Component {
 
 
       }
-      
+
     render(){
         return(
             <Container fluid className="main-content-container px-4 pb-4">
@@ -115,7 +115,7 @@ class CourseDetails extends React.Component {
 
         <Row>
           <Col>
-      <Row>    
+      <Row>
           {/* Editor */}
   <Card style = {{height:"100%",width:"100%",marginLeft:"16px"}} className="mb-4">
     <CardHeader className="border-bottom">
@@ -165,7 +165,7 @@ class CourseDetails extends React.Component {
 
                 <tr>
                   <td>{post.item.name}</td>
-                  <td>{new Date(post.item.sellByDate).getDate().toString().padStart(2,'0') + '/' + new Date(post.item.sellByDate).getMonth().toString().padStart(2,'0') + '/' + new Date(post.item.sellByDate).getFullYear() }</td>
+                  <td>{post.time.padStart(2,'0').split('T')[0] }</td>
                   <td>{post.item.cost}</td>
                 </tr>))}
               </tbody>
@@ -201,7 +201,7 @@ class CourseDetails extends React.Component {
               {  Array.from(this.state.PostsListThree).map((post, idx) => (
 
                 <tr>
-                  <td>{new Date(post.time).getDate().toString().padStart(2,'0') + '/' + new Date(post.time).getMonth().toString().padStart(2,'0') + '/' + new Date(post.time).getFullYear() }</td>
+                  <td>{post.time.padStart(2,'0').split('T')[0] }</td>
                   <td>{new Date(post.time).getHours().toString().padStart(2,'0') + ':' + new Date(post.time).getMinutes().toString().padStart(2,'0')}</td>
                   <td><TableEntry messageType={post.messageType} value={post.value} emojiType={post.emojiType}/></td>
                 </tr>))}

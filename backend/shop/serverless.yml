@@ -11,6 +11,7 @@ provider:
 
     # defines environment variables for connecting to DB
     environment:
+        AUTHORIZER_ARN:             ${self:custom.secrets.AUTHORIZER_ARN}
         DB_NAME:        ${self:custom.secrets.DB_NAME}
         DB_USER:        ${self:custom.secrets.DB_USER}
         DB_PASSWORD:    ${self:custom.secrets.DB_PASSWORD}
@@ -29,11 +30,15 @@ plugins:
 custom:
     # contains the credentials needed to connect to the DB
     secrets:    ${file(secrets.json)}
+    customDomainEnabled:
+        dev: false
+        prod: true
     customDomain:
         domainName: 'api.emon-teach.com'
         basePath: 'shop' # This will be prefixed to all routes
         stage: ${self:provider.stage}
         createRoute53Record: true
+        enabled: ${self:custom.customDomainEnabled.${self:provider.stage}}
 
 #TODO: Implement a more strict CORS policy
 functions:
@@ -45,6 +50,8 @@ functions:
                 path: '{courseId}/items'
                 method: get
                 cors: true
+                authorizer:
+                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
                 request:
                     parameters:
                         paths:
@@ -57,6 +64,8 @@ functions:
                 path: '{courseId}/items'
                 method: post
                 cors: true
+                authorizer:
+                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
                 request:
                     parameters:
                         paths:
@@ -69,6 +78,8 @@ functions:
                 path: '{courseId}/items'
                 method: put
                 cors: true
+                authorizer:
+                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
                 request:
                     parameters:
                         paths:
@@ -81,6 +92,8 @@ functions:
                 path: '{courseId}/item/{itemId}'
                 method: delete
                 cors: true
+                authorizer:
+                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
                 request:
                     parameters:
                         paths:
@@ -94,7 +107,33 @@ functions:
                 path: '{courseId}/order'
                 method: post
                 cors: true
+                authorizer:
+                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
                 request:
                     parameters:
                         paths:
                             courseId: true
+
+resources:
+    Resources:
+        # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
+        GatewayResponse:
+            Type: 'AWS::ApiGateway::GatewayResponse'
+            Properties:
+                ResponseParameters:
+                    gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+                    gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+                ResponseType: EXPIRED_TOKEN
+                RestApiId:
+                    Ref: 'ApiGatewayRestApi'
+                StatusCode: '401'
+        AuthFailureGatewayResponse:
+            Type: 'AWS::ApiGateway::GatewayResponse'
+            Properties:
+                ResponseParameters:
+                    gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+                    gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+                ResponseType: UNAUTHORIZED
+                RestApiId:
+                    Ref: 'ApiGatewayRestApi'
+                StatusCode: '401'

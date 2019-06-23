@@ -315,7 +315,7 @@ class Lesson extends React.Component {
                         return (<Col xs="3" key={idx}>
                         {
                           this.state.chosen_students.indexOf(student.id) >= 0 &&
-                          <Button disabled={this.state.disabled} style={{margin:"6px", fontWeight: "600", fontSize: "0.9em", width: "100%", "--mess-color" : color}} className="mb-2 mr-1 badge1 custom-active" data-badge={"desk #" + student.desk} onClick={()=>{
+                          <Button disabled={this.state.disabled} style={{margin:"6px", fontWeight: "600", fontSize: "0.9em", width: "100%", "--mess-color" : color}} className="mb-2 mr-1 badge1 custom-active" data-badge={"Desk #" + student.desk} onClick={()=>{
                             unchooseStudent(student.id);
                           }}>
                             {student.name}
