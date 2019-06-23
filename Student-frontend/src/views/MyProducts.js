@@ -18,6 +18,7 @@ import TimeoutAlert from "../components/common/TimeoutAlert";
 import awsIot  from 'aws-iot-device-sdk';
 import CoinImage from "../images/midEcoin.png"
 import Dropdown from 'react-dropdown'
+import Select from 'react-select';
 import { DropdownButton } from 'react-bootstrap';
 
 class MyProducts extends React.Component {
@@ -25,7 +26,8 @@ class MyProducts extends React.Component {
         super(props);
         
         this.state = {
-            course:[]    
+            courses:[],
+            selectedCourse: []    
         };
         
         var headers = {
@@ -42,7 +44,7 @@ class MyProducts extends React.Component {
         axios.get('https://api.emon-teach.com/course/byStudent/'+localStorage.getItem('student_id'),
         {headers: headers})
         .then(response =>{
-            this.setState({courses: response.data}); console.log(this.state.courses);  
+            this.setState({courses: response.data}); 
 
 
     const getContent = function(url) {
@@ -88,21 +90,21 @@ class MyProducts extends React.Component {
 
     setCourse(c) {
         this.setState({
-            course: c,
+            selectedCourse: c,
             
         });
     }
 
     render() {
         const {
-            course
+            courses
         } = this.state;
         var rand;
 
         return (
             
     <Container fluid className="main-content-container px-4">
-         {console.log(this.state.course)}
+         {console.log(this.state.courses)}
                 {this.state.error &&
           <Container fluid className="px-0" >
           <TimeoutAlert className="mb-0" theme="danger" msg={this.state.message} time={3000} />
@@ -123,12 +125,15 @@ class MyProducts extends React.Component {
         </Row>
         <Row style={{padding:"16px"}}>
            
-        <DropdownButton id="dropdown-item-button" title="Select Course" onSelect={event => this.setType(event.target.eventCourse)}>
+        <DropdownButton id="dropdown-item-button" title="Select Course">
             
-        {course.map((course, idx) => (
-            <Dropdown.Item as="button" eventCourse={course}>{course.name}</Dropdown.Item>
+        {this.state.courses.map((course, idx) => (
+            <Dropdown.Item as="button" >{course.name}</Dropdown.Item>
             ))}
             </DropdownButton>
+             </Row>
+            <Row style={{padding:"16px"}}>
+             <Select options={ this.state.courses } />
              </Row>
              </Container>
             );
