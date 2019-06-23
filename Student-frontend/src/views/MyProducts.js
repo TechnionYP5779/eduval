@@ -24,12 +24,12 @@ import { DropdownButton } from 'react-bootstrap';
 class MyProducts extends React.Component {
     constructor(props) {
         super(props);
-        
+
         this.state = {
             courses:[],
-            selectedCourse: []    
+            selectedCourse: []
         };
-        
+
         var headers = {
             'Authorization': 'Bearer ' + localStorage.getItem('idToken')
         };
@@ -39,12 +39,12 @@ class MyProducts extends React.Component {
      {headers: headers})
       .then(response =>localStorage.setItem('student_id', response.data.id) );
       let res=[];
-      
-        //getting data all the courses the student taking 
+
+        //getting data all the courses the student taking
         axios.get('https://api.emon-teach.com/course/byStudent/'+localStorage.getItem('student_id'),
         {headers: headers})
         .then(response =>{
-            this.setState({courses: response.data}); 
+            this.setState({courses: response.data});
 
 
     const getContent = function(url) {
@@ -80,18 +80,18 @@ class MyProducts extends React.Component {
 
     }
 
-        
+
 }).catch((error)=>{
      console.log(error);
   });
 
-    } 
+    }
 
 
     setCourse(c) {
         this.setState({
             selectedCourse: c,
-            
+
         });
     }
 
@@ -102,7 +102,7 @@ class MyProducts extends React.Component {
         var rand;
 
         return (
-            
+
     <Container fluid className="main-content-container px-4">
          {console.log(this.state.courses)}
                 {this.state.error &&
@@ -123,23 +123,16 @@ class MyProducts extends React.Component {
 
 
         </Row>
-        <Row style={{padding:"16px"}}>
-           
-        <DropdownButton id="dropdown-item-button" title="Select Course">
-            
-        {this.state.courses.map((course, idx) => (
-            <Dropdown.Item as="button" >{course.name}</Dropdown.Item>
-            ))}
-            </DropdownButton>
-             </Row>
-            <Row style={{padding:"16px"}}>
-             <Select options={ this.state.courses } />
-             </Row>
-             </Container>
-            );
-            
-        }
-        
+        <Row>
+
+        <Select options={ this.state.courses.map((course)=>{
+          return {value: course, label: course.name};
+        }) } />
+
+        </Row>
+
+      </Container>
+    );
+  }
 }
 export default MyProducts;
-    
