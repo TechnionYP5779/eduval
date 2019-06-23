@@ -337,6 +337,28 @@ class Server {
     .then(callback)
     .catch(callbackError);
   }
+  /*
+  =================== Get Products Use ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+      + response is {data: [product objects]}
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - courseId: the course id
+  @use conditions:
+    - User should be logged in when called.
+  */
+  getProductUse(callback, callbackError, courseId){
+    let teacher_id = localStorage.getItem('teacher_id');
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    axios.get(SERVER_CONFIG.domain + "/course/" + courseId + "/purchasedItems", this.getConfig())
+    .then(callback)
+    .catch(callbackError);
+  }
 
   /*
   =================== Get Students ====================
