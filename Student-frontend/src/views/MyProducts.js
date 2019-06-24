@@ -19,7 +19,7 @@ import awsIot  from 'aws-iot-device-sdk';
 import CoinImage from "../images/midEcoin.png"
 import Dropdown from 'react-dropdown'
 import Select from 'react-select';
-import { DropdownButton } from 'react-bootstrap';
+
 
 const customStyles = {
   width: 50 ,
@@ -36,7 +36,9 @@ class MyProducts extends React.Component {
 
         this.state = {
             courses:[],
-            selectedCourse: []
+            selectedCourse: [], 
+            products: [], 
+            ischoosen: false
         };
 
         var headers = {
@@ -96,16 +98,74 @@ class MyProducts extends React.Component {
 
     }
 
-
-    setCourse(c) {
-        this.setState({
-            selectedCourse: c,
-
-        });
-    }
     onSelect = e => {
-    console.log(e.label);
+        this.setState({selectedCourse: e.value});
+        
+        console.log(this.state.selectedCourse);
+        console.log(e.value);
+        this.setState({products: [], ischoosen: true});
+
+        var headers = {
+        'Authorization': 'Bearer ' + localStorage.getItem('idToken')
+         };
+
+        axios.get('https://api.emon-teach.com/student/'+localStorage.getItem('student_id')+'/courseInventory/'+e.value.id,
+         {headers: headers})
+         .then(response =>{var data = Array.from(response.data); this.setState({products: data.filter(elem => elem.amountAvailable>0) }); console.log(this.state.products)} );
+
+
   }
+
+  sleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
+}
+
+  stringToColour(str) {
+    var hash = 0;
+    for (var i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    var colour = '#';
+    for (var i = 0; i < 3; i++) {
+        var value = (hash >> (i * 8)) & 0xFF;
+        colour += ('00' + value.toString(16)).substr(-2);
+    }
+    return colour;
+  }
+
+  stringToInitials(str){
+    return str.split(" ").map((n)=>n[0].toUpperCase()).join("");
+  }
+
+  getCorrectTextColor(hex){
+
+    const threshold = 130;
+
+
+    function hexToR(h) {return parseInt((cutHex(h)).substring(0,2),16)}
+    function hexToG(h) {return parseInt((cutHex(h)).substring(2,4),16)}
+    function hexToB(h) {return parseInt((cutHex(h)).substring(4,6),16)}
+    function cutHex(h) {return (h.charAt(0)=="#") ? h.substring(1,7):h}
+
+    hex = cutHex(hex);
+    let hRed = hexToR(hex);
+    let hGreen = hexToG(hex);
+    let hBlue = hexToB(hex);
+
+    let cBrightness = ((hRed * 299) + (hGreen * 587) + (hBlue * 114)) / 1000;
+      if (cBrightness > threshold){return "#000000";} else { return "#ffffff";}
+  }
+
+
+    productuse(product){
+        console.log("YYYEEEYYYY");
+    }
+
 
     render() {
         const {
@@ -144,7 +204,52 @@ class MyProducts extends React.Component {
         </div>
         </Row>
 
+        <Row >
+              <Col >
+                <p style={{fontSize: 20}}>{(Array.from(this.state.products).length == 0 && this.state.ischoosen) ? "You don't have any items!" : null}</p>
+              </Col>
+        </Row>
 
+        {/* items */}
+        <Row>
+           { Array.from(this.state.products).map((product, idx) => (
+            <Col lg="4" key={idx}>
+              <Card small className="card-post mb-4">
+                <CardBody>
+                <Row>
+                <Col md={{ span: 1, offset: 0}}>
+                <div data-letters={this.stringToInitials(product.name)} style={{"--background-color" :  this.stringToColour(product.name), "--font-color" : this.getCorrectTextColor(this.stringToColour(product.name))}} className="blog-comments__meta text-mutes">
+                {}
+                </div>
+                </Col>
+                <Col md={{ span: 1, offset: 1 }}>
+                <h4 className="card-title" style={{ color:  this.stringToColour(product.name) }}>{product.name}</h4>
+                </Col>
+                </Row>
+
+
+
+
+                  <p className="card-text text-muted" style={{ color:  this.getRandomColor() }}><b>Description: </b>{" "+ product.description}</p>
+                  <p className="card-text text-muted" style={{ color:  this.getRandomColor() }}><b>Cost: </b>{" "+product.cost}</p>
+                  <p className="card-text text-muted" style={{ color:  this.getRandomColor() }}><b>Amount Left: </b>{" "+product.amountAvailable}</p>
+
+                </CardBody>
+                <CardFooter className="border-top d-flex">
+                  <div className="card-post__author d-flex">
+                    <div className="d-flex flex-column justify-content-center ml-3">
+                    <a ><Button ssize="sm"   theme="white" onClick={() => {this.productuse(product)}}>
+                      <i className="far  mr-1" /> Buy
+                    </Button></a>
+                    </div>
+                  </div>
+                  </CardFooter>
+
+
+              </Card>
+            </Col>
+          ))}
+        </Row>
       </Container>
     );
   }
