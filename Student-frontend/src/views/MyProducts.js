@@ -21,6 +21,15 @@ import Dropdown from 'react-dropdown'
 import Select from 'react-select';
 import { DropdownButton } from 'react-bootstrap';
 
+const customStyles = {
+  width: 50 ,
+  control: base => ({
+    ...base,
+    height: 50,
+    minHeight: 35
+  })
+};
+
 class MyProducts extends React.Component {
     constructor(props) {
         super(props);
@@ -94,6 +103,9 @@ class MyProducts extends React.Component {
 
         });
     }
+    onSelect = e => {
+    console.log(e.label);
+  }
 
     render() {
         const {
@@ -124,12 +136,14 @@ class MyProducts extends React.Component {
 
         </Row>
         <Row>
+        <div style={{width: '300px'}}>
 
-        <Select options={ this.state.courses.map((course)=>{
+        <Select  onChange={this.onSelect} options={ this.state.courses.map((course)=>{
           return {value: course, label: course.name};
         }) } />
-
+        </div>
         </Row>
+
 
       </Container>
     );
