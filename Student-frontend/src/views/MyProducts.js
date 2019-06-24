@@ -38,7 +38,9 @@ class MyProducts extends React.Component {
             courses:[],
             selectedCourse: [], 
             products: [], 
-            ischoosen: false
+            ischoosen: false, 
+            haveAnswer: false, 
+            message: ""
         };
 
         var headers = {
@@ -96,23 +98,35 @@ class MyProducts extends React.Component {
      console.log(error);
   });
 
+
+
+           const getContent = function(url) {
+      return new Promise((resolve, reject) => {
+    	    const lib = url.startsWith('https') ? require('https') : require('http');
+    	    const request = lib.get(url, (response) => {
+    	      if (response.statusCode < 200 || response.statusCode > 299) {
+    	         reject(new Error('Failed to load page, status code: ' + response.statusCode));
+    	       }
+
+    	      const body = [];
+    	      response.on('data', (chunk) => body.push(chunk));
+    	      response.on('end', () => resolve(body.join('')));
+    	    });
+    	    request.on('error', (err) => reject(err))
+        })
+    };
     }
 
     onSelect = e => {
-        this.setState({selectedCourse: e.value});
-        
-        console.log(this.state.selectedCourse);
-        console.log(e.value);
-        this.setState({products: [], ischoosen: true});
+        this.setState({products: [],selectedCourse: e, ischoosen: true});
 
         var headers = {
         'Authorization': 'Bearer ' + localStorage.getItem('idToken')
          };
-
+        this.setState({haveAnswer: false});
         axios.get('https://api.emon-teach.com/student/'+localStorage.getItem('student_id')+'/courseInventory/'+e.value.id,
          {headers: headers})
-         .then(response =>{var data = Array.from(response.data); this.setState({products: data.filter(elem => elem.amountAvailable>0) }); console.log(this.state.products)} );
-
+         .then(response =>{var data = Array.from(response.data); this.setState({products: data.filter(elem => (elem.amount - elem.amountUsed)>0 ), haveAnswer: true }); } );
 
   }
 
@@ -161,9 +175,34 @@ class MyProducts extends React.Component {
       if (cBrightness > threshold){return "#000000";} else { return "#ffffff";}
   }
 
+  getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+
+
+   }
 
     productuse(product){
-        console.log("YYYEEEYYYY");
+        var headers = {
+        'Authorization': 'Bearer ' + localStorage.getItem('idToken')
+      };
+
+      
+      axios.post('https://api.emon-teach.com/student/'+localStorage.getItem('student_id')+ '/courseInventory/' + this.state.selectedCourse.value.id + '/useItem', 
+    product.itemId,
+     {headers: headers})
+      .then(response =>{this.setState({message: "The items is successfully used", success: true, error:false}); this.onSelect(this.state.selectedCourse); } );
+
+
+      this.sleep(500);
+      //getting emon balance of student in the course
+      
+
+
     }
 
 
@@ -176,7 +215,6 @@ class MyProducts extends React.Component {
         return (
 
     <Container fluid className="main-content-container px-4">
-         {console.log(this.state.courses)}
                 {this.state.error &&
           <Container fluid className="px-0" >
           <TimeoutAlert className="mb-0" theme="danger" msg={this.state.message} time={3000} />
@@ -195,7 +233,7 @@ class MyProducts extends React.Component {
 
 
         </Row>
-        <Row>
+        <Row noGutters className="page-header py-4">
         <div style={{width: '300px'}}>
 
         <Select  onChange={this.onSelect} options={ this.state.courses.map((course)=>{
@@ -206,7 +244,7 @@ class MyProducts extends React.Component {
 
         <Row >
               <Col >
-                <p style={{fontSize: 20}}>{(Array.from(this.state.products).length == 0 && this.state.ischoosen) ? "You don't have any items!" : null}</p>
+                <p style={{fontSize: 20}}>{(Array.from(this.state.products).length == 0 && this.state.ischoosen && this.state.haveAnswer) ? "You don't have any items!" : null}</p>
               </Col>
         </Row>
 
@@ -231,14 +269,15 @@ class MyProducts extends React.Component {
 
 
                   <p className="card-text text-muted" style={{ color:  this.getRandomColor() }}><b>Description: </b>{" "+ product.description}</p>
-                  <p className="card-text text-muted" style={{ color:  this.getRandomColor() }}><b>Cost: </b>{" "+product.cost}</p>
-                  <p className="card-text text-muted" style={{ color:  this.getRandomColor() }}><b>Amount Left: </b>{" "+product.amountAvailable}</p>
+                  <p className="card-text text-muted" style={{ color:  this.getRandomColor() }}><b>Amount Left: </b>{" "+(product.amount - product.amountUsed)}</p>
+                  <p className="card-text text-muted" style={{ color:  this.getRandomColor() }}><b>Status: </b>{(product.isActive) ? "Active" : "Not Active"}</p>
+
 
                 </CardBody>
                 <CardFooter className="border-top d-flex">
                   <div className="card-post__author d-flex">
                     <div className="d-flex flex-column justify-content-center ml-3">
-                    <a ><Button ssize="sm"   theme="white" onClick={() => {this.productuse(product)}}>
+                    <a ><Button ssize="sm"   theme="white" disabled={!product.isActive} onClick={() => {this.productuse(product)}}>
                       <i className="far  mr-1" /> Buy
                     </Button></a>
                     </div>
