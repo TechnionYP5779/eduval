@@ -12,6 +12,7 @@ import ErrorNotLogin from "./views/ErrorNotLogin";
 import ComponentsOverview from "./views/ComponentsOverview";
 import Tables from "./views/Tables";
 import MyCourses from "./views/MyCourses";
+import MyProducts from "./views/MyProducts";
 import Callback from "./views/Callback";
 import CourseDetails from "./views/CourseDetails";
 import Lesson from "./views/Lesson";
@@ -70,6 +71,11 @@ export default [
     path: "/my-courses",
     layout: ProtectedLayout,
     component: MyCourses
+  },
+  {
+    path: "/my-products",
+    layout: ProtectedLayout,
+    component: MyProducts
   },
   {
     path: "/course-summery/:id",

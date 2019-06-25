@@ -48,6 +48,9 @@ class CourseStore extends React.Component {
       course: {
       },
 
+      used_items: [
+      ],
+
       disabled: false,
 
       current_item: {},
@@ -58,7 +61,42 @@ class CourseStore extends React.Component {
 
       modalDeleteIsOpen: false,
 
-      products: []
+      products: [],
+
+      demi_products: [
+        {
+          id: 1,
+          name: "Test pass",
+          description: "skip the test on Monday",
+          cost: 100,
+          amountAvailable: 5,
+          sellByDate: "14-02-2019"
+        },
+        {
+          id: 2,
+          name: "Homework pass",
+          description: "one time pass to not turn in homework",
+          cost: 30,
+          amountAvailable: 25,
+          sellByDate: "11-02-2019"
+        },
+        {
+          id: 3,
+          name: "Late day",
+          description: "one time pass to come in late",
+          cost: 5,
+          amountAvailable: 25,
+          sellByDate: "11-02-2019"
+        },
+        {
+          id: 4,
+          name: "Notebook",
+          description: "Notebooks cupons",
+          cost: 15,
+          amountAvailable: 40,
+          sellByDate: "11-07-2019"
+        }
+      ]
 
     };
 
@@ -72,6 +110,13 @@ class CourseStore extends React.Component {
     this.showEditItemModal = this.showEditItemModal.bind(this);
     this.showDeleteItemModal = this.showDeleteItemModal.bind(this);
     this.closeDeleteModal = this.closeDeleteModal.bind(this);
+
+    this.showBuyersModal = this.showBuyersModal.bind(this);
+    this.closeInfoModal = this.closeInfoModal.bind(this);
+  }
+
+  showBuyersModal(product){
+    this.setState({current_item: product, modalInfoIsOpen: true});
   }
 
   handleNameInput(input){
@@ -95,7 +140,8 @@ class CourseStore extends React.Component {
   handleLastDateInput(input){
     let item = this.state.current_item;
     item.sellByDate = input.target.value;
-    this.setState({current_item: item})
+
+    this.setState({current_item: item});
   }
 
   handleDescriptionInput(input){
@@ -105,7 +151,7 @@ class CourseStore extends React.Component {
   }
 
   showNewItemModal() {
-    this.setState({modalIsOpen: true, titleModal: "Add new item to " + this.state.course.name + " store", current_item: {
+    this.setState({modalIsOpen: true, titleModal: "Add new item to \"" + this.state.course.name + "\" store", current_item: {
       id: -1,
       name: "",
       description: "",
@@ -119,8 +165,9 @@ class CourseStore extends React.Component {
     let edit_item = {};
     Object.assign(edit_item, item);
     edit_item.sellByDate = edit_item.sellByDate.substring(0,10);
+
     this.setState({modalIsOpen: true,
-      titleModal: "Add new item to " + this.state.course.name + " store",
+      titleModal: "Update \"" + edit_item.name + "\"",
       current_item: edit_item});
   }
 
@@ -137,6 +184,10 @@ class CourseStore extends React.Component {
     this.setState({modalDeleteIsOpen: false});
   }
 
+  closeInfoModal() {
+    this.setState({modalInfoIsOpen: false});
+  }
+
   componentDidMount() {
     var self = this;
     server.getCourse(function(response){
@@ -144,8 +195,9 @@ class CourseStore extends React.Component {
     }, (err)=>{}, this.props.match.params.id);
     server.getProducts((response)=>{
       self.setState({products: response.data});
-      console.log("===== response ======");
-      console.log(response);
+    }, (err)=>{console.log(err);}, this.props.match.params.id);
+    server.getProductUse((response)=>{
+      self.setState({used_items: response.data});
     }, (err)=>{console.log(err);}, this.props.match.params.id);
   }
 
@@ -204,6 +256,7 @@ class CourseStore extends React.Component {
     let showDeleteItemModal = this.showDeleteItemModal;
     let closeDeleteModal = this.closeDeleteModal;
     let self = this;
+    let showBuyersModal = this.showBuyersModal;
 
     return (
       <div>
@@ -212,7 +265,7 @@ class CourseStore extends React.Component {
         onRequestClose={this.closeDeleteModal}
         style={customStyles}
       >
-      <h3>Are you sure you want to delete {this.state.current_item.name}?</h3>
+      <h3>Are you sure you want to delete "{this.state.current_item.name}"?</h3>
 
       <Button disabled={this.state.disabled} theme="success" onClick={()=>{
         self.setState({disabled: true});
@@ -221,6 +274,53 @@ class CourseStore extends React.Component {
         self.state.current_item.id, self.props.match.params.id);
       }}>Yes</Button>
       <Button theme="danger" disabled={this.state.disabled} style={{float: "right"}} onClick={closeDeleteModal}>No</Button>
+      </Modal>
+
+      <Modal
+        isOpen={this.state.modalInfoIsOpen}
+        onRequestClose={this.closeInfoModal}
+        style={customStyles}
+      >
+      <h3>Students who bought "{this.state.current_item.name}"</h3>
+
+      <table className="table mb-0">
+        <thead className="bg-light">
+          <tr>
+            <th scope="col" className="border-0">
+            #
+            </th>
+            <th scope="col" className="border-0">
+            Name
+            </th>
+            <th scope="col" className="border-0">
+            Email
+            </th>
+            <th scope="col" className="border-0">
+            Use count
+            </th>
+            <th scope="col" className="border-0">
+            Buy count
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {this.state.used_items.filter(item=>item.id == this.state.current_item.id).map((item, idx)=>
+            item.students.map((student, i)=>
+              <tr key={i}>
+                {console.log(student)}
+                <td> {i+1} </td>
+                <td> {student.name} </td>
+                <td> {student.email} </td>
+                <td> {student.amountUsed} </td>
+                <td> {student.amountPurchased} </td>
+              </tr>
+            )
+          )}
+        </tbody>
+      </table>
+
+
+      <Button theme="danger" disabled={this.state.disabled} style={{float: "right"}} onClick={this.closeInfoModal}>Close</Button>
       </Modal>
 
       <Modal
@@ -332,7 +432,7 @@ class CourseStore extends React.Component {
                     <ButtonGroup vertical style={{width:"100%"}} className="mr-2">
                       <Button disabled={this.state.disabled} theme="white" onClick={()=>showEditItemModal(product)}>
                         <span className="text-light">
-                          <i className="material-icons">more_vert</i>
+                          <i className="material-icons">edit</i>
                         </span>{" "}
                         Edit
                       </Button>
@@ -342,7 +442,12 @@ class CourseStore extends React.Component {
                         </span>{" "}
                         Delete
                       </Button>
-
+                      <Button disabled={this.state.disabled} theme="white" onClick={()=>showBuyersModal(product)}>
+                        <span outline className="text-light">
+                          <i className="material-icons">error_outline</i>
+                        </span>{" "}
+                        Usage Information
+                      </Button>
                     </ButtonGroup>
                   </div>
                   </Col></Row>

@@ -278,9 +278,9 @@ class Lesson extends React.Component {
     }
       <Container fluid className="main-content-container px-4">
 
-            
 
-           
+
+
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
           <PageTitle sm="4" title={this.state.name} subtitle="Lesson View" className="text-sm-left" />
@@ -308,7 +308,7 @@ class Lesson extends React.Component {
                 </ul>
               </CardHeader>
 
-              
+
             </Card>
           </Col>
 
@@ -341,7 +341,7 @@ class Lesson extends React.Component {
                       axios.post(
                       'https://api.emon-teach.com' + "/lesson/" + this.state.lesson_id + "/teacherMessages" ,
                       {messageType: "MESSAGE", studentId:  this.state.student_id, content: message.enum},
-                      this.config)
+                      {headers: headers})
                     .then( (response) =>{
                         this.setState({message: "Your message sent to your teacher!", success: true});
                         window.scrollTo(0, 0)});

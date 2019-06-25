@@ -72,6 +72,11 @@ export default [
     component: MyCourses
   },
   {
+    path: "/my-products",
+    layout: ProtectedLayout,
+    component: MyProducts
+  },
+  {
     path: "/course-summery/:id",
     layout: DefaultLayout,
     component: CourseSummery
