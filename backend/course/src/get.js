@@ -147,6 +147,7 @@ function processResult(result) {
 				name: r.studentName,
 				phoneNum: r.phoneNum,
 				amountUsed: r.amountUsed,
+				amountPurchased: r.amountPurchased,
 				email: r.email,
 			});
 		} else {
@@ -160,6 +161,7 @@ function processResult(result) {
 						name: r.studentName,
 						phoneNum: r.phoneNum,
 						amountUsed: r.amountUsed,
+						amountPurchased: r.amountPurchased,
 						email: r.email,
 					},
 				],
@@ -170,8 +172,8 @@ function processResult(result) {
 	return Object.values(toRet);
 }
 
-// GET course/{courseId}/usedItems
-const getUsedItems = async (event, context, callback) => {
+// GET course/{courseId}/purchasedItems
+const getPurchasedItems = async (event, context, callback) => {
 	if (!event.pathParameters.courseId) {
 		return callback(createError.BadRequest("Course's ID required."));
 	}
@@ -193,6 +195,7 @@ const getUsedItems = async (event, context, callback) => {
 			'ShopItems.description as itemDesc',
 			'ShopItems.itemId',
 			'OwnedItems.amountUsed',
+			'OwnedItems.amount as amountPurchased',
 			'Students.name as studentName',
 			'Students.studentId',
 			'Students.email',
@@ -232,11 +235,11 @@ const byStudentId = middy(getCoursesByStudent)
 	.use(httpErrorHandler())
 	.use(cors(corsConfig));
 
-const usedItems = middy(getUsedItems)
+const purchasedItems = middy(getPurchasedItems)
 	.use(httpEventNormalizer())
 	.use(httpErrorHandler())
 	.use(cors(corsConfig));
 
 module.exports = {
-	byId, byTeacherId, byStudentId, usedItems,
+	byId, byTeacherId, byStudentId, purchasedItems,
 };

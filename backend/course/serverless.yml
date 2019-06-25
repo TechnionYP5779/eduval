@@ -77,12 +77,12 @@ functions:
                     parameters:
                         paths:
                             courseId: true
-    getUsedItems:
-        handler: src/get.usedItems
-        description: Get the shop items that were used in this course.
+    getPurchasedItems:
+        handler: src/get.purchasedItems
+        description: Get the shop items that were purchased and used in this course.
         events:
             - http:
-                path: /{courseId}/usedItems
+                path: /{courseId}/purchasedItems
                 method: get
                 cors: true
                 authorizer:

@@ -187,7 +187,6 @@ const getActiveLesson = async (event, context, callback) => {
 
 function ownedItemsTransform(obj) {
 	const retObj = { ...obj };
-	delete retObj.itemId;
 	delete retObj.studentId;
 	delete retObj.courseId;
 	delete retObj.cost;
@@ -250,7 +249,6 @@ const useShopItem = async (event, context, callback) => {
 	return knexConnection('OwnedItems')
 		.where({
 			studentId: event.pathParameters.studentId,
-			courseId: event.pathParameters.courseId,
 			itemId: event.body,
 		})
 		.increment('amountUsed', 1)

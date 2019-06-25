@@ -707,13 +707,13 @@ paths:
       security:
         - auth0_token: []
   
-  '/course/{courseId}/usedItems':
+  '/course/{courseId}/purchasedItems':
     get:
       tags:
         - course
-      summary: Get the items that students used in this course
+      summary: Get the items that students bought in this course
       
-      description: Returns a list of all the items from this course that were used.
+      description: Returns a list of all the items from this course that were purchased and used.
       parameters:
         - name: courseId
           in: path
@@ -1610,6 +1610,8 @@ components:
                 format: email
               phoneNum:
                 type: string
+              amountPurchased:
+                type: integer
               amountUsed:
                 type: integer
       additionalProperties: false
