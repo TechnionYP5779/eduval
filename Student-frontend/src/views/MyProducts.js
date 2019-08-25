@@ -278,7 +278,7 @@ class MyProducts extends React.Component {
                   <div className="card-post__author d-flex">
                     <div className="d-flex flex-column justify-content-center ml-3">
                     <a ><Button ssize="sm"   theme="white" disabled={!product.isActive} onClick={() => {this.productuse(product)}}>
-                      <i className="far  mr-1" /> Buy
+                      <i className="far  mr-1" /> Use
                     </Button></a>
                     </div>
                   </div>
