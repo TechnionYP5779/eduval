@@ -46,7 +46,7 @@ class MyCourses extends React.Component {
     } = this.state;
 
     return (
-      <div>
+      <div class="main-content container-fluid">
       {this.state.error &&
       <TimeoutAlert className="mb-0" theme="danger" msg={this.state.error} time={10000}/>
       }
