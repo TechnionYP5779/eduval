@@ -26,7 +26,6 @@ provider:
 #    individually: true
 
 plugins:
-    - serverless-offline
     - serverless-domain-manager
 
 custom:
