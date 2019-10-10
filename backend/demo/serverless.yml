@@ -1,0 +1,94 @@
+# For full config options, check the docs:
+#    docs.serverless.com
+
+service:        demo
+
+provider:
+    name:       aws
+    runtime:    nodejs8.10
+    stage:      prod
+    region:     eu-central-1
+
+    # defines environment variables for connecting to DB
+    environment:
+        AUTHORIZER_ARN:             ${self:custom.secrets.AUTHORIZER_ARN}
+        DB_NAME:        ${self:custom.secrets.DB_NAME}
+        DB_USER:        ${self:custom.secrets.DB_USER}
+        DB_PASSWORD:    ${self:custom.secrets.DB_PASSWORD}
+        DB_HOST:        ${self:custom.secrets.DB_HOST}
+        DB_PORT:        ${self:custom.secrets.DB_PORT}
+        LAMBDA_ENDPOINT:        ${self:custom.secrets.LAMBDA_ENDPOINT}
+        LAMBDA_APIKEY:        ${self:custom.secrets.LAMBDA_APIKEY}
+        BITLY_APIKEY:        ${self:custom.secrets.BITLY_APIKEY}
+        BITLY_GROUP_GUID:        ${self:custom.secrets.BITLY_GROUP_GUID}
+
+#package:
+#    individually: true
+
+plugins:
+    - serverless-offline
+    - serverless-domain-manager
+
+custom:
+    # contains the credentials needed to connect to the DB
+    secrets:    ${file(secrets.json)}
+    customDomainEnabled:
+        dev: false
+        prod: true
+    customDomain:
+        domainName: 'api.emon-teach.com'
+        basePath: 'demo' # This will be prefixed to all routes
+        stage: ${self:provider.stage}
+        createRoute53Record: true
+        enabled: ${self:custom.customDomainEnabled.${self:provider.stage}}
+
+#TODO: Implement a more strict CORS policy
+functions:
+    createDemo:
+        handler: src/create.handler
+        description: Create new demo course.
+        events:
+            - http:
+                path: /
+                method: post
+                cors: true
+                authorizer:
+                  arn: ${self:custom.secrets.AUTHORIZER_ARN}
+    getDemoCourse:
+        handler: src/get.handler
+        description: Get demo course info.
+        events:
+            - http:
+                path: /{demoHash}
+                method: get
+                cors: true
+                authorizer:
+                  arn: ${self:custom.secrets.AUTHORIZER_ARN}
+                request:
+                    parameters:
+                        paths:
+                            demoHash: true
+
+resources:
+    Resources:
+        # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
+        GatewayResponse:
+            Type: 'AWS::ApiGateway::GatewayResponse'
+            Properties:
+                ResponseParameters:
+                    gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+                    gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+                ResponseType: EXPIRED_TOKEN
+                RestApiId:
+                    Ref: 'ApiGatewayRestApi'
+                StatusCode: '401'
+        AuthFailureGatewayResponse:
+            Type: 'AWS::ApiGateway::GatewayResponse'
+            Properties:
+                ResponseParameters:
+                    gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+                    gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+                ResponseType: UNAUTHORIZED
+                RestApiId:
+                    Ref: 'ApiGatewayRestApi'
+                StatusCode: '401'
