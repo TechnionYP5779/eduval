@@ -535,6 +535,35 @@ class Server {
   }
 
   /*
+  =================== Create New Demo ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+      + response is {data: {course object}}
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - courseDetails: course object {name, location, description, startDate, endDate}
+  @use conditions:
+    - User should be logged in when called.
+  @effects:
+    - Will add the desired course to the DB or return an appropriate error
+  */
+  async createNewDemo(callback, callbackError, courseDetails){
+    let teacher_id = localStorage.getItem('teacher_id');
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    courseDetails['id'] = 0;
+    courseDetails['teacherId'] = parseInt(teacher_id);
+    console.log(courseDetails['teacherId']);
+    axios.post(SERVER_CONFIG.domain + '/demo', courseDetails, this.getConfig())
+    .then(callback)
+    .catch(callbackError);
+  }
+
+
+  /*
   =================== Get Teacher Profile ====================
   @params:
     - callback: function to do in case of success that has one paramater - the response

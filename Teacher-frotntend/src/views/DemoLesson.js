@@ -39,9 +39,9 @@ export default class DemoLesson extends React.Component {
       <Container fluid className="main-content-container px-4">
       {/* Page Header */}
       <Row noGutters className="page-header py-4">
-        <PageTitle sm="4" title="Start a Demo Lesson" className="text-sm-left" />
+        <PageTitle sm="4" title="Start a Trial Lesson" className="text-sm-left" />
       </Row>
-      <Card style={{width:"80%", marginLeft: "16px"}} >
+      <Card style={{width:"50%", marginLeft: "16px"}} >
         <DemoLessonProperties handler = {handler.bind(this)}/>
       </Card>
 

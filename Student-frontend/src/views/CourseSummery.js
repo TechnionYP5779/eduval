@@ -65,8 +65,11 @@ class CourseSummery extends React.Component {
               {headers: headers})
               .then((response) => {
               this.setState(
-                {course_name: response.data.name ,course_description : response.data.description,course_location: response.data.location, course_start_date: response.data.startDate.substring(0,10), course_end_date: response.data.endDate.substring(0,10)});
-
+                {course_name: response.data.name ,
+                  course_description : response.data.description,
+                  course_location: response.data.location,
+                  course_start_date: response.data.startDate.substring(0,10),
+                  course_end_date: response.data.endDate.substring(0,10)});
             })
             .catch((error)=>{
               console.log(error);
@@ -77,7 +80,8 @@ class CourseSummery extends React.Component {
             <Container fluid className="main-content-container px-4 pb-4">
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title={this.state.course_name} subtitle="Course Summary" className="text-sm-left" />
+          <PageTitle sm="4" title={this.state.course_name}
+          subtitle="Course Summary" className="text-sm-left" />
         </Row>
 
         <Row>
@@ -101,7 +105,7 @@ class CourseSummery extends React.Component {
                   <p>Lesson's description: {this.state.course_description}</p>
                 </Row>
 
-              
+
               <Row form>
                  {/* Course Location */}
                   <p>Location: {this.state.course_location}</p>
