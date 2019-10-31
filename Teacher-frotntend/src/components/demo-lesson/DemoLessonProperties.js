@@ -1,4 +1,5 @@
 import React from "react";
+import Alert from 'react-bootstrap/Alert'
 import {
   Button,
   ListGroup,
@@ -18,10 +19,31 @@ export default class DemoLessonProperties extends React.Component {
     super(props);
     this.state = {
       disabled:false,
-      invite_link: ""
+      invite_link: "",
+      activeLessonId: -1,
+      course: {id: "", name: "", location: "", description: "", startDate: "", endDate: ""}
     };
     this.startDemoLesson = this.startDemoLesson.bind(this);
   }
+
+  componentDidMount() {
+    var self = this;
+    server.getActiveLesson(function(response){
+      console.log(response);
+      console.log("GETACTIVE");
+      if (response.status==200){
+        self.setState({activeLessonId: response.data});
+        server.getCourse(function(response){
+          console.log(response.data);
+          console.log("GOTCOURSE");
+          self.setState({course: response.data});
+        }, function(error){
+        }, self.state.activeLessonId);
+      }
+    }, (err)=>{console.log("err", err);});
+
+  }
+
 
   updateName(evnt){
     this.setState({name: evnt.target.value});
@@ -52,7 +74,18 @@ export default class DemoLessonProperties extends React.Component {
 
   render(){
     return (
+
+
       <ListGroup flush>
+          {this.state.activeLessonId!=-1 &&
+            <Alert variant = "danger" dismissible>
+              <Alert.Heading style={{color:"white"}}>Warning! A lesson is still active!</Alert.Heading>
+              <p>
+                Your course {this.state.course.name} is in active lesson currently.
+                If you start a new trial, all active lesson will be closed.
+              </p>
+            </Alert>
+          }
           <Button disabled={this.state.disabled} onClick={this.startDemoLesson}>Start Trial Lesson</Button>
           <Col md="6" className="form-group">
             <label htmlFor="feEmailAddress">Invite Link</label>

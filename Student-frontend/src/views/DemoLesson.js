@@ -14,6 +14,7 @@ import {
 
 
 import server from "../Server/Server";
+import Auth from "../Auth/Auth"
 
 
 export default class DemoLesson extends React.Component {
@@ -28,6 +29,7 @@ export default class DemoLesson extends React.Component {
       authIdToken:"",
       disabled: false
     };
+
 
     let headers = {
       'Authorization': 'Bearer ' + localStorage.getItem('idToken')
@@ -50,6 +52,21 @@ export default class DemoLesson extends React.Component {
       this.startDemoLesson = this.startDemoLesson.bind(this);
 
   }
+  componentDidMount(){
+      // Remove tokens and expiry time
+      Auth.accessToken = null;
+      Auth.idToken = null;
+      Auth.expiresAt = 0;
+
+      // Remove isLoggedIn flag from localStorage
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('expiresAt');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('idToken');
+      localStorage.removeItem('sub');
+      localStorage.removeItem('student_id');
+  }
+
 
   updateStudentName(evnt){
     this.setState({student_name: evnt.target.value});
@@ -60,6 +77,7 @@ export default class DemoLesson extends React.Component {
   }
 
   startDemoLesson(){
+
     this.setState({disabled: true});
     console.log(this.state.student_name);
     console.log(this.state.student_seat);
@@ -85,12 +103,17 @@ export default class DemoLesson extends React.Component {
         localStorage.setItem('accessToken', response.data.accessToken);
         localStorage.setItem('idToken', response.data.idToken);
         localStorage.setItem('sub', response.data.sub);
+        Auth.accessToken = response.data.accessToken;
+        Auth.idToken = response.idToken;
+        Auth.expiresAt = expiresAt;
+        Auth.registerstudent()
 
         history.push("/lesson/" + this.state.lesson_id);
     })
     .catch((error)=>{
       console.log("Posting Student didn't work");
       console.log(error);
+      this.setState({disabled: false});
     });
   }
 

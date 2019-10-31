@@ -34,7 +34,6 @@ export default class NewCourseForm extends React.Component {
 
   updateName(evnt){
     this.setState({name: evnt.target.value});
-    console.log("NAME");
   }
 
   updateDescription(evnt){
