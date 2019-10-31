@@ -21,6 +21,10 @@ provider:
         LAMBDA_APIKEY:        ${self:custom.secrets.LAMBDA_APIKEY}
         BITLY_APIKEY:        ${self:custom.secrets.BITLY_APIKEY}
         BITLY_GROUP_GUID:        ${self:custom.secrets.BITLY_GROUP_GUID}
+        AUTH0_CLIENT_ID:        ${self:custom.secrets.AUTH0_CLIENT_ID}
+        AUTH0_CLIENT_SECRET:        ${self:custom.secrets.AUTH0_CLIENT_SECRET}
+        AUTH0_MANAGEMENT_CLIENT_ID:        ${self:custom.secrets.AUTH0_MANAGEMENT_CLIENT_ID}
+        AUTH0_MANAGEMENT_CLIENT_SECRET:        ${self:custom.secrets.AUTH0_MANAGEMENT_CLIENT_SECRET}
 
 #package:
 #    individually: true
@@ -61,8 +65,18 @@ functions:
                 path: /{demoHash}
                 method: get
                 cors: true
-                authorizer:
-                  arn: ${self:custom.secrets.AUTHORIZER_ARN}
+                request:
+                    parameters:
+                        paths:
+                            demoHash: true
+    registerDemoStudents:
+        handler: src/join.handler
+        description: Register a new demo course participant.
+        events:
+            - http:
+                path: /{demoHash}/students
+                method: post
+                cors: true
                 request:
                     parameters:
                         paths:

@@ -34,7 +34,13 @@ const addDemoCourse = async (event, context, callback) => {
 	let demoHash;
 
 	return knexConnection('Courses')
-		.insert(courseObj)
+		.select()
+		.where('courseName', 'like', `${courseObj.courseName}%`)
+		.then((result) => {
+			if (result.length !== 0) courseObj.courseName = `${courseObj.courseName} #${result.length + 1}`;
+		})
+		.then(() =>	knexConnection('Courses')
+			.insert(courseObj))
 		.then((result) => {
 			demoHash = uuidv5(`https://emon-teach.com/course/${result[0]}`, uuidv5.URL);
 			return knexConnection('DemoHashes')
@@ -44,12 +50,27 @@ const addDemoCourse = async (event, context, callback) => {
 					demoId: demoHash,
 				});
 		})
+		.then(() => axios.get(`https://api.emon-teach.com/teacher/${courseObj.teacherId}/activeLesson`, {
+			headers: {
+				Authorization: event.headers.Authorization,
+			},
+		}))
+		.then((response) => {
+			if (response.status === 200) {
+				return axios.post(`https://api.emon-teach.com/lesson/${response.data}/status`, 'LESSON_END', {
+					headers: {
+						Authorization: event.headers.Authorization,
+					},
+				});
+			}
+			return Promise.resolve();
+		})
 		.then(() => {
 			knexConnection.client.destroy();
 
 			return axios.post('https://api-ssl.bitly.com/v4/shorten', {
 				group_guid: process.env.BITLY_GROUP_GUID,
-				long_url: `http://lvh.me:3001/demo-invite?id=${demoHash}`,
+				long_url: `https://student.emon-teach.com/demo-invite?id=${demoHash}`, // `http://lvh.me:3001/demo-invite?id=${demoHash}`,
 			}, {
 				headers: { Authorization: `Bearer ${process.env.BITLY_APIKEY}`, 'Content-Type': 'application/json' },
 			}).then((response) => {
@@ -62,6 +83,8 @@ const addDemoCourse = async (event, context, callback) => {
 		.catch((err) => {
 			// Disconnect
 			knexConnection.client.destroy();
+			// eslint-disable-next-line no-console
+			console.log(`ERROR adding course: ${err}. ${JSON.stringify(err)}`);
 			// eslint-disable-next-line no-console
 			console.log(err.response.data);
 			// console.log(`ERROR adding course: ${err}. ${JSON.stringify(err)}`);

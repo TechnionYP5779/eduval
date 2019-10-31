@@ -67,11 +67,25 @@ const updateLessonStatus = async (event, context, callback) => {
 	// Connect
 	const knexConnection = knex(dbConfig);
 
-	return knexConnection('Courses')
+	return knexConnection('Courses').select()
 		.where({
 			courseId: event.pathParameters.courseId,
 		})
-		.update({ status: newStatus })
+		.then((result) => {
+			if (result.length === 1) {
+				// eslint-disable-next-line no-throw-literal
+				if (result[0].status === newStatus) throw 'Same status';
+			} else if (result.length === 0) {
+				callback(createError.NotFound('Course not found.'));
+			} else {
+				callback(createError.InternalServerError('More than one course with same ID found.'));
+			}
+		})
+		.then(() => knexConnection('Courses')
+			.where({
+				courseId: event.pathParameters.courseId,
+			})
+			.update({ status: newStatus }))
 		.then(async (result) => {
 			if (result === 1) {
 				new Promise((resolve, reject) => {
@@ -108,7 +122,7 @@ const updateLessonStatus = async (event, context, callback) => {
 						});
 					});
 				});
-			} else if (result.length === 0) {
+			} else if (result === 0) {
 				callback(createError.NotFound('Course not found.'));
 			} else {
 				callback(createError.InternalServerError('More than one course (with same ID) updated.'));
@@ -117,6 +131,14 @@ const updateLessonStatus = async (event, context, callback) => {
 		.catch((err) => {
 			// Disconnect
 			knexConnection.client.destroy();
+
+			if (typeof (err) === 'string') {
+				return callback(null, {
+					statusCode: 200,
+					body: '',
+				});
+			}
+
 			// eslint-disable-next-line no-console
 			console.log(`ERROR updating status: ${err}`);
 			return callback(createError.InternalServerError('Error updating status.'));

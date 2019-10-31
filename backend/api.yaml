@@ -31,6 +31,8 @@ tags:
       Also remember that you can use wildcards.
   - name: shop
     description: stuff related to the item shop
+  - name: demo
+    description: stuff related to demo lessons
 
 paths:
   /teacher:
@@ -707,13 +709,13 @@ paths:
       security:
         - auth0_token: []
   
-  '/course/{courseId}/usedItems':
+  '/course/{courseId}/purchasedItems':
     get:
       tags:
         - course
-      summary: Get the items that students used in this course
+      summary: Get the items that students bought in this course
       
-      description: Returns a list of all the items from this course that were used.
+      description: Returns a list of all the items from this course that were purchased and used.
       parameters:
         - name: courseId
           in: path
@@ -882,6 +884,12 @@ paths:
       tags:
         - lesson
       summary: Start or end a lesson
+      
+      description: >-
+        Start or end a lesson by changing its status to `LESSON_START` or `LESSON_END`.
+        
+        
+        If the requested new status is the same as the old one, nothing is performed.
       
       parameters:
         - name: courseId
@@ -1357,6 +1365,92 @@ paths:
       security:
         - auth0_token: []
   
+  '/demo':
+    post:
+      tags:
+        - demo
+      summary: Add a new demo course
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Course'
+        required: true
+      responses:
+        '200':
+          description: All OK
+          content: 
+            text/plain:
+              schema:
+                type: string
+                example: 'http://bit.ly/2U05Lzs'
+                description: 'Invite link to the new course.'
+        '400':
+          description: Validation exception. Invalid JSON.
+          content: {}
+      security:
+        - auth0_token: []
+  
+  '/demo/{demoHash}':
+    get:
+      tags:
+        - demo
+      summary: Get information about a demo course
+      parameters:
+        - name: demoHash
+          in: path
+          description: The ID hash of the requested demo course.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: All OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+      security:
+        - auth0_token: []
+  '/demo/{demoHash}/students':
+    post:
+      tags:
+        - demo
+      summary: Register a new student to a demo
+      description: >-
+        Performs the following:
+          * Creates new Auth0 user & registers it as a student.
+          * Logs it in.
+          * Registers the student to the demo lesson.
+          * Starts the demo lesson if needed and joins it as the new student.
+      parameters:
+        - name: demoHash
+          in: path
+          description: The ID hash of the requested demo course.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nickname:
+                  type: string
+                seatNumber:
+                  type: integer
+      responses:
+        '200':
+          description: All OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+                description: 'Auth0 token of created user.'
+      security:
+        - auth0_token: []
   
 components:
   schemas:
@@ -1610,6 +1704,8 @@ components:
                 format: email
               phoneNum:
                 type: string
+              amountPurchased:
+                type: integer
               amountUsed:
                 type: integer
       additionalProperties: false
