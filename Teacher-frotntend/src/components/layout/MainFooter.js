@@ -39,7 +39,7 @@ MainFooter.propTypes = {
 
 MainFooter.defaultProps = {
   contained: false,
-  copyright: "All rights reserved - Yearly Project Techion - Team #3 © 2019",
+  copyright: "All Rights Reserved - Arkadiy@Iluha © 2019",
   menuItems: [
     {
       title: "Home",

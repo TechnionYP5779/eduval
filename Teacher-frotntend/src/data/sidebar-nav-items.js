@@ -20,6 +20,11 @@ export default function() {
       title: "User Profile",
       htmlBefore: '<i class="material-icons">person</i>',
       to: "/user-profile-lite",
+    },
+    {
+      title: "Trial Lesson",
+      htmlBefore: '<i class="material-icons">flash_on</i>',
+      to: "/demo-lesson",
     }
   ];
 }

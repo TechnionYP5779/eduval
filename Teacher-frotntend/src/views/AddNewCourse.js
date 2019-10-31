@@ -19,7 +19,6 @@ export default class AddNewCourse extends React.Component {
     };
 
     this.handler = this.handler.bind(this)
-    // this.removeAlert = this.removeAlert.bind(this);
   }
 
   // removeAlert(){
@@ -52,7 +51,7 @@ export default class AddNewCourse extends React.Component {
   // </TimeoutAlert>
     var successMsg = "Success! Your course has been added!";
     return (
-          <div>
+          <div class="main-content container-fluid">
             {this.state.error &&
               <TimeoutAlert msg={this.state.error} time={10000} className="mb-0" theme="danger"/>
             }

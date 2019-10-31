@@ -77,8 +77,6 @@ export default class NewCourseForm extends React.Component {
       description: this.state.description, startDate: this.state.startDate,
       endDate: this.state.endDate
     });
-    //handler("Fill all forms!");
-    //Send state to the server code
   }
 
   render(){
@@ -125,8 +123,7 @@ export default class NewCourseForm extends React.Component {
                     value={this.state.location} onChange={this.updateLocation}
                   />
                 </FormGroup>
-                <Button disabled={this.state.disabled} onClick={this.handleSubmit}>Create New Course</Button>
-              </Form>
+                <Button disabled={this.state.disabled} onClick={this.handleSubmit}>Create New Course</Button>              </Form>
             </Col>
           </Row>
         </ListGroupItem>

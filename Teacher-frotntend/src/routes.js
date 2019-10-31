@@ -16,6 +16,8 @@ import Callback from "./views/Callback";
 import CourseDetails from "./views/CourseDetails";
 import CourseStore from "./views/CourseStore";
 import Lesson from "./views/Lesson";
+import DemoLesson from "./views/DemoLesson";
+
 
 
 export default [
@@ -38,12 +40,12 @@ export default [
   },
   {
     path: "/course-details/:id",
-    layout: DefaultLayout,
+    layout: ProtectedLayout,
     component: CourseDetails
   },
   {
     path: "/manage-store/:id",
-    layout: DefaultLayout,
+    layout: ProtectedLayout,
     component: CourseStore
   },
   {
@@ -68,7 +70,7 @@ export default [
   },
   {
     path: "/lesson/:id",
-    layout: DefaultLayout,
+    layout: ProtectedLayout,
     component: Lesson
   },
   {
@@ -80,5 +82,10 @@ export default [
     path: "/my-courses",
     layout: ProtectedLayout,
     component: MyCourses
+  },
+  {
+    path: "/demo-lesson",
+    layout: ProtectedLayout,
+    component: DemoLesson
   }
 ];

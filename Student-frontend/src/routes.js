@@ -16,6 +16,7 @@ import MyProducts from "./views/MyProducts";
 import Callback from "./views/Callback";
 import CourseDetails from "./views/CourseDetails";
 import Lesson from "./views/Lesson";
+import DemoLesson from "./views/DemoLesson";
 import CourseSummery from "./views/CourseSummery";
 import Store from "./views/Store";
 
@@ -81,6 +82,11 @@ export default [
     path: "/course-summery/:id",
     layout: DefaultLayout,
     component: CourseSummery
+  },
+  {
+    path: "/demo-invite",
+    layout: DefaultLayout,
+    component: DemoLesson
   },
   {
     path: "/store/:id",
