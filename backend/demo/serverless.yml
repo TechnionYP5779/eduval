@@ -6,7 +6,7 @@ service:        demo
 provider:
     name:       aws
     runtime:    nodejs8.10
-    stage:      prod
+    stage:      dev
     region:     eu-central-1
 
     # defines environment variables for connecting to DB
@@ -25,6 +25,7 @@ provider:
         AUTH0_CLIENT_SECRET:        ${self:custom.secrets.AUTH0_CLIENT_SECRET}
         AUTH0_MANAGEMENT_CLIENT_ID:        ${self:custom.secrets.AUTH0_MANAGEMENT_CLIENT_ID}
         AUTH0_MANAGEMENT_CLIENT_SECRET:        ${self:custom.secrets.AUTH0_MANAGEMENT_CLIENT_SECRET}
+        NEW_DEMO_REDIRECT_DOMAIN:               ${self:custom.newDemoRedirectDomain.${self:provider.stage}}
 
 #package:
 #    individually: true
@@ -33,13 +34,21 @@ plugins:
     - serverless-domain-manager
 
 custom:
+    domains:
+        prod: api.emon-teach.com
+        dev: dev-api.emon-teach.com
+    
+    newDemoRedirectDomain:
+        prod: https://student.emon-teach.com
+        dev: http://lvh.me:3001
+    
     # contains the credentials needed to connect to the DB
     secrets:    ${file(secrets.json)}
     customDomainEnabled:
         dev: false
         prod: true
     customDomain:
-        domainName: 'api.emon-teach.com'
+        domainName: ${self:custom.domains.${self:provider.stage}}
         basePath: 'demo' # This will be prefixed to all routes
         stage: ${self:provider.stage}
         createRoute53Record: true
