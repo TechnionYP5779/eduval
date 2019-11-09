@@ -40,14 +40,32 @@ const registerDemoStudent = async (event, context, callback) => {
 	let decodedToken = null;
 	let accessToken = null;
 
-	return management.createUser({
-		email,
-		password,
-		name: event.body.nickname,
-		username,
-		nickname: event.body.nickname,
-		connection: 'Username-Password-Authentication',
-	})
+	return knexConnection('DemoHashes')
+		.where({
+			demoId: event.pathParameters.demoHash,
+		})
+		.then(result => knexConnection('PresentStudents')
+			.select()
+			.where({
+				courseId: result[0].courseId,
+				desk: event.body.seatNumber,
+			}))
+		.then((result) => {
+			if (result.length !== 0) {
+				callback(createError.Conflict('The requested desk is already taken.'));
+				return Promise.reject(createError.Conflict('The requested desk is already taken.'));
+			}
+
+			return Promise.resolve();
+		})
+		.then(() => management.createUser({
+			email,
+			password,
+			name: event.body.nickname,
+			username,
+			nickname: event.body.nickname,
+			connection: 'Username-Password-Authentication',
+		}))
 		.then(() => {
 			const authentication = new auth0.AuthenticationClient({
 				domain: 'e-mon.eu.auth0.com',
