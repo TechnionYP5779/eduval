@@ -27,13 +27,17 @@ plugins:
     - serverless-domain-manager
 
 custom:
+    domains:
+        prod: api.emon-teach.com
+        dev: dev-api.emon-teach.com
+
     # contains the credentials needed to connect to the DB
     secrets:    ${file(secrets.json)}
     customDomainEnabled:
         dev: false
         prod: true
     customDomain:
-        domainName: 'api.emon-teach.com'
+        domainName: ${self:custom.domains.${self:provider.stage}}
         basePath: 'course' # This will be prefixed to all routes
         stage: ${self:provider.stage}
         createRoute53Record: true

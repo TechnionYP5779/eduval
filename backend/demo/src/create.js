@@ -70,7 +70,7 @@ const addDemoCourse = async (event, context, callback) => {
 
 			return axios.post('https://api-ssl.bitly.com/v4/shorten', {
 				group_guid: process.env.BITLY_GROUP_GUID,
-				long_url: `https://student.emon-teach.com/demo-invite?id=${demoHash}`, // `http://lvh.me:3001/demo-invite?id=${demoHash}`,
+				long_url: `${process.env.NEW_DEMO_REDIRECT_DOMAIN}/demo-invite?id=${demoHash}`,
 			}, {
 				headers: { Authorization: `Bearer ${process.env.BITLY_APIKEY}`, 'Content-Type': 'application/json' },
 			}).then((response) => {
