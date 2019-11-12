@@ -55,16 +55,6 @@ const addDemoCourse = async (event, context, callback) => {
 				Authorization: event.headers.Authorization,
 			},
 		}))
-		.then((response) => {
-			if (response.status === 200) {
-				return axios.post(`https://api.emon-teach.com/lesson/${response.data}/status`, 'LESSON_END', {
-					headers: {
-						Authorization: event.headers.Authorization,
-					},
-				});
-			}
-			return Promise.resolve();
-		})
 		.then(() => {
 			knexConnection.client.destroy();
 

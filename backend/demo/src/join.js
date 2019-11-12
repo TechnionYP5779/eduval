@@ -44,16 +44,53 @@ const registerDemoStudent = async (event, context, callback) => {
 		.where({
 			demoId: event.pathParameters.demoHash,
 		})
-		.then(result => knexConnection('PresentStudents')
-			.select()
-			.where({
-				courseId: result[0].courseId,
-				desk: event.body.seatNumber,
-			}))
+		.then((result) => {
+			// eslint-disable-next-line prefer-destructuring
+			courseId = result[0].courseId;
+
+			if (result.length === 0) {
+				callback(createError.NotFound('Demo lesson not found.'));
+				return Promise.reject(createError.NotFound('Demo lesson not found.'));
+			}
+			if (result.length !== 1) {
+				callback(createError.InternalServerError('More than one demo lesson with this hash.'));
+				return Promise.reject(createError.InternalServerError('More than one demo lesson with this hash.'));
+			}
+
+			return knexConnection('PresentStudents')
+				.select()
+				.where({
+					courseId: result[0].courseId,
+					desk: event.body.seatNumber,
+				});
+		})
 		.then((result) => {
 			if (result.length !== 0) {
-				callback(createError.Conflict('The requested desk is already taken.'));
+				callback(null, {
+					statusCode: 409,		// HTTP Gone
+					body: JSON.stringify({
+						error: 'DESK_TAKEN',
+					}),
+				});
 				return Promise.reject(createError.Conflict('The requested desk is already taken.'));
+			}
+
+			return Promise.resolve();
+		})
+		.then(() => knexConnection('Courses')
+			.select('status')
+			.where({
+				courseId,
+			}))
+		.then((result) => {
+			if (result[0].status === 'LESSON_END') {
+				callback(null, {
+					statusCode: 409,		// HTTP Gone
+					body: JSON.stringify({
+						error: 'COURSE_NOT_STARTED',
+					}),
+				});
+				return Promise.reject(createError.Gone('The course is not active.'));
 			}
 
 			return Promise.resolve();
@@ -101,45 +138,18 @@ const registerDemoStudent = async (event, context, callback) => {
 			// Not sure if already int or not. If yes, this does nothing.
 			studentId = parseInt(response.data, 10);
 		})
-		.then(() =>	knexConnection('DemoHashes')
-			.where({
-				demoId: event.pathParameters.demoHash,
-			}))
-		.then((result) => {
+		.then(() => {
 			knexConnection.client.destroy();
 
-			// eslint-disable-next-line prefer-destructuring
-			courseId = result[0].courseId;
-
-			if (result.length === 1) {
-				return axios({
-					url: `https://api.emon-teach.com/course/${courseId}/registered`,
-					method: 'post',
-					data: [parseInt(studentId, 10)],
-					headers: {
-						Authorization: `Bearer ${auth0Token}`,
-					},
-				});
-				// return axios.post(`https://api.emon-teach.com/course/${courseId}/registered`, `[${studentId}]`, {
-				// 	headers: {
-				// 		Authorization: `Bearer ${auth0Token}`,
-				// 	},
-				// });
-			}
-			if (result.length === 0) {
-				callback(createError.NotFound('Demo lesson not found.'));
-				return Promise.reject(createError.NotFound('Demo lesson not found.'));
-			}
-
-			callback(createError.InternalServerError('More than one demo lesson with this hash.'));
-			return Promise.reject(createError.InternalServerError('More than one demo lesson with this hash.'));
+			return axios({
+				url: `https://api.emon-teach.com/course/${courseId}/registered`,
+				method: 'post',
+				data: [parseInt(studentId, 10)],
+				headers: {
+					Authorization: `Bearer ${auth0Token}`,
+				},
+			});
 		})
-		// TODO: start lesson? join lesson
-		.then(() => axios.post(`https://api.emon-teach.com/lesson/${courseId}/status`, 'LESSON_START', {
-			headers: {
-				Authorization: `Bearer ${auth0Token}`,
-			},
-		}))
 		.then(() => axios.post(`https://api.emon-teach.com/lesson/${courseId}/present`, {
 			id: studentId,
 			desk: event.body.seatNumber,
