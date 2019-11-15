@@ -34,10 +34,21 @@ const addDemoCourse = async (event, context, callback) => {
 	let demoHash;
 
 	return knexConnection('Courses')
-		.select()
+		.select('courseName')
 		.where('courseName', 'like', `${courseObj.courseName}%`)
+		.andWhere('teacherId', courseObj.teacherId)
 		.then((result) => {
-			if (result.length !== 0) courseObj.courseName = `${courseObj.courseName} #${result.length + 1}`;
+			if (result.length !== 0) {
+				const highestNumber = result.map((x) => {		// Parse "Lesson #123" => 123
+					const hashIndex = x.courseName.lastIndexOf('#');
+					if (hashIndex === -1) {
+						return 1;
+					}
+					return parseInt(x.courseName.substr(hashIndex + 1, x.courseName.length), 10);
+				}).sort((a, b) => b - a)[0];	// reverse sort and select largest
+
+				courseObj.courseName = `${courseObj.courseName} #${highestNumber + 1}`;
+			}
 		})
 		.then(() =>	knexConnection('Courses')
 			.insert(courseObj))
