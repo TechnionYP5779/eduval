@@ -77,6 +77,7 @@ class Lesson extends React.Component {
       student_id : localStorage.getItem('student_id'),
       chosen_smile : -1,
       chosen_message : -1,
+      showing_messages: false,
 
     name: "string",
     teacherId: 0,
@@ -115,45 +116,47 @@ class Lesson extends React.Component {
       }]
     ],currentEmojis: [],
    };
-   const getHistory=() =>{
-    var LessonsMessageURL='lesson/'+this.state.lesson_id+'/messages/'+localStorage.getItem('student_id');
-    var LessonsStatusURL = 'lesson/'+this.state.lesson_id+'/status';
-    this.setState(prevState => ({
-    reward_money : 0
-      }));
-      this.setState(prevState => ({
-      currentEmojis : []
-    }));
-    axios.get('https://api.emon-teach.com/'+LessonsMessageURL,
-     {headers: headers})
-     .then((response) =>
-     {
-
-       //iterating over the recieved messages
-      var data=response.data;
-      for(var res of data){
-        //if got an emoji
-        if(res.messageType != "EMON"){
-            this.setState(prevState => ({
-            currentEmojis : [...this.state.currentEmojis, EmojiEnum[res.emojiType]]
-          }));
-        }else
-        {
-          //if got an emoji
-          var updated_reward_money = this.state.reward_money ? this.state.reward_money : 0;
-          updated_reward_money +=res.value
-
-          this.setState(prevState => ({
-          reward_money : updated_reward_money
-        }));
-      }
-   }})
-   .catch((error)=>{
-     console.log(error);
-   });
 
    }
 
+   componentDidMount(){
+     const getHistory=() =>{
+      var LessonsMessageURL='lesson/'+this.state.lesson_id+'/messages/'+localStorage.getItem('student_id');
+      var LessonsStatusURL = 'lesson/'+this.state.lesson_id+'/status';
+      this.setState(prevState => ({
+      reward_money : 0
+        }));
+        this.setState(prevState => ({
+        currentEmojis : []
+      }));
+      axios.get('https://api.emon-teach.com/'+LessonsMessageURL,
+       {headers: headers})
+       .then((response) =>
+       {
+
+         //iterating over the recieved messages
+        var data=response.data;
+        for(var res of data){
+          //if got an emoji
+          if(res.messageType != "EMON"){
+              this.setState(prevState => ({
+              currentEmojis : [...this.state.currentEmojis, EmojiEnum[res.emojiType]]
+            }));
+          }else
+          {
+            //if got an emoji
+            var updated_reward_money = this.state.reward_money ? this.state.reward_money : 0;
+            updated_reward_money +=res.value
+
+            this.setState(prevState => ({
+            reward_money : updated_reward_money
+          }));
+        }
+     }})
+     .catch((error)=>{
+       console.log(error);
+     });
+   }
 
 
 
@@ -267,15 +270,15 @@ class Lesson extends React.Component {
     return (
       <div>
         {this.state.error &&
-    <Container fluid className="px-0" >
-      <TimeoutAlert className="mb-0" theme="danger" msg={this.state.message} time={3000} />
-    </Container>
-    }
-    {this.state.success &&
-    <Container fluid className="px-0">
-    <TimeoutAlert className="mb-0" theme="success" msg={this.state.message} time={3000} />
-    </Container>
-    }
+          <Container fluid className="px-0" >
+            <TimeoutAlert className="mb-0" theme="danger" msg={this.state.message} time={3000} />
+          </Container>
+        }
+        {this.state.success &&
+          <Container fluid className="px-0">
+            <TimeoutAlert className="mb-0" theme="success" msg={this.state.message} time={3000} />
+          </Container>
+        }
       <Container fluid className="main-content-container px-4">
 
 
@@ -316,45 +319,57 @@ class Lesson extends React.Component {
             {/* Sliders & Progress Bars */}
             <Card small className="mb-4" >
               <CardHeader className="border-bottom">
-                <h5 className="m-0">Send message to the teacher</h5>
-              </CardHeader>
-              <ListGroup flush>
-                  <div className="mb-2 pb-1" style={{margin:"10px"}}>
-                <h7 style={{fontSize:"17px"}}>Choose a message to send</h7>
-                </div>
-                {messageRows.map((messages, idx) => (
-                <Row style={{margin:"2px"}}>
-                {messages.map((message, idx) => (
-                  <Col>
-                  {
-                    (this.state.chosen_message == message.id) &&
-                    <Button outline="none" style={{fontSize:"13px", borderColor:message.color ,color:message.color, background:'white'}} className="mb-2 mr-1" onClick={()=>{
-                      this.setState({chosen_message : -1});
-                    }}>
-                      {message.message}
+                <Row>
+                  <Col xs sm>
+                    <h5 className="m-0">Send a Message to the Teacher</h5>
+                  </Col>
+                  <Col xs="2" sm>
+                    <Button style={{padding:"0px"}}
+                    onClick={()=>{this.setState({showing_messages:!this.state.showing_messages});}}>
+                    {this.state.showing_messages && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CE;</i>}
+                    {!this.state.showing_messages && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CF;</i>}
                     </Button>
-                  }
-                  {
-                    (this.state.chosen_message != message.id) &&
-                    <Button outline style={{fontSize:"13px", borderColor:message.color ,color:message.color, background:'white'}} className="mb-2 mr-1" onClick={()=>{;
-                      this.setState({chosen_message : message.id});
-                      axios.post(
-                      'https://api.emon-teach.com' + "/lesson/" + this.state.lesson_id + "/teacherMessages" ,
-                      {messageType: "MESSAGE", studentId:  this.state.student_id, content: message.enum},
-                      {headers: headers})
-                    .then( (response) =>{
-                        this.setState({message: "Your message sent to your teacher!", success: true});
-                        window.scrollTo(0, 0)});
-                    }} >
-                      {message.message}
-                    </Button>
-                  }
-
-                </Col>))}
+                  </Col>
                 </Row>
-                ))}
-              </ListGroup>
+              </CardHeader>
+              {this.state.showing_messages &&
+                <ListGroup flush>
+                    <div className="mb-2 pb-1" style={{margin:"10px"}}>
+                  <h7 style={{fontSize:"17px"}}>Choose a message to send</h7>
+                  </div>
+                  {messageRows.map((messages, idx) => (
+                  <Row style={{margin:"2px"}}>
+                  {messages.map((message, idx) => (
+                    <Col>
+                    {
+                      (this.state.chosen_message == message.id) &&
+                      <Button outline="none" style={{fontSize:"13px", borderColor:message.color ,color:message.color, background:'white'}} className="mb-2 mr-1" onClick={()=>{
+                        this.setState({chosen_message : -1});
+                      }}>
+                        {message.message}
+                      </Button>
+                    }
+                    {
+                      (this.state.chosen_message != message.id) &&
+                      <Button outline style={{fontSize:"13px", borderColor:message.color ,color:message.color, background:'white'}} className="mb-2 mr-1" onClick={()=>{;
+                        this.setState({chosen_message : message.id});
+                        axios.post(
+                        'https://api.emon-teach.com' + "/lesson/" + this.state.lesson_id + "/teacherMessages" ,
+                        {messageType: "MESSAGE", studentId:  this.state.student_id, content: message.enum},
+                        {headers: headers})
+                      .then( (response) =>{
+                          this.setState({message: "Your message sent to your teacher!", success: true});
+                          window.scrollTo(0, 0)});
+                      }} >
+                        {message.message}
+                      </Button>
+                    }
 
+                  </Col>))}
+                  </Row>
+                  ))}
+                </ListGroup>
+                }
             </Card>
 
           </Col>

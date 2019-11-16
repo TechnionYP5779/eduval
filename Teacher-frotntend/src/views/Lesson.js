@@ -1,6 +1,8 @@
 /* eslint jsx-a11y/anchor-is-valid: 0 */
 import history from '../history';
 import React from "react";
+import Badge from 'react-bootstrap/Alert'
+
 import {
   Container,
   Row,
@@ -8,7 +10,6 @@ import {
   Card,
   CardBody,
   CardFooter,
-  Badge,
   Button,
   CardHeader,
   ListGroup,
@@ -307,7 +308,6 @@ class Lesson extends React.Component {
               {this.state.showing_student && <ListGroup flush>
                 <ListGroupItem className="p-0 px-3 pt-3">
                   <Row>
-
                       {this.state.students.map((student, idx) => {
                         let color = "#007bff";
                         if (messaged_students.has(student.id))
@@ -315,15 +315,20 @@ class Lesson extends React.Component {
                         return (<Col xs="3" key={idx}>
                         {
                           this.state.chosen_students.indexOf(student.id) >= 0 &&
-                          <Button disabled={this.state.disabled} style={{margin:"6px", fontWeight: "600", fontSize: "0.9em", width: "100%", "--mess-color" : color}} className="mb-2 mr-1 badge1 custom-active" data-badge={"Desk #" + student.desk} onClick={()=>{
-                            unchooseStudent(student.id);
-                          }}>
+                          <Button disabled={this.state.disabled}
+                          style={{margin:"6px", fontWeight: "600", fontSize: "0.9em", width: "100%", "--mess-color" : color}}
+                          className="mb-2 mr-1 badge1 custom-active"
+                          data-badge={"Desk #" + student.desk}
+                          onClick={()=>{ unchooseStudent(student.id);}}>
                             {student.name}
                           </Button>
                         }
                         {
                           this.state.chosen_students.indexOf(student.id) < 0 &&
-                          <Button outline disabled={this.state.disabled} style={{margin:"6px", fontWeight: "600", fontSize: "0.9em", borderWidth:"2px", width: "100%", "--mess-color" : color}} className="mb-2 mr-1 badge1 custom-button" data-badge={"desk #" + student.desk} onClick={()=>{
+                          <Button outline disabled={this.state.disabled}
+                          style={{margin:"6px", fontWeight: "600", fontSize: "0.9em", borderWidth:"2px", width: "100%", "--mess-color" : color}}
+                          className="mb-2 mr-1 badge1 custom-button"
+                           data-badge={"Desk #" + student.desk} onClick={()=>{
                             let tmp_chosen = this.state.chosen_students;
                             tmp_chosen.push(student.id);
                             this.setState({chosen_students : tmp_chosen, success: false, error: false});
@@ -347,7 +352,8 @@ class Lesson extends React.Component {
                     <h6 style={{fontSize:"12px"}}>Click <i className="material-icons">&#xE8F4;</i> to see students who sent messages or <i className="material-icons">&#xE8F5;</i> to hide them.</h6>
                   </Col>
                   <Col sm="1">
-                    <Button style={{padding:"0px"}} onClick={()=>{this.setState({showing_messages:!this.state.showing_messages});}}>
+                    <Button style={{padding:"0px"}}
+                    onClick={()=>{this.setState({showing_messages:!this.state.showing_messages});}}>
                       {this.state.showing_messages && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CE;</i>}
                       {!this.state.showing_messages && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CF;</i>}
                     </Button>
@@ -514,7 +520,7 @@ class Lesson extends React.Component {
                     let self = this;
                     server.changeLessonStatus(function(response){
                       server.deleteLessonMessages(()=>{
-                        history.replace('/');
+                        history.push("/my-courses");
                       }, ()=>{
                       }, self.props.match.params.id);
                     }, function(error){

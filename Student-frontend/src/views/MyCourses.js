@@ -107,7 +107,7 @@ class MyCourses extends React.Component {
       axios.get('https://api.emon-teach.com/lesson/'+ this.state.PostsListThree[j].id +'/status',
           {headers: headers})
           .then((response) => {
-            
+
             var current_id = ((response.request.responseURL).split('lesson')[1]).split('/')[1];
           if(response.data === "LESSON_START"){
             var insert = this.state.lessons_status;
@@ -120,20 +120,20 @@ class MyCourses extends React.Component {
                    var Student_id = parseInt(localStorage.getItem('student_id'));
                     for (var student of response.data){
                       if(student.id == Student_id){
-                        
+
                         insert_student_status[current_id] = true;
                         this.setState({lessons_student_status: insert_student_status});
                         break;
                       }
                     }
                 });
-          
+
           }else{
-            
+
               this.state.lessons_status[current_id] = true;
              this.setState({lessons_status: this.state.lessons_status});
           }
-          
+
         }).catch((error)=>{
           console.log(error);
         });
@@ -141,12 +141,12 @@ class MyCourses extends React.Component {
 
      var i;
     for (i = 0; i < this.state.PostsListThree.length; i++) {
-      
+
       let LessonsStatusURL = 'lesson/'+ this.state.PostsListThree[i].id +'/status';
       connect().then(() => {
         client.subscribe(LessonsStatusURL);
         client.on('message', (topic, message) => {
-          
+
         var current_id = ((topic).split('lesson')[1]).split('/')[1];
          if(message == "LESSON_START"){
             var insert = this.state.lessons_status;
@@ -178,12 +178,14 @@ class MyCourses extends React.Component {
       };
       var txt;
       this.showModal();
-        axios.post('https://api.emon-teach.com/lesson/'+ lesson_id +'/present',{
+        axios.post('https://api.emon-teach.com/lesson/'+ lesson_id +'/present',
+        {
           id:  Student_id,
-          desk: this.state.deskNum}, config).then(function(response){
+          desk: this.state.deskNum}, config).then(function(response)
+          {
             history.push("/lesson/" + lesson_id);
           });
-      
+
      }
 
 showModal(id) {
@@ -191,7 +193,7 @@ showModal(id) {
     history.push("/lesson/" + id);
   }else{
     this.setState({modalIsOpen: true, titleModal: "Enter your desk number " , desk_num: "767"});
-    this.setState({post_id: id}); 
+    this.setState({post_id: id});
   }
   }
 
@@ -222,7 +224,7 @@ showModal(id) {
         onRequestClose={this.closeModal}
         style={customStyles}
       >
-      <h5>Please enter your desk number</h5>
+      <h5>Please Enter Your Desk Number</h5>
       <Form>
         <FormGroup>
           <label htmlFor="deskNum">Desk number</label>

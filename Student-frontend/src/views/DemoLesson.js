@@ -1,6 +1,7 @@
 import React from "react";
 import history from '../history';
 import axios from 'axios';
+import Alert from 'react-bootstrap/Alert'
 import {
   Button,
   ListGroup,
@@ -27,7 +28,8 @@ export default class DemoLesson extends React.Component {
       lesson_id: -1,
       lesson_name:"",
       authIdToken:"",
-      disabled: false
+      disabled: false,
+      student_seat_taken: false
     };
 
 
@@ -107,12 +109,17 @@ export default class DemoLesson extends React.Component {
         Auth.idToken = response.idToken;
         Auth.expiresAt = expiresAt;
         Auth.registerstudent()
-
+        console.log("PUSH?");
         history.push("/lesson/" + this.state.lesson_id);
+        console.log("PUSH!");
     })
     .catch((error)=>{
       console.log("Posting Student didn't work");
-      console.log(error);
+      console.log(error.response.status);
+      if(error.response.status==409)
+      {
+        this.setState({student_seat_taken: true})
+      }
       this.setState({disabled: false});
     });
   }
@@ -121,6 +128,14 @@ export default class DemoLesson extends React.Component {
   render(){
     return (
       <ListGroup flush>
+      {this.state.student_seat_taken &&
+        <Alert variant = "danger">
+          <Alert.Heading style={{color:"white"}}>This Seat is Taken!</Alert.Heading>
+          <p>
+            Select another seat if you want to proceed. Contact the teacher in case of further problems.
+          </p>
+        </Alert>
+      }
         <Form>
             <Col md="6" className="form-group">
               <FormGroup>

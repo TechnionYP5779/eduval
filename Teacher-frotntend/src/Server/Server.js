@@ -562,7 +562,6 @@ class Server {
     .catch(callbackError);
   }
 
-
   /*
   =================== Get Teacher Profile ====================
   @params:
