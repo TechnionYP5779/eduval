@@ -8,6 +8,7 @@ const axios = require('axios');
 const auth0 = require('auth0');
 const shortid = require('shortid');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const passwordGenerator = require('generate-password');
 const dbConfig = require('../db');
 const corsConfig = require('../cors');
@@ -24,7 +25,8 @@ const registerDemoStudent = async (event, context, callback) => {
 	});
 
 	const username = shortid.generate();
-	const email = `${username}@fake.email`;
+	let email;
+	let emailSuffix;
 	const password = passwordGenerator.generate({
 		length: 10,
 		excludeSimilarCharacters: true,
@@ -47,6 +49,8 @@ const registerDemoStudent = async (event, context, callback) => {
 		.then((result) => {
 			// eslint-disable-next-line prefer-destructuring
 			courseId = result[0].courseId;
+			emailSuffix = `fake${crypto.createHash('md5').update(courseId.toString()).digest('hex')}.email`;
+			email = `${username}@${emailSuffix}`;
 
 			if (result.length === 0) {
 				callback(createError.NotFound('Demo lesson not found.'));
@@ -91,6 +95,23 @@ const registerDemoStudent = async (event, context, callback) => {
 					}),
 				});
 				return Promise.reject(createError.Gone('The course is not active.'));
+			}
+
+			return Promise.resolve();
+		})
+		.then(() => management.getUsers({
+			search_engine: 'v3',
+			q: `email:*@${emailSuffix} AND name:${event.body.nickname}`,
+		}))
+		.then((users) => {
+			if (users.length !== 0) {
+				callback(null, {
+					statusCode: 409,		// HTTP Gone
+					body: JSON.stringify({
+						error: 'NAME_ALREADY_TAKEN',
+					}),
+				});
+				return Promise.reject(createError.Gone('This name is already taken.'));
 			}
 
 			return Promise.resolve();

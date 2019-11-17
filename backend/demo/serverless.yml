@@ -81,6 +81,7 @@ functions:
     registerDemoStudents:
         handler: src/join.handler
         description: Register a new demo course participant.
+        timeout: 12     # in seconds. default is 6
         events:
             - http:
                 path: /{demoHash}/students
