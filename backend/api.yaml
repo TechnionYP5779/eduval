@@ -1537,7 +1537,7 @@ paths:
                   error:
                     type: string
                     description: The cause of the error
-                    enum: ["COURSE_NOT_STARTED", "DESK_TAKEN"]
+                    enum: ["COURSE_NOT_STARTED", "DESK_TAKEN", "NAME_TAKEN"]
       security:
         - auth0_token: []
   

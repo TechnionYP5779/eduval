@@ -108,7 +108,7 @@ const registerDemoStudent = async (event, context, callback) => {
 				callback(null, {
 					statusCode: 409,		// HTTP Gone
 					body: JSON.stringify({
-						error: 'NAME_ALREADY_TAKEN',
+						error: 'NAME_TAKEN',
 					}),
 				});
 				return Promise.reject(createError.Gone('This name is already taken.'));
