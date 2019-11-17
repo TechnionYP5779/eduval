@@ -30,11 +30,11 @@ const deleteCourse = async (event, context, callback) => {
 			courseId,
 		})
 		.then((result) => {
-			if (result === 0) {
+			if (result.length === 0) {
 				callback(createError.NotFound('Course not found.'));
 				return Promise.reject(createError.NotFound('Course not found.'));
 			}
-			if (result !== 1) {
+			if (result.length !== 1) {
 				callback(createError.InternalServerError('More than one course with same ID found.'));
 				return Promise.reject(createError.InternalServerError('More than one course with same ID found.'));
 			}
