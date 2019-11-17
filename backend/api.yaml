@@ -1617,6 +1617,9 @@ components:
         endDate:
           type: string
           format: date
+        demoLink:
+          type: string
+          format: url
           
     Message:
       oneOf:

@@ -32,6 +32,7 @@ const addDemoCourse = async (event, context, callback) => {
 	// Connect
 	const knexConnection = knex(dbConfig);
 	let demoHash;
+	let demoLink;
 
 	return knexConnection('Courses')
 		.select('courseName')
@@ -49,6 +50,16 @@ const addDemoCourse = async (event, context, callback) => {
 
 				courseObj.courseName = `${courseObj.courseName} #${highestNumber + 1}`;
 			}
+		})
+		.then(() => axios.post('https://api-ssl.bitly.com/v4/shorten', {
+			group_guid: process.env.BITLY_GROUP_GUID,
+			long_url: `${process.env.NEW_DEMO_REDIRECT_DOMAIN}/demo-invite?id=${demoHash}`,
+		}, {
+			headers: { Authorization: `Bearer ${process.env.BITLY_APIKEY}`, 'Content-Type': 'application/json' },
+		}))
+		.then((response) => {
+			demoLink = response.data.link;
+			courseObj.demoLink = demoLink;
 		})
 		.then(() =>	knexConnection('Courses')
 			.insert(courseObj))
@@ -68,17 +79,9 @@ const addDemoCourse = async (event, context, callback) => {
 		}))
 		.then(() => {
 			knexConnection.client.destroy();
-
-			return axios.post('https://api-ssl.bitly.com/v4/shorten', {
-				group_guid: process.env.BITLY_GROUP_GUID,
-				long_url: `${process.env.NEW_DEMO_REDIRECT_DOMAIN}/demo-invite?id=${demoHash}`,
-			}, {
-				headers: { Authorization: `Bearer ${process.env.BITLY_APIKEY}`, 'Content-Type': 'application/json' },
-			}).then((response) => {
-				callback(null, {
-					statusCode: 200,
-					body: `${response.data.link}`,			// this contains the ID of the created course
-				});
+			callback(null, {
+				statusCode: 200,
+				body: `${demoLink}`,
 			});
 		})
 		.catch((err) => {
