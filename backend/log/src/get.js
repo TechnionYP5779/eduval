@@ -25,6 +25,7 @@ async function dbRowToProperObject(obj) {
 
 		if (retObj.value < 0) {
 			delete retObj.messageReason;
+			delete retObj.lessonNumber;
 			retObj.value = -obj.val;
 			const knexConnection = knex(dbConfig);
 

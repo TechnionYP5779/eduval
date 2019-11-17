@@ -166,6 +166,7 @@ const registerDemoStudent = async (event, context, callback) => {
 					accessToken,
 					expiresIn: decodedToken.exp,
 					sub: decodedToken.sub,
+					studentId,
 				}),
 			});
 		})
