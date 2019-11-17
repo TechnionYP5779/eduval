@@ -1199,6 +1199,37 @@ paths:
       security:
         - auth0_token: []
  
+  '/lesson/{courseId}/awardedEmons':
+    get:
+      tags:
+        - lesson
+      summary: Get a list of Emons awarded to students
+      description: Get all Emons awarded per student in current lesson.
+      parameters:
+        - name: courseId
+          in: path
+          description: The ID of the lesson's course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: All OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentWithEmons'
+        '404':
+          description: Course not found
+          content: {}
+        '405':
+          description: Invalid ID
+          content: {}
+      security:
+        - auth0_token: []
   
   '/shop/{courseId}/items':
     get:
@@ -1457,8 +1488,16 @@ paths:
                 example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
                 description: 'Auth0 token of created user.'
         '409':
-          description: Desk already taken 
-          content: {}
+          description: Desk already taken, or demo lesson not started.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: The cause of the error
+                    enum: ["COURSE_NOT_STARTED", "DESK_TAKEN"]
       security:
         - auth0_token: []
   
@@ -1718,6 +1757,15 @@ components:
                 type: integer
               amountUsed:
                 type: integer
+      additionalProperties: false
+    StudentWithEmons:
+      type: object
+      properties:
+        studentId:
+          type: integer
+          format: int64
+        emons:
+          type: integer
       additionalProperties: false
     
  
