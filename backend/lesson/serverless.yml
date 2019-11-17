@@ -190,6 +190,21 @@ functions:
                     parameters:
                         paths:
                             courseId: true
+    
+    getStudentEmons:
+        handler: src/emons.handler
+        description: Get the emons awarded to students.
+        events:
+            - http:
+                path: /{courseId}/awardedEmons
+                method: get
+                cors: true
+                authorizer:
+                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
 
 resources:
     Resources:
