@@ -192,7 +192,7 @@ class CourseDetails extends React.Component {
 <Row>
 {
   !this.state.condensed &&
-  <h2> Waiting For Graph</h2>
+  <h2 style = {{margin:"auto"}}> Waiting For Graph</h2>
 }
 {
   this.state.condensed &&

@@ -64,7 +64,7 @@ const initialState = {
       label: 'Emoj Per Lesson',
       fill: true,
       lineTension: 0.1,
-      backgroundColor: 'rgba(2,2,192,0.4)',
+      backgroundColor: 'rgba(191,191,63,0.4)',
       borderColor: 'Lime',
       borderCapStyle: 'butt',
       borderDash: [],
@@ -132,7 +132,8 @@ class StudentLessonGraph extends React.Component {
 
   render() {
 		return (
-      <div>
+      <div style = {{margin:"5px 10px"}}>
+        <h4 style = {{margin:"10px"}}> Emons and Emoji per Lesson in {this.state.courseName}</h4>
 		    <Line data={this.state}/>
       </div>
 		);
