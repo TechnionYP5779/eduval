@@ -26,7 +26,6 @@ import Fade from '@material-ui/core/Fade';
 import Button from '@material-ui/core/Button';
 import ClearIcon from '@material-ui/icons/Clear';
 
-var QRCode = require('qrcode.react');
 
 const LightTooltip = withStyles(theme => ({
   tooltip: {
@@ -97,13 +96,7 @@ const styles = theme => ({
   {
     width: "50%",
     position: 'relative',
-  },
-  qr: {
-    margin: "auto",
-    display: "block",
-    maxWidth: "20%"
   }
-
 });
 
 class CourseCard extends React.Component
@@ -117,8 +110,7 @@ class CourseCard extends React.Component
       id: this.props.id,
       play_pushed: this.props.play_pushed,
       disabled_play: this.props.disabled_play,
-      delete_modal_open: false,
-      demoLink: this.props.demoLink
+      delete_modal_open: false
     };
 
     this.handlePlayClick = this.handlePlayClick.bind(this);
@@ -158,73 +150,16 @@ class CourseCard extends React.Component
     const classes = this.props.classes;
     return(
       <div>
-        <Modal
-          aria-labelledby="transition-modal-title"
-          aria-describedby="transition-modal-description"
-          className={classes.modal}
-          open={this.state.delete_modal_open}
-          onClose={this.handleDeleteModalClose}
-          closeAfterTransition
-          BackdropComponent={Backdrop}
-          BackdropProps={{
-            timeout: 500,
-          }}
-        >
-          <Fade in={this.state.delete_modal_open}>
-            <div className={classes.paper}>
-              <h3 id="transition-modal-title">Are you sure you want to delete {this.state.name}?</h3>
-              <Button
-                variant="contained"
-                color="primary"
-                className={classes.delete_confirmation}
-                endIcon={<ClearIcon />}
-                onClick={this.handleDeleteModalClose}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                color="secondary"
-                className={classes.delete_confirmation}
-                endIcon={<Delete />}
-                onClick={this.handleDeleteCourse}
-              >
-                Delete
-              </Button>
-            </div>
-          </Fade>
-        </Modal>
         <Card className={this.state.play_pushed? classes.card_in_lesson : classes.card} >
           <CardHeader
           classes={{
             title: classes.title,
           }}
           title={this.state.name + (this.state.play_pushed? " [In Progress!]" : "")}
-          action={
-            <LightTooltip title="Delete Course" placement="top-start" className={classes.tooltip}>
-              <IconButton aria-label="delete"
-              className={classes.delete}
-              disabled={this.state.play_pushed}
-              onClick={this.handleDeleteModalOpen}
-              >
-                <Delete  />
-              </IconButton>
-            </LightTooltip>
-          }
           />
-          { this.state.description!="" &&
-            <CardContent>
-              <Typography paragraph>Course Description: {this.state.description}</Typography>
-            </CardContent>
-          }
-
-          { this.state.demoLink!=null &&
-            <CardContent>
-              <Typography paragraph>Trial Lesson Invite Link: <br/> {this.state.demoLink}</Typography>
-              <QRCode size="200" value={this.state.demoLink} className={classes.qr}/>
-
-            </CardContent>
-          }
+          <CardContent>
+            <Typography paragraph>{this.state.description}</Typography>
+          </CardContent>
 
 
           <CardActions disableSpacing>
@@ -237,13 +172,13 @@ class CourseCard extends React.Component
             </LightTooltip>
             <LightTooltip title="Manage Store" placement="bottom-end">
               <IconButton>
-                <a href={"/manage-store/" + this.state.id}>
+                <a href={"/store/" + this.state.id}>
                 <ShoppingCartIcon />
                 </a>
               </IconButton>
             </LightTooltip>
 
-            <LightTooltip title={this.state.play_pushed? "Resume Lesson" : "Start Lesson"}
+            <LightTooltip title={this.state.play_pushed? "Resume Lesson" : "Join Lesson"}
               placement="bottom-end">
               <IconButton
               disabled={ this.state.disabled_play}

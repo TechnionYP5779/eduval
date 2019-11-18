@@ -82,6 +82,7 @@ class MyCourses extends React.Component {
         self.setState({activeLesson: -1})
       }
       server.getAllCourses(function(response){
+        console.log(response);
           self.setState({courses: response.data});
         }, function(error){
       });
@@ -129,6 +130,7 @@ class MyCourses extends React.Component {
             <Col sm="6" lg="4" key={idx}>
               <CourseCard
 
+              demoLink={course.demoLink}
               name={course.name}
               description={course.description}
               disabled_play={this.state.disabled ||

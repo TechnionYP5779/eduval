@@ -42,6 +42,10 @@ import CustomSelect from "../components/components-overview/CustomSelect";
 import CoinImage from "../images/midEcoin.png"
 import PageTitle from "../components/common/PageTitle";
 
+import Modal from '@material-ui/core/Modal';
+import Backdrop from '@material-ui/core/Backdrop';
+import Fade from '@material-ui/core/Fade';
+import { withStyles } from '@material-ui/core/styles';
 
 import awsIot  from 'aws-iot-device-sdk';
 import "./Lesson.css";
@@ -62,6 +66,68 @@ const EmojiEnum = {
 
 var client;
 
+const styles = theme => ({
+  card: {
+    maxWidth: 345,
+    marginBottom: '30px ',
+  },
+
+  card_in_lesson: {
+    maxWidth: 345,
+    marginBottom: '30px ',
+    backgroundColor: "#77dd77"
+  },
+
+  media: {
+    height: 0,
+    paddingTop: '56.25%', // 16:9
+  },
+  play: {
+    color: "#77dd77",
+    // transform: 'scale(1) translate(0%, 5%)',
+    marginLeft: 'auto',
+    transition: theme.transitions.create('transform', {
+      duration: theme.transitions.duration.shortest,
+    }),
+  },
+  play_pushed: {
+    color: "Gold",
+    marginLeft: 'auto',
+    // transform: 'scale(1.2) translate(-10%, 5%)',
+  },
+
+  play_disabled:{
+    color: "Silver",
+    marginLeft: 'auto'
+  },
+
+  title:{
+    color: "DarkBlue",
+  },
+
+  delete:{
+    color: "red"
+  },
+
+  modal: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  paper: {
+    color: "white",
+    backgroundColor: "DarkGreen",
+    border: '2px solid #000',
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2, 4, 3),
+  },
+
+  delete_confirmation:
+  {
+    width: "50%",
+    position: 'relative',
+  }
+});
 
 
 
@@ -78,46 +144,70 @@ class Lesson extends React.Component {
       chosen_smile : -1,
       chosen_message : -1,
       showing_messages: false,
+      message_modal_open: false,
 
-    name: "string",
-    teacherId: 0,
-    location: "string",
-    description: "string",
+      name: "Lesson",
+      teacherId: 0,
+      location: "string",
+      description: "string",
 
-      messageRows: [[{
-          message: "I have a question",
-          enum: "MESSAGE_QUESTION",
-          color:"Tomato",
-          id: 0
-      },
-      {
-          message: "I didn't understand",
-          enum: "MESSAGE_CONFUSED",
-          color:"Violet",
-          id: 2
-      }],
-      [{
-          message: "May I go out?",
-          enum: "MESSAGE_NEED_TO_LEAVE",
-          color:"Orange",
-          id: 3
-      },
-      {
-          message: "I know the answer!",
-          enum: "MESSAGE_ANSWER",
-          color:"MediumSeaGreen",
-          id: 4
-      }],
-      [{
-          message: "Speak louder please",
-          enum: "MESSAGE_LOUDER",
-          color:"SlateBlue",
-          id: 5
-      }]
-    ],currentEmojis: [],
-   };
+        messageRows: [[{
+            message: "I have a question",
+            enum: "MESSAGE_QUESTION",
+            color:"Tomato",
+            id: 0
+        },
+        {
+            message: "I didn't understand",
+            enum: "MESSAGE_CONFUSED",
+            color:"Violet",
+            id: 2
+        }],
+        [{
+            message: "May I go out?",
+            enum: "MESSAGE_NEED_TO_LEAVE",
+            color:"Orange",
+            id: 3
+        },
+        {
+            message: "I know the answer!",
+            enum: "MESSAGE_ANSWER",
+            color:"MediumSeaGreen",
+            id: 4
+        }],
+        [{
+            message: "Speak louder please",
+            enum: "MESSAGE_LOUDER",
+            color:"SlateBlue",
+            id: 5
+        }]
+      ],currentEmojis: [],
+     };
+     this.setMessageModalChange = this.setMessageModalChange.bind(this)
+     this.handleMessageModalOpen = this.handleMessageModalOpen.bind(this)
+     this.handleMessageModalClose = this.handleMessageModalClose.bind(this)
 
    }
+
+   setMessageModalChange(value)
+  {
+    this.setState({message_modal_open: value})
+  }
+
+  handleMessageModalOpen = () => {
+    this.setMessageModalChange(true);
+
+    if(this.state.message_modal_open==true) {
+        setTimeout(function(){
+             this.setState({message_modal_open:false});
+        }.bind(this),10000);  // wait 5 seconds, then reset to false
+   }
+  };
+
+  handleMessageModalClose = () => {
+    this.setMessageModalChange(false);
+  };
+
 
    componentDidMount(){
      const getHistory=() =>{
@@ -178,6 +268,7 @@ class Lesson extends React.Component {
 
 
     var connect = async () => {
+      console.log("Connecting!");
     	return getContent('https://qh6vsuof2f.execute-api.eu-central-1.amazonaws.com/dev/iot/keys').then((res) => {
     		res = JSON.parse(res)
     		client = awsIot.device({
@@ -217,6 +308,7 @@ class Lesson extends React.Component {
                 currentEmojis : [...this.state.currentEmojis, EmojiEnum[res.emojiType]]
               }));
               this.setState({message: "You got an Emoji from your teacher: "+ EmojiEnum[res.emojiType], success: true});
+              this.handleMessageModalOpen();
               window.scrollTo(0, 0);
             }else{
               let updated_reward_money = +this.state.reward_money + +res.value
@@ -224,6 +316,7 @@ class Lesson extends React.Component {
               reward_money : updated_reward_money
             }));
             this.setState({message: "You got "+ res.value+" Emons from your teacher!", success: true});
+            this.handleMessageModalOpen();
               window.scrollTo(0, 0);
             }
 
@@ -232,7 +325,7 @@ class Lesson extends React.Component {
               axios.delete('https://api.emon-teach.com/'+LessonsMessageURL,
                {headers: headers});
 
-              this.setState({message: "The lesson ended", success: false});
+              this.setState({message: "The lesson ended", success: false, message_modal_open:false});
               window.scrollTo(0, 0);
               window.location.href = "/course-summery/" + JSON.stringify( {
                   id: this.state.lesson_id,
@@ -265,6 +358,7 @@ class Lesson extends React.Component {
   render() {
 
    const {messageRows, smileys} = this.state;
+   const classes = this.props.classes;
 
 
     return (
@@ -274,11 +368,26 @@ class Lesson extends React.Component {
             <TimeoutAlert className="mb-0" theme="danger" msg={this.state.message} time={3000} />
           </Container>
         }
-        {this.state.success &&
-          <Container fluid className="px-0">
-            <TimeoutAlert className="mb-0" theme="success" msg={this.state.message} time={3000} />
-          </Container>
-        }
+
+        <Modal
+          aria-labelledby="transition-modal-title"
+          aria-describedby="transition-modal-description"
+          className={classes.modal}
+          open={this.state.message_modal_open}
+          onClose={this.handleMessageModalClose}
+          closeAfterTransition
+          BackdropComponent={Backdrop}
+          BackdropProps={{
+            timeout: 500,
+          }}
+        >
+          <Fade in={this.state.message_modal_open}>
+            <div className={classes.paper}>
+              <h3 id="transition-modal-title" style={{color:"white"}}>{this.state.message}</h3>
+            </div>
+          </Fade>
+        </Modal>
+
       <Container fluid className="main-content-container px-4">
 
 
@@ -359,6 +468,7 @@ class Lesson extends React.Component {
                         {headers: headers})
                       .then( (response) =>{
                           this.setState({message: "Your message sent to your teacher!", success: true});
+                          this.handleMessageModalOpen();
                           window.scrollTo(0, 0)});
                       }} >
                         {message.message}
@@ -381,4 +491,4 @@ class Lesson extends React.Component {
   }
 }
 
-export default Lesson;
+export default withStyles(styles)(Lesson);

@@ -246,7 +246,7 @@ class Lesson extends React.Component {
     }, (error)=>{});
 
     iotMessages.getKeys(function(response){
-      iotMessages.connect(courseId, onConnectMessages, onConnectMessages, onOffline);
+       iotMessages.connect(courseId, onConnectMessages, onConnectMessages, onOffline);
     }, (error)=>{});
 
     server.getCourse(function(response){

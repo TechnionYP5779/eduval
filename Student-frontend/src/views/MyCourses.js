@@ -2,6 +2,9 @@
 import history from '../history';
 import React from "react";
 import axios from 'axios';
+
+import Alert from 'react-bootstrap/Alert'
+
 import {
   Container,
   Row,
@@ -17,6 +20,8 @@ import {
 } from "shards-react";
 
 import PageTitle from "../components/common/PageTitle";
+import CourseCard from "../components/common/CourseCard";
+
 import awsIot  from 'aws-iot-device-sdk';
 
 import Modal from 'react-modal';
@@ -45,7 +50,8 @@ class MyCourses extends React.Component {
       lessons_student_status: {},
       modalIsOpen: false,
       post_id:-1,
-      deskNum: -1
+      deskNum: -1,
+      studentSeatTaken: false
     };
 
     this.showModal = this.showModal.bind(this);
@@ -172,19 +178,33 @@ class MyCourses extends React.Component {
 
   insertDeskNumber() {
     var Student_id = parseInt(localStorage.getItem('student_id'));
+    console.log(this.state);
     var lesson_id = this.state.post_id;
       let config = {
           headers: {'Authorization': 'Bearer ' + localStorage.getItem('idToken')}
       };
       var txt;
-      this.showModal();
+      this.showModal(lesson_id);
         axios.post('https://api.emon-teach.com/lesson/'+ lesson_id +'/present',
         {
           id:  Student_id,
           desk: this.state.deskNum}, config).then(function(response)
           {
             history.push("/lesson/" + lesson_id);
-          });
+          })
+
+          .catch((error)=>{
+            console.log(error);
+            console.log("Failed presenting maself");
+            if(error.response)
+            {
+              if(error.response.status==409)
+              {
+                this.setState({studentSeatTaken: true})
+              }
+            }
+            this.setState({disabled:false})
+          })
 
      }
 
@@ -203,6 +223,8 @@ showModal(id) {
 
   handleNameInput(input){
     this.setState({deskNum: input.target.value});
+    this.setState({studentSeatTaken: false});
+
   }
 
   render() {
@@ -224,6 +246,14 @@ showModal(id) {
         onRequestClose={this.closeModal}
         style={customStyles}
       >
+      {(this.state.studentSeatTaken) &&
+        <Alert variant = "danger">
+          <Alert.Heading style={{color:"white"} }>This seat is Taken!</Alert.Heading>
+          <p>
+            Select another seat if you want to proceed. <br/> Contact the teacher in case of further problems.
+          </p>
+        </Alert>
+      }
       <h5>Please Enter Your Desk Number</h5>
       <Form>
         <FormGroup>
@@ -302,3 +332,10 @@ showModal(id) {
 }
 
 export default MyCourses;
+
+// <CourseCard
+//   name={post.name}
+//   description={post.description}
+//   id={post.id}
+//   play_pushed={this.state.lessons_student_status[post.id]}
+// />

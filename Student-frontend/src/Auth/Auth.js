@@ -100,24 +100,30 @@ class Auth {
     let config = {
       headers: {'Authorization': 'Bearer ' + localStorage.getItem('idToken')}
     };
-    let student_id = localStorage.getItem('student_id');
+    let student_id = localStorage.getItem('student_id');console.log("REGISTE1RSTUDENT");
     if (student_id != null){
+      console.log("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD")
       history.replace('/');
       return;
     }
 
     let sub = this.sub;
     if(sub == null){
+      console.log("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC")
       history.replace('/');
       return;
     }
+      console.log("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEee")
     axios.get(SERVER_CONFIG.domain + '/student/byToken/'+new Buffer(sub).toString('base64'), config)
     .then(function(response){
+      console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaa");
       localStorage.setItem('student_id', response.data.id);
       history.replace('/');
     })
     .catch(function(error){
+      console.log("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
       console.log("error");
+        console.log(error);
       if (!error.response || error.response.status !== 404){
         console.log(error);
         history.replace('/');

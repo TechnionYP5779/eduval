@@ -21,6 +21,7 @@ import {
   CardBody
 } from "shards-react";
 import PageTitle from "../components/common/PageTitle";
+import StudentLessonGraph from "../components/Graphs/StudentLessonGraph";
 
 import CoinImage from "../images/midEcoin.png"
 import "./CourseDetails.css"
@@ -65,6 +66,7 @@ class CourseDetails extends React.Component {
 
           ],
 
+          //condensed: []
 
         };
         let config = {
@@ -90,7 +92,19 @@ class CourseDetails extends React.Component {
             {headers: headers})
             .then((response) => {
             this.setState({courseName: response.data.name});
-          });
+          })
+          .then(()=>
+        {
+          axios.get('https://api.emon-teach.com/log/condensed/'
+          + student+'/byCourse/'+course,
+              {headers: headers})
+              .then((response) => {
+                console.log("condensed");
+                console.log(response)
+                 this.setState({condensed: response.data});
+            });
+
+        })
 
           axios.get('https://api.emon-teach.com/log/ofStudent/'
           + student+'/byCourse/'+course,
@@ -102,9 +116,11 @@ class CourseDetails extends React.Component {
 
 
 
+
       }
 
     render(){
+      console.log("Render");
         return(
             <Container fluid className="main-content-container px-4 pb-4">
         {/* Page Header */}
@@ -173,6 +189,19 @@ class CourseDetails extends React.Component {
           </CardBody>
   </Card>
 </Row>
+<Row>
+{
+  !this.state.condensed &&
+  <h2> Waiting For Graph</h2>
+}
+{
+  this.state.condensed &&
+  <Card style = {{height:"100%",width:"100%",marginLeft:"16px"}} className="mb-4">
+    <CardBody className="p-0 pb-3">
+      <StudentLessonGraph style = {{margin:"auto"}} condensed={this.state.condensed} courseName={this.state.courseName} />
+    </CardBody>
+  </Card>
+}</Row>
 </Col>
       <Col>
         <Card small className="mb-4">
@@ -211,6 +240,7 @@ class CourseDetails extends React.Component {
         </Card>
       </Col>
     </Row>
+
       </Container>
     );
    }
