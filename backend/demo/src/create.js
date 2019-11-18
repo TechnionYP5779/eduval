@@ -33,6 +33,7 @@ const addDemoCourse = async (event, context, callback) => {
 	const knexConnection = knex(dbConfig);
 	let demoHash;
 	let demoLink;
+	let courseId;
 
 	return knexConnection('Courses')
 		.select('courseName')
@@ -51,6 +52,19 @@ const addDemoCourse = async (event, context, callback) => {
 				courseObj.courseName = `${courseObj.courseName} #${highestNumber + 1}`;
 			}
 		})
+		.then(() =>	knexConnection('Courses')
+			.insert(courseObj))
+		.then((result) => {
+			// eslint-disable-next-line prefer-destructuring
+			courseId = result[0];
+			demoHash = uuidv5(`https://emon-teach.com/course/${result[0]}`, uuidv5.URL);
+			return knexConnection('DemoHashes')
+				.insert({
+					teacherId: courseObj.teacherId,
+					courseId: result[0],
+					demoId: demoHash,
+				});
+		})
 		.then(() => axios.post('https://api-ssl.bitly.com/v4/shorten', {
 			group_guid: process.env.BITLY_GROUP_GUID,
 			long_url: `${process.env.NEW_DEMO_REDIRECT_DOMAIN}/demo-invite?id=${demoHash}`,
@@ -59,18 +73,9 @@ const addDemoCourse = async (event, context, callback) => {
 		}))
 		.then((response) => {
 			demoLink = response.data.link;
-			courseObj.demoLink = demoLink;
-		})
-		.then(() =>	knexConnection('Courses')
-			.insert(courseObj))
-		.then((result) => {
-			demoHash = uuidv5(`https://emon-teach.com/course/${result[0]}`, uuidv5.URL);
-			return knexConnection('DemoHashes')
-				.insert({
-					teacherId: courseObj.teacherId,
-					courseId: result[0],
-					demoId: demoHash,
-				});
+			return knexConnection('Courses')
+				.update('demoLink', demoLink)
+				.where('courseId', courseId);
 		})
 		.then(() => axios.get(`https://api.emon-teach.com/teacher/${courseObj.teacherId}/activeLesson`, {
 			headers: {

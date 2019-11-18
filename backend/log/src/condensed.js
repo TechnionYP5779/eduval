@@ -69,23 +69,22 @@ const getStudentLog = async (event, context, callback) => {
 		.then((result) => {
 			toRet = result.map(x => ({ emons: x['sum(`val`)'] }));
 		})
-		.then(knexConnection('Logs')
+		.then(() => knexConnection('Logs')
 			.where({
 				courseId: event.pathParameters.courseId,
 				studentId: event.pathParameters.studentId,
 				msgType: 1,	// emojis
 			})
-			.select('lessonNumber', 'val')
-			.groupBy('lessonNumber'))
+			.select('lessonNumber', 'val'))
 		.then((result) => {
 			toRet = toRet.map((x) => {
 				// eslint-disable-next-line no-param-reassign
 				x.emojis = [];
 				return x;
 			});
-			if (result && result.length !== 0) {
+			if (result.length !== 0) {
 				result.forEach((x) => {
-					toRet[x.lessonNumber].push(numToEmoji(x.val));
+					toRet[x.lessonNumber].emojis.push(numToEmoji(x.val));
 				});
 			}
 		})
