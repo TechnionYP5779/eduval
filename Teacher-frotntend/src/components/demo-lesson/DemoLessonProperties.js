@@ -1,7 +1,7 @@
 import React from "react";
 import Alert from 'react-bootstrap/Alert'
+
 import {
-  Button,
   ListGroup,
   ListGroupItem,
   Row,
@@ -11,10 +11,64 @@ import {
   FormGroup
 } from "shards-react";
 
+import Card from '@material-ui/core/Card';
+import CardHeader from '@material-ui/core/CardHeader';
+import CardMedia from '@material-ui/core/CardMedia';
+import CardContent from '@material-ui/core/CardContent';
+import CardActions from '@material-ui/core/CardActions';
+import { withStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import TextField from '@material-ui/core/TextField';
+import Icon from '@material-ui/core/Icon';
+import Button from '@material-ui/core/Button';
+import AccountCircle from '@material-ui/icons/AccountCircle';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import FormatListNumberedIcon from '@material-ui/icons/FormatListNumbered';
+import SchoolIcon from '@material-ui/icons/School';
+import PublicIcon from '@material-ui/icons/Public';
+import SubjectIcon from '@material-ui/icons/Subject';
+import LinkIcon from '@material-ui/icons/Link';
+
+
+
 
 import server from "../../Server/Server";
+var QRCode = require('qrcode.react');
 
-export default class DemoLessonProperties extends React.Component {
+const styles = theme => ({
+  card: {
+    width: "90%",
+    marginBottom: '30px ',
+    margin: "15px auto",
+  },
+
+  title:{
+    color: "DarkBlue",
+    align: "center"
+  },
+
+  textField: {
+    margin: "auto",
+    width: "100%",
+    marginBottom: '15px ',
+  },
+
+  button: {
+    marginBottom: '10px ',
+    marginTop: '10px ',
+    margin: "auto",
+    width: "100%"
+  },
+
+  qr: {
+    margin: "auto",
+    display: "block",
+    maxWidth: "85%"
+  }
+});
+
+
+class DemoLessonProperties extends React.Component {
   constructor(props){
     super(props);
     this.state = {
@@ -24,48 +78,67 @@ export default class DemoLessonProperties extends React.Component {
       course: {id: "", name: "", location: "", description: "", startDate: "", endDate: ""}
     };
     this.startDemoLesson = this.startDemoLesson.bind(this);
+    this.updateCourseName = this.updateCourseName.bind(this);
+    this.updateCourseLocation = this.updateCourseLocation.bind(this);
+    this.updateCourseDescription = this.updateCourseDescription.bind(this);
   }
 
-  componentDidMount() {
-    var self = this;
-    server.getActiveLesson(function(response){
-      console.log(response);
-      console.log("GETACTIVE");
-      if (response.status==200){
-        self.setState({activeLessonId: response.data});
-        server.getCourse(function(response){
-          console.log(response.data);
-          console.log("GOTCOURSE");
-          self.setState({course: response.data});
-        }, function(error){
-        }, self.state.activeLessonId);
-      }
-    }, (err)=>{console.log("err", err);});
+  // componentDidMount() {
+  //   var self = this;
+  //   server.getActiveLesson(function(response){
+  //     console.log(response);
+  //     console.log("GETACTIVE");
+  //     if (response.status==200){
+  //       self.setState({activeLessonId: response.data});
+  //       server.getCourse(function(response){
+  //         console.log(response.data);
+  //         console.log("GOTCOURSE");
+  //         self.setState({course: response.data});
+  //       }, function(error){
+  //       }, self.state.activeLessonId);
+  //     }
+  //   }, (err)=>{console.log("err", err);});
+  //
+  // }
 
+
+  updateCourseName(evnt){
+    this.state.course.name =  evnt.target.value;
   }
 
-
-  updateName(evnt){
-    this.setState({name: evnt.target.value});
+  updateCourseLocation(evnt){
+    this.state.course.location = evnt.target.value;
   }
+
+  updateCourseDescription(evnt){
+    this.state.course.description =  evnt.target.value;
+  }
+
 
   startDemoLesson(evnt){
     let self = this;
     this.setState({disabled: true});
-    let handler  =   this.props.handler;
+
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var yyyy = today.getFullYear();
+
+    today = yyyy + '-' + mm + '-' + dd;
 
     server.createNewDemo(function(response){
-      handler(null);
+      console.log(response);
       self.setState({disabled: false});
       self.setState({invite_link: response.data});
     }, function(error){
       console.log(error);
       console.log("Demo error");
-      handler("An error has occured");
+      console.log("An error has occured");
       self.setState({disabled: false});
-    }, {name: "Trial Lesson", location: "111",
-      description: "", startDate: "2019-10-29",
-      endDate: "2019-10-29"
+    }, {name: this.state.course.name=="" ? "Trial Lesson" : this.state.course.name,
+        location: this.state.course.location == "" ? "" : this.state.course.location,
+      description: this.state.course.description=="" ? "" : this.state.course.description, startDate: today,
+      endDate: today
     });
 
 
@@ -73,29 +146,99 @@ export default class DemoLessonProperties extends React.Component {
   }
 
   render(){
+    const classes = this.props.classes;
     return (
-
-
       <ListGroup flush>
-          {this.state.activeLessonId!=-1 &&
-            <Alert variant = "danger" dismissible>
-              <Alert.Heading style={{color:"white"}}>Warning! A lesson is still active!</Alert.Heading>
-              <p>
-                Your course {this.state.course.name} is in active lesson currently.
-                If you start a new trial, all active lesson will be closed.
-              </p>
-            </Alert>
-          }
-          <Button disabled={this.state.disabled} onClick={this.startDemoLesson}>Start Trial Lesson</Button>
-          <Col md="6" className="form-group">
-            <label htmlFor="feEmailAddress">Invite Link</label>
-            <FormInput
-              id="invite_link"
-              type="link"
-              value={this.state.invite_link}
+        <Card className={classes.card}>
+          <CardHeader
+            classes={{
+            title: classes.title,
+            }}
+            title={"Create a Trial Lesson"}
+          />
+          <CardContent>
+            <TextField
+              id="standard-required"
+              label="Lesson Name (OPTIONAL)"
+              className={classes.textField}
+              margin="normal"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SchoolIcon />
+                  </InputAdornment>
+                ),
+              }}
+              onChange={this.updateCourseName}
             />
-          </Col>
+            <TextField
+              id="standard-required"
+              label="Location (OPTIONAL)"
+              className={classes.textField}
+              margin="normal"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PublicIcon />
+                  </InputAdornment>
+                ),
+              }}
+              onChange={this.updateCourseLocation}
+            />
+
+            <TextField
+              multiline
+              rowsMax="4"
+              id="standard-multiline-flexible"
+              label="Course Description (OPTIONAL)"
+              className={classes.textField}
+              margin="normal"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SubjectIcon />
+                  </InputAdornment>
+                ),
+              }}
+              onChange={this.updateCourseDescription}
+            />
+
+            <Button
+              variant="contained"
+              color="primary"
+              className={classes.button}
+              endIcon={<Icon>send</Icon>}
+              onClick={this.startDemoLesson}
+            >
+              Create Trial Lesson
+            </Button>
+            {
+              this.state.invite_link != "" &&
+              <TextField
+                readonly
+                id="standard-readonly"
+                label="Link"
+                className={classes.textField}
+                margin="normal"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LinkIcon />
+                    </InputAdornment>
+                  ),
+                }}
+                value={this.state.invite_link}
+              />
+            }
+            {
+              this.state.invite_link != "" &&
+              <QRCode size="200" value={this.state.invite_link} className={classes.qr}/>
+            }
+          </CardContent>
+        </Card>
       </ListGroup>
     )
   }
 }
+
+export default withStyles(styles)(DemoLessonProperties);

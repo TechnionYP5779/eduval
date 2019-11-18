@@ -113,7 +113,7 @@ class CourseSummery extends React.Component {
 
                 <Row form>
                  {/* E-Mony earned */}
-                  <p>Total E-Mony: {this.state.total_reward_money}</p>
+                  <p>Total E-Money: {this.state.total_reward_money}</p>
                 </Row>
 
               <a href={"/Overview"}>

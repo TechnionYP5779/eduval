@@ -554,6 +554,7 @@ class Server {
       callbackError(error);
       return;
     }
+    console.log(courseDetails);
     courseDetails['id'] = 0;
     courseDetails['teacherId'] = parseInt(teacher_id);
     console.log(courseDetails['teacherId']);
@@ -561,7 +562,6 @@ class Server {
     .then(callback)
     .catch(callbackError);
   }
-
 
   /*
   =================== Get Teacher Profile ====================
