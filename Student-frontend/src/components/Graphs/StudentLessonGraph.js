@@ -108,15 +108,16 @@ class StudentLessonGraph extends React.Component {
 
   componentDidMount(){
 
-    this.setState({labels: [...Array(this.state.condensed.length).keys()]});
     console.log(this.state);
     var tmp = this.state.datasets;
     tmp[0].label="Emons Per Lesson";
+    var lbl = []
     var arr = []
     var arr2 = []
     var j = 0
     for (j=0 ; j<this.state.condensed.length; j++)
     {
+      lbl.push(j+1);
       arr.push(this.state.condensed[j].emons);
       arr2.push(this.state.condensed[j].emojis.length);
       console.log("PUSHING EMONS");
@@ -127,6 +128,7 @@ class StudentLessonGraph extends React.Component {
     console.log("TMP");
     console.log(tmp);
     this.setState({datasets: tmp})
+    this.setState({labels: lbl});
   };
 
 
