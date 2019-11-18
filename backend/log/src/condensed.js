@@ -55,19 +55,36 @@ const getStudentLog = async (event, context, callback) => {
 
 	// Connect
 	const knexConnection = knex(dbConfig);
-	let toRet;
+	let toRet = [];
 
 	return knexConnection('Logs')
+		.max('lessonNumber')
 		.where({
 			courseId: event.pathParameters.courseId,
 			studentId: event.pathParameters.studentId,
-			msgType: 0,	// emon messages
 		})
-		.select('lessonNumber')
-		.sum('val')
-		.groupBy('lessonNumber')
 		.then((result) => {
-			toRet = result.map(x => ({ emons: x['sum(`val`)'] }));
+			for (let i = 0; i <= result[0]['max(`lessonNumber`)']; i += 1) {
+				toRet.push({
+					emons: 0,
+					emojis: [],
+				});
+			}
+			console.log(JSON.stringify(toRet));
+		})
+		.then(() => knexConnection('Logs')
+			.where({
+				courseId: event.pathParameters.courseId,
+				studentId: event.pathParameters.studentId,
+				msgType: 0,	// emon messages
+			})
+			.select('lessonNumber')
+			.sum('val')
+			.groupBy('lessonNumber'))
+		.then((result) => {
+			result.forEach((x) => {
+				toRet[x.lessonNumber].emons += x['sum(`val`)'];
+			});// result.map(x => ({ emons: x['sum(`val`)'] }));
 		})
 		.then(() => knexConnection('Logs')
 			.where({
@@ -77,11 +94,11 @@ const getStudentLog = async (event, context, callback) => {
 			})
 			.select('lessonNumber', 'val'))
 		.then((result) => {
-			toRet = toRet.map((x) => {
+			/*toRet = toRet.map((x) => {
 				// eslint-disable-next-line no-param-reassign
 				x.emojis = [];
 				return x;
-			});
+			});*/
 			if (result.length !== 0) {
 				result.forEach((x) => {
 					toRet[x.lessonNumber].emojis.push(numToEmoji(x.val));
@@ -101,6 +118,8 @@ const getStudentLog = async (event, context, callback) => {
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
 			console.log(`ERROR getting log: ${err}`);
+			console.log(err);
+			console.log(JSON.stringify(err));
 			return callback(createError.InternalServerError('Error getting log.'));
 		});
 };
