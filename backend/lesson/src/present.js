@@ -78,7 +78,21 @@ const updatePresentStudents = async (event, context, callback) => {
 	const knexConnection = knex(dbConfig);
 
 	return knexConnection('PresentStudents')
-		.insert(objToInsert)
+		.select()
+		.where({
+			courseId: objToInsert.courseId,
+			desk: objToInsert.desk,
+		})
+		.then((result) => {
+			if (result.length !== 0) {
+				callback(createError.Conflict('The requested desk is already taken.'));
+				return Promise.reject(createError.Conflict('The requested desk is already taken.'));
+			}
+
+			return Promise.resolve();
+		})
+		.then(() => knexConnection('PresentStudents')
+			.insert(objToInsert))
 		.then(async (result) => {
 			knexConnection.client.destroy();
 			return axios.post(

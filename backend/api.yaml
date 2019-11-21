@@ -579,6 +579,10 @@ paths:
       tags:
         - course
       summary: Deletes a course
+      description: >-
+        Deletes __*everything*__ related to the course. Registered student records, shop items, emons. Irreversible.  
+        
+        <img src="https://media.tenor.com/images/0b60c301b5209c27fd98ebbb489c87c9/tenor.gif"/>
       parameters:
         - name: courseId
           in: path
@@ -846,6 +850,46 @@ paths:
       security:
         - auth0_token: []
   
+  '/log/condensed/{studentId}/byCourse/{courseId}':
+    get:
+      tags:
+        - log
+      summary: Get a condensed log
+      description: Returns a log of a student in a course, summed up per lesson.
+      parameters:
+        - name: studentId
+          in: path
+          description: ID of the relevant student
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: courseId
+          in: path
+          description: ID of the requested course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LessonLog'
+        '400':
+          description: Validation exception. Invalid ID(s).
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+      security:
+        - auth0_token: []
+  
+  
   
   '/lesson/{courseId}/status':
     get:
@@ -1098,6 +1142,9 @@ paths:
         '404':
           description: Course not found
           content: {}
+        '409':
+          description: Desk already taken 
+          content: {}
         '405':
           description: Invalid ID
           content: {}
@@ -1192,6 +1239,37 @@ paths:
       security:
         - auth0_token: []
  
+  '/lesson/{courseId}/awardedEmons':
+    get:
+      tags:
+        - lesson
+      summary: Get a list of Emons awarded to students
+      description: Get all Emons awarded per student in current lesson.
+      parameters:
+        - name: courseId
+          in: path
+          description: The ID of the lesson's course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: All OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentWithEmons'
+        '404':
+          description: Course not found
+          content: {}
+        '405':
+          description: Invalid ID
+          content: {}
+      security:
+        - auth0_token: []
   
   '/shop/{courseId}/items':
     get:
@@ -1449,6 +1527,17 @@ paths:
                 type: string
                 example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
                 description: 'Auth0 token of created user.'
+        '409':
+          description: Desk already taken, or demo lesson not started.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: The cause of the error
+                    enum: ["COURSE_NOT_STARTED", "DESK_TAKEN", "NAME_TAKEN"]
       security:
         - auth0_token: []
   
@@ -1528,6 +1617,9 @@ components:
         endDate:
           type: string
           format: date
+        demoLink:
+          type: string
+          format: url
           
     Message:
       oneOf:
@@ -1593,6 +1685,10 @@ components:
             courseId:
               type: integer
               format: int64
+            lessonNumber:
+              type: integer
+              format: int64
+              description: The lesson the emon was given in
             messageType:
               type: string
               enum: ["EMON"]
@@ -1635,6 +1731,10 @@ components:
             courseId:
               type: integer
               format: int64
+            lessonNumber:
+              type: integer
+              format: int64
+              description: The lesson the emoji was given in
             messageType:
               type: string
               enum: ["EMOJI"]
@@ -1645,6 +1745,17 @@ components:
               type: string
               description: what emoji was sent
               enum: ["EMOJI_HAPPY", "EMOJI_THUMBS_UP", "EMOJI_ANGEL", "EMOJI_GRIN", "EMOJI_SHUSH", "EMOJI_ZZZ", "EMOJI_ANGRY", "EMOJI_THUMBS_DOWN"]
+    
+    LessonLog:
+      type: object
+      properties:
+        emons:
+          type: integer
+        emojis:
+          type: array
+          items:
+            type: string
+            enum: ["EMOJI_HAPPY", "EMOJI_THUMBS_UP", "EMOJI_ANGEL", "EMOJI_GRIN", "EMOJI_SHUSH", "EMOJI_ZZZ", "EMOJI_ANGRY", "EMOJI_THUMBS_DOWN"]
     
     ShopItem:
       type: object
@@ -1708,6 +1819,15 @@ components:
                 type: integer
               amountUsed:
                 type: integer
+      additionalProperties: false
+    StudentWithEmons:
+      type: object
+      properties:
+        studentId:
+          type: integer
+          format: int64
+        emons:
+          type: integer
       additionalProperties: false
     
  

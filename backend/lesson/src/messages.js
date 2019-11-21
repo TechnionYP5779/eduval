@@ -15,6 +15,8 @@ function dbRowToProperObject(obj) {
 	delete retObj.courseId;
 	delete retObj.idToken;
 	delete retObj.dtime;
+	delete retObj.lessonNumber;
+
 	switch (obj.msgType) {
 	case 0:
 		delete retObj.msgType;
@@ -178,12 +180,18 @@ const postStudentMessages = async (event, context, callback) => {
 	// Connect
 	const knexConnection = knex(dbConfig);
 
-	return knexConnection('Logs')
-		.insert(objToInsert)
-		.then(async (result) => {
+	return knexConnection('Courses')
+		.select('lessonNumber')
+		.where('courseId', objToInsert.courseId)
+		.then((result) => {
+			objToInsert.lessonNumber = result[0].lessonNumber;
+		})
+		.then(() => knexConnection('Logs')
+			.insert(objToInsert))
+		.then(async () => {
 			knexConnection.client.destroy();
 			iot.connect().then(() => {
-				iot.client.publish(`lesson/${event.pathParameters.courseId}/messages/${event.pathParameters.studentId}`, JSON.stringify(event.body), {}, (uneededResult) => {
+				iot.client.publish(`lesson/${event.pathParameters.courseId}/messages/${event.pathParameters.studentId}`, JSON.stringify(event.body), {}, () => {
 					iot.client.end(false);
 					return callback(null, {
 						statusCode: 200,
@@ -221,7 +229,7 @@ const clearStudentMessages = async (event, context, callback) => {
 			live: true,
 		})
 		.update({ live: false })
-		.then(async (result) => {
+		.then(async () => {
 			knexConnection.client.destroy();
 			return callback(null, {
 				statusCode: 200,

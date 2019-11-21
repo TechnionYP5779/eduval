@@ -32,16 +32,31 @@ const addDemoCourse = async (event, context, callback) => {
 	// Connect
 	const knexConnection = knex(dbConfig);
 	let demoHash;
+	let demoLink;
+	let courseId;
 
 	return knexConnection('Courses')
-		.select()
+		.select('courseName')
 		.where('courseName', 'like', `${courseObj.courseName}%`)
+		.andWhere('teacherId', courseObj.teacherId)
 		.then((result) => {
-			if (result.length !== 0) courseObj.courseName = `${courseObj.courseName} #${result.length + 1}`;
+			if (result.length !== 0) {
+				const highestNumber = result.map((x) => {		// Parse "Lesson #123" => 123
+					const hashIndex = x.courseName.lastIndexOf('#');
+					if (hashIndex === -1) {
+						return 1;
+					}
+					return parseInt(x.courseName.substr(hashIndex + 1, x.courseName.length), 10);
+				}).sort((a, b) => b - a)[0];	// reverse sort and select largest
+
+				courseObj.courseName = `${courseObj.courseName} #${highestNumber + 1}`;
+			}
 		})
 		.then(() =>	knexConnection('Courses')
 			.insert(courseObj))
 		.then((result) => {
+			// eslint-disable-next-line prefer-destructuring
+			courseId = result[0];
 			demoHash = uuidv5(`https://emon-teach.com/course/${result[0]}`, uuidv5.URL);
 			return knexConnection('DemoHashes')
 				.insert({
@@ -50,34 +65,28 @@ const addDemoCourse = async (event, context, callback) => {
 					demoId: demoHash,
 				});
 		})
+		.then(() => axios.post('https://api-ssl.bitly.com/v4/shorten', {
+			group_guid: process.env.BITLY_GROUP_GUID,
+			long_url: `${process.env.NEW_DEMO_REDIRECT_DOMAIN}/demo-invite?id=${demoHash}`,
+		}, {
+			headers: { Authorization: `Bearer ${process.env.BITLY_APIKEY}`, 'Content-Type': 'application/json' },
+		}))
+		.then((response) => {
+			demoLink = response.data.link;
+			return knexConnection('Courses')
+				.update('demoLink', demoLink)
+				.where('courseId', courseId);
+		})
 		.then(() => axios.get(`https://api.emon-teach.com/teacher/${courseObj.teacherId}/activeLesson`, {
 			headers: {
 				Authorization: event.headers.Authorization,
 			},
 		}))
-		.then((response) => {
-			if (response.status === 200) {
-				return axios.post(`https://api.emon-teach.com/lesson/${response.data}/status`, 'LESSON_END', {
-					headers: {
-						Authorization: event.headers.Authorization,
-					},
-				});
-			}
-			return Promise.resolve();
-		})
 		.then(() => {
 			knexConnection.client.destroy();
-
-			return axios.post('https://api-ssl.bitly.com/v4/shorten', {
-				group_guid: process.env.BITLY_GROUP_GUID,
-				long_url: `${process.env.NEW_DEMO_REDIRECT_DOMAIN}/demo-invite?id=${demoHash}`,
-			}, {
-				headers: { Authorization: `Bearer ${process.env.BITLY_APIKEY}`, 'Content-Type': 'application/json' },
-			}).then((response) => {
-				callback(null, {
-					statusCode: 200,
-					body: `${response.data.link}`,			// this contains the ID of the created course
-				});
+			callback(null, {
+				statusCode: 200,
+				body: `${demoLink}`,
 			});
 		})
 		.catch((err) => {

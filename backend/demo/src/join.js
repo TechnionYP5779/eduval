@@ -8,6 +8,7 @@ const axios = require('axios');
 const auth0 = require('auth0');
 const shortid = require('shortid');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const passwordGenerator = require('generate-password');
 const dbConfig = require('../db');
 const corsConfig = require('../cors');
@@ -24,7 +25,8 @@ const registerDemoStudent = async (event, context, callback) => {
 	});
 
 	const username = shortid.generate();
-	const email = `${username}@fake.email`;
+	let email;
+	let emailSuffix;
 	const password = passwordGenerator.generate({
 		length: 10,
 		excludeSimilarCharacters: true,
@@ -40,14 +42,88 @@ const registerDemoStudent = async (event, context, callback) => {
 	let decodedToken = null;
 	let accessToken = null;
 
-	return management.createUser({
-		email,
-		password,
-		name: event.body.nickname,
-		username,
-		nickname: event.body.nickname,
-		connection: 'Username-Password-Authentication',
-	})
+	return knexConnection('DemoHashes')
+		.where({
+			demoId: event.pathParameters.demoHash,
+		})
+		.then((result) => {
+			// eslint-disable-next-line prefer-destructuring
+			courseId = result[0].courseId;
+			emailSuffix = `fake${crypto.createHash('md5').update(courseId.toString()).digest('hex')}.email`;
+			email = `${username}@${emailSuffix}`;
+
+			if (result.length === 0) {
+				callback(createError.NotFound('Demo lesson not found.'));
+				return Promise.reject(createError.NotFound('Demo lesson not found.'));
+			}
+			if (result.length !== 1) {
+				callback(createError.InternalServerError('More than one demo lesson with this hash.'));
+				return Promise.reject(createError.InternalServerError('More than one demo lesson with this hash.'));
+			}
+
+			return knexConnection('PresentStudents')
+				.select()
+				.where({
+					courseId: result[0].courseId,
+					desk: event.body.seatNumber,
+				});
+		})
+		.then((result) => {
+			if (result.length !== 0) {
+				callback(null, {
+					statusCode: 409,		// HTTP Gone
+					body: JSON.stringify({
+						error: 'DESK_TAKEN',
+					}),
+				});
+				return Promise.reject(createError.Conflict('The requested desk is already taken.'));
+			}
+
+			return Promise.resolve();
+		})
+		.then(() => knexConnection('Courses')
+			.select('status')
+			.where({
+				courseId,
+			}))
+		.then((result) => {
+			if (result[0].status === 'LESSON_END') {
+				callback(null, {
+					statusCode: 409,		// HTTP Gone
+					body: JSON.stringify({
+						error: 'COURSE_NOT_STARTED',
+					}),
+				});
+				return Promise.reject(createError.Gone('The course is not active.'));
+			}
+
+			return Promise.resolve();
+		})
+		.then(() => management.getUsers({
+			search_engine: 'v3',
+			q: `email:*@${emailSuffix} AND name:${event.body.nickname}`,
+		}))
+		.then((users) => {
+			if (users.length !== 0) {
+				callback(null, {
+					statusCode: 409,		// HTTP Gone
+					body: JSON.stringify({
+						error: 'NAME_TAKEN',
+					}),
+				});
+				return Promise.reject(createError.Gone('This name is already taken.'));
+			}
+
+			return Promise.resolve();
+		})
+		.then(() => management.createUser({
+			email,
+			password,
+			name: event.body.nickname,
+			username,
+			nickname: event.body.nickname,
+			connection: 'Username-Password-Authentication',
+		}))
 		.then(() => {
 			const authentication = new auth0.AuthenticationClient({
 				domain: 'e-mon.eu.auth0.com',
@@ -83,45 +159,18 @@ const registerDemoStudent = async (event, context, callback) => {
 			// Not sure if already int or not. If yes, this does nothing.
 			studentId = parseInt(response.data, 10);
 		})
-		.then(() =>	knexConnection('DemoHashes')
-			.where({
-				demoId: event.pathParameters.demoHash,
-			}))
-		.then((result) => {
+		.then(() => {
 			knexConnection.client.destroy();
 
-			// eslint-disable-next-line prefer-destructuring
-			courseId = result[0].courseId;
-
-			if (result.length === 1) {
-				return axios({
-					url: `https://api.emon-teach.com/course/${courseId}/registered`,
-					method: 'post',
-					data: [parseInt(studentId, 10)],
-					headers: {
-						Authorization: `Bearer ${auth0Token}`,
-					},
-				});
-				// return axios.post(`https://api.emon-teach.com/course/${courseId}/registered`, `[${studentId}]`, {
-				// 	headers: {
-				// 		Authorization: `Bearer ${auth0Token}`,
-				// 	},
-				// });
-			}
-			if (result.length === 0) {
-				callback(createError.NotFound('Demo lesson not found.'));
-				return Promise.reject(createError.NotFound('Demo lesson not found.'));
-			}
-
-			callback(createError.InternalServerError('More than one demo lesson with this hash.'));
-			return Promise.reject(createError.InternalServerError('More than one demo lesson with this hash.'));
+			return axios({
+				url: `https://api.emon-teach.com/course/${courseId}/registered`,
+				method: 'post',
+				data: [parseInt(studentId, 10)],
+				headers: {
+					Authorization: `Bearer ${auth0Token}`,
+				},
+			});
 		})
-		// TODO: start lesson? join lesson
-		.then(() => axios.post(`https://api.emon-teach.com/lesson/${courseId}/status`, 'LESSON_START', {
-			headers: {
-				Authorization: `Bearer ${auth0Token}`,
-			},
-		}))
 		.then(() => axios.post(`https://api.emon-teach.com/lesson/${courseId}/present`, {
 			id: studentId,
 			desk: event.body.seatNumber,
@@ -138,6 +187,7 @@ const registerDemoStudent = async (event, context, callback) => {
 					accessToken,
 					expiresIn: decodedToken.exp,
 					sub: decodedToken.sub,
+					studentId,
 				}),
 			});
 		})

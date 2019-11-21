@@ -88,40 +88,45 @@ const updateLessonStatus = async (event, context, callback) => {
 			.update({ status: newStatus }))
 		.then(async (result) => {
 			if (result === 1) {
-				new Promise((resolve, reject) => {
+				new Promise((resolve) => {
 					if (newStatus === 'LESSON_END') {
 						// then we need to clean up
 						const promise = knexConnection('PresentStudents').where({
 							courseId: event.pathParameters.courseId,
 						}).del()
-							.then(result => knexConnection('Logs')
+							.then(() => knexConnection('Logs')
 								.where({
 									courseId: event.pathParameters.courseId,
 									live: true,
 								})
 								.update({ live: false }))
-							.then(result => knexConnection('TeacherLogs')
+							.then(() => knexConnection('TeacherLogs')
 								.where({
 									courseId: event.pathParameters.courseId,
 									live: true,
 								})
-								.update({ live: false }));
+								.update({ live: false }))
+							.then(() => knexConnection('Courses')
+								.where('courseId', event.pathParameters.courseId)
+								.increment('lessonNumber'));
 						resolve(promise);
+						return;
 					}
 					resolve();
-				}).then(() => {
-					knexConnection.client.destroy();
+				})
+					.then(() => {
+						knexConnection.client.destroy();
 
-					iot.connect().then(() => {
-						iot.client.publish(`lesson/${event.pathParameters.courseId}/status`, newStatus, {}, (uneededResult) => {
-							iot.client.end(false);
-							callback(null, {
-								statusCode: 200,
-								body: '',
+						iot.connect().then(() => {
+							iot.client.publish(`lesson/${event.pathParameters.courseId}/status`, newStatus, {}, () => {
+								iot.client.end(false);
+								callback(null, {
+									statusCode: 200,
+									body: '',
+								});
 							});
 						});
 					});
-				});
 			} else if (result === 0) {
 				callback(createError.NotFound('Course not found.'));
 			} else {

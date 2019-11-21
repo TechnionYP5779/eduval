@@ -14,6 +14,7 @@ function dbRowToProperObject(obj) {
 	delete retObj.courseId;
 	retObj.name = obj.courseName;
 	delete retObj.courseName;
+	delete retObj.lessonNumber;
 	if ('studentId' in obj) { delete retObj.studentId; }
 	return retObj;
 }
