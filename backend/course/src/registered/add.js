@@ -31,15 +31,17 @@ const addCourseRegistered = async (event, context, callback) => {
 
 	const knexConnection = knex(dbConfig);
 	return new Promise((resolve, reject) => {
-		if (typeof requestArray[0] === 'string') {
+		if (!Number.isNaN(parseInt(requestArray[0], 10))) {		// real ugly workaround, but it works
+			// they're already IDs
+			resolve(requestArray);
+		} else if (typeof requestArray[0] === 'string') {
 			// then we need to get the IDs
 			resolve(knexConnection('Students')
 				.select('studentId')
 				.where('email', 'in', requestArray)
 				.then(result => result.map(x => x.studentId)));
 		} else {
-			// they're already IDs
-			resolve(requestArray);
+			reject(new Error('Invalid array.'));
 		}
 	})
 		.then((studentIds) => {

@@ -24,17 +24,20 @@ provider:
 #    individually: true
 
 plugins:
-    - serverless-offline
     - serverless-domain-manager
 
 custom:
+    domains:
+        prod: api.emon-teach.com
+        dev: dev-api.emon-teach.com
+
     # contains the credentials needed to connect to the DB
     secrets:    ${file(secrets.json)}
     customDomainEnabled:
         dev: false
         prod: true
     customDomain:
-        domainName: 'api.emon-teach.com'
+        domainName: ${self:custom.domains.${self:provider.stage}}
         basePath: 'lesson' # This will be prefixed to all routes
         stage: ${self:provider.stage}
         createRoute53Record: true
@@ -180,6 +183,21 @@ functions:
             - http:
                 path: /{courseId}/teacherMessages
                 method: delete
+                cors: true
+                authorizer:
+                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+    
+    getStudentEmons:
+        handler: src/emons.handler
+        description: Get the emons awarded to students.
+        events:
+            - http:
+                path: /{courseId}/awardedEmons
+                method: get
                 cors: true
                 authorizer:
                     arn: ${self:custom.secrets.AUTHORIZER_ARN}

@@ -1,7 +1,7 @@
 # For full config options, check the docs:
 #    docs.serverless.com
 
-service:        shop
+service:        demo
 
 provider:
     name:       aws
@@ -19,6 +19,13 @@ provider:
         DB_PORT:        ${self:custom.secrets.DB_PORT}
         LAMBDA_ENDPOINT:        ${self:custom.secrets.LAMBDA_ENDPOINT}
         LAMBDA_APIKEY:        ${self:custom.secrets.LAMBDA_APIKEY}
+        BITLY_APIKEY:        ${self:custom.secrets.BITLY_APIKEY}
+        BITLY_GROUP_GUID:        ${self:custom.secrets.BITLY_GROUP_GUID}
+        AUTH0_CLIENT_ID:        ${self:custom.secrets.AUTH0_CLIENT_ID}
+        AUTH0_CLIENT_SECRET:        ${self:custom.secrets.AUTH0_CLIENT_SECRET}
+        AUTH0_MANAGEMENT_CLIENT_ID:        ${self:custom.secrets.AUTH0_MANAGEMENT_CLIENT_ID}
+        AUTH0_MANAGEMENT_CLIENT_SECRET:        ${self:custom.secrets.AUTH0_MANAGEMENT_CLIENT_SECRET}
+        NEW_DEMO_REDIRECT_DOMAIN:               ${self:custom.newDemoRedirectDomain.${self:provider.stage}}
 
 #package:
 #    individually: true
@@ -30,92 +37,60 @@ custom:
     domains:
         prod: api.emon-teach.com
         dev: dev-api.emon-teach.com
-
+    
+    newDemoRedirectDomain:
+        prod: https://student.emon-teach.com
+        dev: http://lvh.me:3001
+    
     # contains the credentials needed to connect to the DB
     secrets:    ${file(secrets.json)}
     customDomainEnabled:
-        dev: false
+        dev: true
         prod: true
     customDomain:
         domainName: ${self:custom.domains.${self:provider.stage}}
-        basePath: 'shop' # This will be prefixed to all routes
+        basePath: 'demo' # This will be prefixed to all routes
         stage: ${self:provider.stage}
         createRoute53Record: true
         enabled: ${self:custom.customDomainEnabled.${self:provider.stage}}
 
 #TODO: Implement a more strict CORS policy
 functions:
-    getShopItems:
-        handler: src/items.get
-        description: Get items in shop
+    createDemo:
+        handler: src/create.handler
+        description: Create new demo course.
         events:
             - http:
-                path: '{courseId}/items'
+                path: /
+                method: post
+                cors: true
+                authorizer:
+                  arn: ${self:custom.secrets.AUTHORIZER_ARN}
+    getDemoCourse:
+        handler: src/get.handler
+        description: Get demo course info.
+        events:
+            - http:
+                path: /{demoHash}
                 method: get
                 cors: true
-                authorizer:
-                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
                 request:
                     parameters:
                         paths:
-                            courseId: true
-    addShopItem:
-        handler: src/items.post
-        description: Add item to shop
+                            demoHash: true
+    registerDemoStudents:
+        handler: src/join.handler
+        description: Register a new demo course participant.
+        timeout: 12     # in seconds. default is 6
         events:
             - http:
-                path: '{courseId}/items'
+                path: /{demoHash}/students
                 method: post
                 cors: true
-                authorizer:
-                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
                 request:
                     parameters:
                         paths:
-                            courseId: true
-    updateShopItem:
-        handler: src/items.put
-        description: Update item from shop
-        events:
-            - http:
-                path: '{courseId}/items'
-                method: put
-                cors: true
-                authorizer:
-                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
-                request:
-                    parameters:
-                        paths:
-                            courseId: true
-    deleteShopItem:
-        handler: src/items.del
-        description: Delete item from shop
-        events:
-            - http:
-                path: '{courseId}/item/{itemId}'
-                method: delete
-                cors: true
-                authorizer:
-                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
-                request:
-                    parameters:
-                        paths:
-                            courseId: true
-                            itemId: true
-    orderItem:
-        handler: src/order.handler
-        description: Order an item
-        events:
-            - http:
-                path: '{courseId}/order'
-                method: post
-                cors: true
-                authorizer:
-                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
-                request:
-                    parameters:
-                        paths:
-                            courseId: true
+                            demoHash: true
 
 resources:
     Resources:

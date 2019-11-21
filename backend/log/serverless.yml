@@ -24,17 +24,20 @@ provider:
 #    individually: true
 
 plugins:
-    - serverless-offline
     - serverless-domain-manager
 
 custom:
+    domains:
+        prod: api.emon-teach.com
+        dev: dev-api.emon-teach.com
+
     # contains the credentials needed to connect to the DB
     secrets:    ${file(secrets.json)}
     customDomainEnabled:
         dev: false
         prod: true
     customDomain:
-        domainName: 'api.emon-teach.com'
+        domainName: ${self:custom.domains.${self:provider.stage}}
         basePath: 'log' # This will be prefixed to all routes
         stage: ${self:provider.stage}
         createRoute53Record: true
@@ -43,11 +46,27 @@ custom:
 #TODO: Implement a more strict CORS policy
 functions:
     getStudentLog:
-        handler: src/get.handler
-        description: Get blaaaaaaaaaaaaaaa
+            handler: src/get.handler
+            description: Get blaaaaaaaaaaaaaaa
+            events:
+                - http:
+                    path: ofStudent/{studentId}/byCourse/{courseId}/
+                    method: get
+                    cors: true
+                    authorizer:
+                        arn: ${self:custom.secrets.AUTHORIZER_ARN}
+                    request:
+                        parameters:
+                            paths:
+                                courseId: true
+                                studentId: true
+                                
+    getCondensedLog:
+        handler: src/condensed.handler
+        description: Get condensed log
         events:
             - http:
-                path: ofStudent/{studentId}/byCourse/{courseId}/
+                path: condensed/{studentId}/byCourse/{courseId}/
                 method: get
                 cors: true
                 authorizer:

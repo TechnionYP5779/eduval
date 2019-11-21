@@ -57,7 +57,8 @@ class Server {
           return;
         }
 
-        axios.post(SERVER_CONFIG.domain + '/student', {authIdToken: new Buffer(sub).toString('base64'),
+        axios.post(SERVER_CONFIG.domain + '/student',
+        {authIdToken: new Buffer(sub).toString('base64'),
           name: profile.nickname,
           email: profile.email,
           phoneNum: profile[SERVER_CONFIG.phone_number]}, config)
@@ -66,6 +67,14 @@ class Server {
       });
     });
   }
+
+
+  // async registerStudentTrial(callback, callbackError, studentDetails){
+  //   axios.post(SERVER_CONFIG.domain + '/demo', courseDetails, this.config)
+  //   .then(callback)
+  //   .catch(callbackError);
+  //
+  // }
 }
 
 let server = new Server();

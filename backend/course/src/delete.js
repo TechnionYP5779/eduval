@@ -22,33 +22,94 @@ const deleteCourse = async (event, context, callback) => {
 
 	// Connect
 	const knexConnection = knex(dbConfig);
+	const { courseId } = event.pathParameters;
 
 	return knexConnection('Courses')
+		.select()
 		.where({
-			courseId: event.pathParameters.courseId,
+			courseId,
 		})
-		.del()
 		.then((result) => {
-			knexConnection.client.destroy();
+			if (result.length === 0) {
+				callback(createError.NotFound('Course not found.'));
+				return Promise.reject(createError.NotFound('Course not found.'));
+			}
+			if (result.length !== 1) {
+				callback(createError.InternalServerError('More than one course with same ID found.'));
+				return Promise.reject(createError.InternalServerError('More than one course with same ID found.'));
+			}
 
-			if (result === 1) {
+			return Promise.resolve();
+		})
+
+		.then(() => knexConnection('Logs')
+			.where({
+				courseId,
+			})
+			.del())
+		.then(() => knexConnection('PresentStudents')
+			.where({
+				courseId,
+			})
+			.del())
+		.then(() => knexConnection('DemoHashes')
+			.where({
+				courseId,
+			})
+			.del())
+		.then(() => knexConnection('Logs')
+			.where({
+				courseId,
+			})
+			.del())
+		.then(() => knexConnection('Registered')
+			.where({
+				courseId,
+			})
+			.del())
+		.then(() => knexConnection('TeacherLogs')
+			.where({
+				courseId,
+			})
+			.del())
+		.then(() => knexConnection('ShopItems')
+			.select('itemId')
+			.where({
+				courseId,
+			}))
+		.then((result) => {
+			const badIds = result.map(x => x.itemId);
+
+			return knexConnection('OwnedItems')
+				.whereIn('itemId', badIds)
+				.del();
+		})
+		.then(() => knexConnection('ShopItems')
+			.where({
+				courseId,
+			})
+			.del())
+		.then(() => knexConnection('Courses')
+			.where({
+				courseId,
+			})
+			.del()
+			.then(() => {
+				knexConnection.client.destroy();
+
+				// no need to check result. we already checked at the start
 				callback(null, {
 					statusCode: 200,
 					body: '',
 				});
-			} else if (result === 0) {
-				callback(createError.NotFound('Course not found.'));
-			} else {
-				callback(createError.InternalServerError('More than one course deleted.'));
-			}
-		})
-		.catch((err) => {
+			})
+			.catch((err) => {
 			// Disconnect
-			knexConnection.client.destroy();
-			// eslint-disable-next-line no-console
-			console.log(`ERROR deleting course: ${err}`);
-			return callback(createError.InternalServerError('Error deleting course.'));
-		});
+				knexConnection.client.destroy();
+				// eslint-disable-next-line no-console
+				console.log(`ERROR deleting course: ${err}`);
+				return callback(createError.InternalServerError('Error deleting course.'));
+			}));
 };
 
 const handler = middy(deleteCourse)
