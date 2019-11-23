@@ -13,6 +13,7 @@
     },
     "author": "",
     "dependencies": {
+        "auth0": "^2.20.0",
         "http-errors": "^1.7.2",
         "knex": "^0.16.5",
         "middy": "^0.27.0",

@@ -37,7 +37,7 @@ exports.TeacherMessage = {
 		type: 'object',
 		properties: {
 			studentId: {
-				type: 'integer',
+				type: 'string',
 			},
 			messageType: {
 				type: 'string',

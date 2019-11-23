@@ -4,6 +4,7 @@ const {
 	cors, httpErrorHandler, httpEventNormalizer,
 } = require('middy/middlewares');
 const createError = require('http-errors');
+const auth0 = require('auth0');
 const dbConfig = require('../db');
 const corsConfig = require('../cors');
 
@@ -68,16 +69,14 @@ const getCoursesByTeacher = async (event, context, callback) => {
 	if (!event.pathParameters.teacherId) {
 		return callback(createError.BadRequest("Teacher's ID required."));
 	}
-	if (!isAnInteger(event.pathParameters.teacherId)) {
-		return callback(createError.BadRequest('ID should be an integer.'));
-	}
+	const teacherId = decodeURI(event.pathParameters.teacherId);
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
 	return knexConnection('Courses')
 		.where({
-			teacherId: event.pathParameters.teacherId,
+			teacherId,
 		})
 		.select()
 		.then((result) => {
@@ -106,16 +105,14 @@ const getCoursesByStudent = async (event, context, callback) => {
 	if (!event.pathParameters.studentId) {
 		return callback(createError.BadRequest("Student's ID required."));
 	}
-	if (!isAnInteger(event.pathParameters.studentId)) {
-		return callback(createError.BadRequest('ID should be an integer.'));
-	}
+	const studentId = decodeURI(event.pathParameters.studentId);
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
 	return knexConnection('Registered')
 		.where({
-			studentId: event.pathParameters.studentId,
+			studentId,
 		})
 		.select()
 		.join('Courses', 'Courses.courseId', 'Registered.courseId')
@@ -142,25 +139,25 @@ function processResult(result) {
 
 	for (let i = 0; i < result.length; i += 1) {
 		const r = result[i];
-		if (toRet[r.itemId]) {
-			toRet[r.itemId].students.push({
-				id: r.studentId,
-				name: r.studentName,
-				phoneNum: r.phoneNum,
-				amountUsed: r.amountUsed,
+		if (toRet[r.shopItem.itemId]) {
+			toRet[r.shopItem.itemId].students.push({
+				id: r.user_id,
+				name: `${r.user_metadata.first_name} ${r.user_metadata.last_name}`,
+				phoneNum: r.user_metadata.phone_number,
+				amountUsed: r.shopItem.amountUsed,
 				email: r.email,
 			});
 		} else {
-			toRet[r.itemId] = {
-				id: r.itemId,
-				name: r.itemName,
-				description: r.itemDesc,
+			toRet[r.shopItem.itemId] = {
+				id: r.shopItem.itemId,
+				name: r.shopItem.itemName,
+				description: r.shopItem.itemDesc,
 				students: [
 					{
-						id: r.studentId,
-						name: r.studentName,
-						phoneNum: r.phoneNum,
-						amountUsed: r.amountUsed,
+						id: r.user_id,
+						name: `${r.user_metadata.first_name} ${r.user_metadata.last_name}`,
+						phoneNum: r.user_metadata.phone_number,
+						amountUsed: r.shopItem.amountUsed,
 						email: r.email,
 					},
 				],
@@ -171,14 +168,21 @@ function processResult(result) {
 	return Object.values(toRet);
 }
 
-// GET course/{courseId}/usedItems
-const getUsedItems = async (event, context, callback) => {
+// GET course/{courseId}/purchasedItems
+const getPurchasedItems = async (event, context, callback) => {
 	if (!event.pathParameters.courseId) {
 		return callback(createError.BadRequest("Course's ID required."));
 	}
 	if (!isAnInteger(event.pathParameters.courseId)) {
 		return callback(createError.BadRequest('ID should be an integer.'));
 	}
+
+	const management = new auth0.ManagementClient({
+		domain: 'e-mon.eu.auth0.com',
+		clientId: process.env.AUTH0_MANAGEMENT_CLIENT_ID,
+		clientSecret: process.env.AUTH0_MANAGEMENT_CLIENT_SECRET,
+		scope: 'read:users',
+	});
 
 	// Connect
 	const knexConnection = knex(dbConfig);
@@ -188,17 +192,33 @@ const getUsedItems = async (event, context, callback) => {
 			courseId: event.pathParameters.courseId,
 		})
 		.join('OwnedItems', 'ShopItems.itemId', 'OwnedItems.itemId')
-		.join('Students', 'OwnedItems.studentId', 'Students.studentId')
 		.select(
 			'ShopItems.name as itemName',
 			'ShopItems.description as itemDesc',
 			'ShopItems.itemId',
 			'OwnedItems.amountUsed',
-			'Students.name as studentName',
-			'Students.studentId',
-			'Students.email',
-			'Students.phoneNum',
 		)
+		.then((result) => {
+			let queryString = '';
+
+			result.forEach((x) => {
+				if (queryString !== '') { queryString += ' OR '; }
+
+				queryString += `user_id:${x.studentId}`;
+			});
+
+			return management.getUsers({
+				search_engine: 'v3',
+				fields: 'user_id,email,user_metadata',
+				include_fields: true,
+				q: queryString,
+			}).then(authResult => authResult.map((student) => {
+				const studentWithItem = student;
+				studentWithItem.shopItem = result.find(element => element.studentId === student.user_id);
+
+				return studentWithItem;
+			}));
+		})
 		.then((result) => {
 			knexConnection.client.destroy();
 
@@ -233,11 +253,11 @@ const byStudentId = middy(getCoursesByStudent)
 	.use(httpErrorHandler())
 	.use(cors(corsConfig));
 
-const usedItems = middy(getUsedItems)
+const purchasedItems = middy(getPurchasedItems)
 	.use(httpEventNormalizer())
 	.use(httpErrorHandler())
 	.use(cors(corsConfig));
 
 module.exports = {
-	byId, byTeacherId, byStudentId, usedItems,
+	byId, byTeacherId, byStudentId, purchasedItems,
 };

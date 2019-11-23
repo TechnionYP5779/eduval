@@ -1,110 +1,26 @@
 const knex = require('knex');
 const middy = require('middy');
 const {
-	cors, httpErrorHandler, httpEventNormalizer, jsonBodyParser, validator
+	cors, httpErrorHandler, httpEventNormalizer, jsonBodyParser,
 } = require('middy/middlewares');
 const createError = require('http-errors');
 const dbConfig = require('../db');
 const corsConfig = require('../cors');
 
-function dbRowToProperObject(obj) {
-	const retObj = { ...obj };		// shallow copy
-	retObj.id = obj.studentId;
-	delete retObj.studentId;
-	retObj.authIdToken = obj.idToken;
-	delete retObj.idToken;
-	return retObj;
-}
-
 function isAnInteger(obj) {
 	return !Number.isNaN(Number(obj)) && Number.isInteger(Number(obj));
 }
-
-// GET student/{studentId}
-const getStudentById = async (event, context, callback) => {
-	if (!event.pathParameters.studentId) {
-		return callback(createError.BadRequest("Student's ID required."));
-	}
-	if (!isAnInteger(event.pathParameters.studentId)) {
-		return callback(createError.BadRequest('ID should be an integer.'));
-	}
-
-	// Connect
-	const knexConnection = knex(dbConfig);
-
-	return knexConnection('Students')
-		.where({
-			studentId: event.pathParameters.studentId,
-		})
-		.select()
-		.then((result) => {
-			knexConnection.client.destroy();
-
-			if (result.length === 1) {
-				callback(null, {
-					statusCode: 200,
-					body: JSON.stringify(dbRowToProperObject(result[0])),
-				});
-			} else if (result.length === 0) {
-				callback(createError.NotFound('Student not found.'));
-			} else {
-				callback(createError.InternalServerError('More than one student with this ID.'));
-			}
-		})
-		.catch((err) => {
-			// Disconnect
-			knexConnection.client.destroy();
-			// eslint-disable-next-line no-console
-			console.log(`ERROR updating student: ${err}`);
-			return callback(createError.InternalServerError('Error getting student.'));
-		});
-};
-
-// GET student/byToken/{authToken}
-const getStudentByToken = async (event, context, callback) => {
-	if (!event.pathParameters.authToken) {
-		return callback(createError.BadRequest("Student's token required."));
-	}
-
-	// Connect
-	const knexConnection = knex(dbConfig);
-
-	return knexConnection('Students')
-		.where({
-			idToken: event.pathParameters.authToken,
-		})
-		.select()
-		.then((result) => {
-			knexConnection.client.destroy();
-
-			if (result.length === 1) {
-				callback(null, {
-					statusCode: 200,
-					body: JSON.stringify(dbRowToProperObject(result[0])),
-				});
-			} else if (result.length === 0) {
-				callback(createError.NotFound('Student not found.'));
-			} else {
-				callback(createError.InternalServerError('More than one student with this token.'));
-			}
-		})
-		.catch((err) => {
-			// Disconnect
-			knexConnection.client.destroy();
-			// eslint-disable-next-line no-console
-			console.log(`ERROR updating student: ${err}`);
-			return callback(createError.InternalServerError('Error getting student.'));
-		});
-};
 
 // GET student/{studentId}/emonBalance/byCourse/{courseId}
 const getEmons = async (event, context, callback) => {
 	if (!event.pathParameters.courseId || !event.pathParameters.studentId) {
 		return callback(createError.BadRequest("Course's and student's IDs are required."));
 	}
-	if (!isAnInteger(event.pathParameters.courseId) || !isAnInteger(event.pathParameters.studentId)) {
-		return callback(createError.BadRequest('IDs should be integers.'));
+	if (!isAnInteger(event.pathParameters.courseId)) {
+		return callback(createError.BadRequest('Course ID should be an integer.'));
 	}
+
+	const studentId = decodeURI(event.pathParameters.studentId);
 
 	// Connect
 	const knexConnection = knex(dbConfig);
@@ -112,7 +28,7 @@ const getEmons = async (event, context, callback) => {
 	return knexConnection('Logs')
 		.where({
 			courseId: event.pathParameters.courseId,
-			studentId: event.pathParameters.studentId,
+			studentId,
 			msgType: 0,
 		})
 		.sum('val')
@@ -142,16 +58,14 @@ const getActiveLesson = async (event, context, callback) => {
 	if (!event.pathParameters.studentId) {
 		return callback(createError.BadRequest("Student's ID required."));
 	}
-	if (!isAnInteger(event.pathParameters.studentId)) {
-		return callback(createError.BadRequest('ID should be an integer.'));
-	}
+	const studentId = decodeURI(event.pathParameters.studentId);
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
 	return knexConnection('Registered')
 		.where({
-			studentId: event.pathParameters.studentId,
+			studentId,
 		})
 		.select()
 		.then(result => knexConnection('Courses')
@@ -204,16 +118,17 @@ const getInventory = async (event, context, callback) => {
 	if (!event.pathParameters.studentId || !event.pathParameters.courseId) {
 		return callback(createError.BadRequest("Student's and course's IDs required."));
 	}
-	if (!isAnInteger(event.pathParameters.studentId) || !isAnInteger(event.pathParameters.courseId)) {
-		return callback(createError.BadRequest('IDs should be integers.'));
+	if (!isAnInteger(event.pathParameters.courseId)) {
+		return callback(createError.BadRequest('Course ID should be an integer.'));
 	}
+	const studentId = decodeURI(event.pathParameters.studentId);
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
 	return knexConnection('OwnedItems')
 		.where({
-			studentId: event.pathParameters.studentId,
+			studentId,
 			courseId: event.pathParameters.courseId,
 		})
 		.select()
@@ -241,20 +156,21 @@ const useShopItem = async (event, context, callback) => {
 		return callback(createError.BadRequest("Student's and course's IDs required."));
 	}
 	if (!isAnInteger(event.pathParameters.studentId) || !isAnInteger(event.pathParameters.courseId)) {
-		return callback(createError.BadRequest('IDs should be integers.'));
+		return callback(createError.BadRequest('Course ID should be an integer.'));
 	}
+	const studentId = decodeURI(event.pathParameters.studentId);
 
 	// Connect
 	const knexConnection = knex(dbConfig);
 
 	return knexConnection('OwnedItems')
 		.where({
-			studentId: event.pathParameters.studentId,
+			studentId,
 			courseId: event.pathParameters.courseId,
 			itemId: event.body,
 		})
 		.increment('amountUsed', 1)
-		.then((result) => {
+		.then(() => {
 			knexConnection.client.destroy();
 
 			callback(null, {
@@ -270,16 +186,6 @@ const useShopItem = async (event, context, callback) => {
 			return callback(createError.InternalServerError('Error using item.'));
 		});
 };
-
-const byId = middy(getStudentById)
-	.use(httpEventNormalizer())
-	.use(httpErrorHandler())
-	.use(cors(corsConfig));
-
-const byToken = middy(getStudentByToken)
-	.use(httpEventNormalizer())
-	.use(httpErrorHandler())
-	.use(cors(corsConfig));
 
 const emons = middy(getEmons)
 	.use(httpEventNormalizer())
@@ -306,5 +212,5 @@ const useItem = middy(useShopItem)
 	.use(cors(corsConfig));
 
 module.exports = {
-	byId, byToken, emons, activeLesson, inventory, useItem,
+	emons, activeLesson, inventory, useItem,
 };

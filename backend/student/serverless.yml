@@ -6,7 +6,7 @@ service:        student
 provider:
     name:       aws
     runtime:    nodejs8.10
-    stage:      prod
+    stage:      dev
     region:     eu-central-1
     
     # defines environment variables for connecting to DB
@@ -35,7 +35,7 @@ custom:
     # contains the credentials needed to connect to the DB
     secrets:    ${file(secrets.json)}
     customDomainEnabled:
-        dev: false
+        dev: true
         prod: true
     customDomain:
         domainName: ${self:custom.domains.${self:provider.stage}}
@@ -46,34 +46,6 @@ custom:
 
 #TODO: Implement a more strict CORS policy
 functions:
-    getStudentByToken:
-        handler: src/get.byToken
-        description: Get information about a student by their Auth Token.
-        events:
-            - http:
-                path: byToken/{authToken}
-                method: get
-                cors: true
-                authorizer:
-                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
-                request:
-                    parameters:
-                        paths:
-                            authToken: true
-    getStudentById:
-        handler: src/get.byId
-        description: Get information about a student by their ID.
-        events:
-            - http:
-                path: /{studentId}
-                method: get
-                cors: true
-                authorizer:
-                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
-                request:
-                    parameters:
-                        paths:
-                            studentId: true
     getActiveLesson:
         handler: src/get.activeLesson
         description: Get information about a teacher by their Auth Token.
@@ -88,40 +60,6 @@ functions:
                     parameters:
                         paths:
                             studentId: true
-    deleteStudent:
-        handler: src/delete.handler
-        description: Delete student with a certain ID.
-        events:
-            - http:
-                path: /{studentId}
-                method: delete
-                cors: true
-                authorizer:
-                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
-                request:
-                    parameters:
-                        paths:
-                            studentId: true
-    updateStudent:
-        handler: src/update.handler
-        description: Update a student's information.
-        events:
-            - http:
-                path: /
-                method: put
-                cors: true
-                authorizer:
-                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
-    addStudent:
-        handler: src/create.handler
-        description: Create a new student.
-        events:
-            - http:
-                path: /
-                method: post
-                cors: true
-                authorizer:
-                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
     getEmons:
         handler: src/get.emons
         description: Get a student's emon balance

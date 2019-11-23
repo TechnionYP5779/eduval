@@ -6,7 +6,7 @@ service:        lesson
 provider:
     name:       aws
     runtime:    nodejs8.10
-    stage:      prod
+    stage:      dev
     region:     eu-central-1
 
     # defines environment variables for connecting to DB
@@ -17,8 +17,10 @@ provider:
         DB_PASSWORD:                ${self:custom.secrets.DB_PASSWORD}
         DB_HOST:                    ${self:custom.secrets.DB_HOST.${self:provider.stage}}
         DB_PORT:                    ${self:custom.secrets.DB_PORT}
-        LAMBDA_ENDPOINT:            ${self:custom.secrets.LAMBDA_ENDPOINT}
+        LAMBDA_ENDPOINT:            ${self:custom.secrets.LAMBDA_ENDPOINT.${self:provider.stage}}
         LAMBDA_APIKEY:              ${self:custom.secrets.LAMBDA_APIKEY}
+        AUTH0_MANAGEMENT_CLIENT_ID:        ${self:custom.secrets.AUTH0_MANAGEMENT_CLIENT_ID}
+        AUTH0_MANAGEMENT_CLIENT_SECRET:        ${self:custom.secrets.AUTH0_MANAGEMENT_CLIENT_SECRET}
 
 #package:
 #    individually: true
@@ -34,7 +36,7 @@ custom:
     # contains the credentials needed to connect to the DB
     secrets:    ${file(secrets.json)}
     customDomainEnabled:
-        dev: false
+        dev: true
         prod: true
     customDomain:
         domainName: ${self:custom.domains.${self:provider.stage}}

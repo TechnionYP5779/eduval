@@ -4,6 +4,7 @@ const {
 	cors, httpErrorHandler, jsonBodyParser, validator,
 } = require('middy/middlewares');
 const createError = require('http-errors');
+const auth0 = require('auth0');
 const dbConfig = require('../../db');
 const corsConfig = require('../../cors');
 
@@ -20,6 +21,13 @@ const addCourseRegistered = async (event, context, callback) => {
 		return callback(createError.BadRequest('ID should be an integer.'));
 	}
 
+	const management = new auth0.ManagementClient({
+		domain: 'e-mon.eu.auth0.com',
+		clientId: process.env.AUTH0_MANAGEMENT_CLIENT_ID,
+		clientSecret: process.env.AUTH0_MANAGEMENT_CLIENT_SECRET,
+		scope: 'read:users',
+	});
+
 	const requestArray = event.body;
 
 	if (requestArray.length === 0) {
@@ -30,29 +38,29 @@ const addCourseRegistered = async (event, context, callback) => {
 	}
 
 	const knexConnection = knex(dbConfig);
-	return new Promise((resolve, reject) => {
-		if (!Number.isNaN(parseInt(requestArray[0], 10))) {		// real ugly workaround, but it works
-			// they're already IDs
-			resolve(requestArray);
-		} else if (typeof requestArray[0] === 'string') {
-			// then we need to get the IDs
-			resolve(knexConnection('Students')
-				.select('studentId')
-				.where('email', 'in', requestArray)
-				.then(result => result.map(x => x.studentId)));
-		} else {
-			reject(new Error('Invalid array.'));
-		}
+	let queryString = '';
+
+	requestArray.forEach((email) => {
+		if (queryString !== '') { queryString += ' OR '; }
+
+		queryString += `email:${email}`;
+	});
+
+	return management.getUsers({
+		search_engine: 'v3',
+		fields: 'user_id',
+		include_fields: true,
+		q: queryString,
 	})
 		.then((studentIds) => {
 			const pairsArray = studentIds.map(x => ({
-				studentId: x,
+				studentId: x.user_id,
 				courseId: event.pathParameters.courseId,
 			}));
 
 			return knexConnection('Registered').insert(pairsArray);
 		})
-		.then((result) => {
+		.then(() => {
 			knexConnection.client.destroy();
 			return callback(null, {
 				statusCode: 200,
@@ -69,19 +77,11 @@ const addCourseRegistered = async (event, context, callback) => {
 };
 
 const schema = {
-	oneOf: [{
-		type: 'array',
-		items: {
-			type: 'integer',
-		},
+	type: 'array',
+	items: {
+		type: 'string',
+		format: 'email',
 	},
-	{
-		type: 'array',
-		items: {
-			type: 'string',
-			format: 'email',
-		},
-	}],
 };
 
 const handler = middy(addCourseRegistered)

@@ -5,17 +5,18 @@ const {
 	cors, httpErrorHandler, httpEventNormalizer, jsonBodyParser, validator,
 } = require('middy/middlewares');
 const createError = require('http-errors');
+const auth0 = require('auth0');
 const dbConfig = require('../db');
 const corsConfig = require('../cors');
 const iot = require('./Notifications');
 
 function dbRowToProperObject(obj) {
-	const retObj = { ...obj };		// shallow copy
-	retObj.id = obj.studentId;
-	delete retObj.studentId;
-	delete retObj.courseId;
-	retObj.authIdToken = obj.idToken;
-	delete retObj.idToken;
+	const retObj = {};
+	retObj.id = obj.user_id;
+	retObj.name = `${obj.user_metadata.first_name} ${obj.user_metadata.last_name}`;
+	retObj.email = obj.email;
+	retObj.phoneNum = obj.user_metadata.phone_number;
+	retObj.desk = obj.desk;
 	return retObj;
 }
 
@@ -32,6 +33,13 @@ const getPresentStudents = async (event, context, callback) => {
 		return callback(createError.BadRequest('ID should be an integer.'));
 	}
 
+	const management = new auth0.ManagementClient({
+		domain: 'e-mon.eu.auth0.com',
+		clientId: process.env.AUTH0_MANAGEMENT_CLIENT_ID,
+		clientSecret: process.env.AUTH0_MANAGEMENT_CLIENT_SECRET,
+		scope: 'read:users',
+	});
+
 	// Connect
 	const knexConnection = knex(dbConfig);
 
@@ -40,7 +48,27 @@ const getPresentStudents = async (event, context, callback) => {
 			courseId: event.pathParameters.courseId,
 		})
 		.select()
-		.join('Students', 'PresentStudents.studentId', 'Students.studentId')
+		.then((result) => {
+			let queryString = '';
+
+			result.forEach((x) => {
+				if (queryString !== '') { queryString += ' OR '; }
+
+				queryString += `user_id:${x.studentId}`;
+			});
+
+			return management.getUsers({
+				search_engine: 'v3',
+				fields: 'user_id,email,user_metadata',
+				include_fields: true,
+				q: queryString,
+			}).then(authResult => authResult.map((student) => {
+				const studentWithDesk = student;
+				studentWithDesk.desk = result.find(element => element.studentId === student.user_id).desk;
+
+				return studentWithDesk;
+			}));
+		})
 		.then((result) => {
 			knexConnection.client.destroy();
 
@@ -96,7 +124,7 @@ const updatePresentStudents = async (event, context, callback) => {
 		.then(async (result) => {
 			knexConnection.client.destroy();
 			return axios.post(
-				`${process.env.LAMBDA_ENDPOINT}/lesson/${event.pathParameters.courseId}/messages/${event.body.id}`,
+				`${process.env.LAMBDA_ENDPOINT}/lesson/${event.pathParameters.courseId}/messages/${encodeURI(event.body.id)}`,
 				{ messageType: 'EMON', messageReason: '1', value: 5 },
 				{
 					headers: { Authorization: event.headers.Authorization },
@@ -119,6 +147,8 @@ const updatePresentStudents = async (event, context, callback) => {
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
 			console.log(`ERROR updating present students: ${err}`);
+			console.log(err);
+			console.log(JSON.stringify(err));
 			return callback(createError.InternalServerError('Error updating present students.'));
 		});
 };
@@ -135,7 +165,7 @@ const schema = {
 			type: 'string',
 		},
 		id: {
-			type: 'integer',
+			type: 'string',
 		},
 	},
 	required: ['desk', 'id'],

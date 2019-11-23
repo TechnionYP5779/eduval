@@ -6,7 +6,7 @@ service:        teacher
 provider:
     name:       aws
     runtime:    nodejs8.10
-    stage:      prod
+    stage:      dev
     region:     eu-central-1
     
     # defines environment variables for connecting to DB
@@ -34,7 +34,7 @@ custom:
     # contains the credentials needed to connect to the DB
     secrets:    ${file(secrets.json)}
     customDomainEnabled:
-        dev: false
+        dev: true
         prod: true
     customDomain:
         domainName: ${self:custom.domains.${self:provider.stage}}
@@ -45,34 +45,6 @@ custom:
 
 #TODO: Implement a more strict CORS policy
 functions:
-    getTeacherByToken:
-        handler: src/get.byToken
-        description: Get information about a teacher by their Auth Token.
-        events:
-            - http:
-                path: byToken/{authToken}
-                method: get
-                cors: true
-                authorizer:
-                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
-                request:
-                    parameters:
-                        paths:
-                            authToken: true
-    getTeacherById:
-        handler: src/get.byId
-        description: Get information about a teacher by their ID.
-        events:
-            - http:
-                path: /{teacherId}
-                method: get
-                cors: true
-                authorizer:
-                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
-                request:
-                    parameters:
-                        paths:
-                            teacherId: true
     getActiveLesson:
         handler: src/get.activeLesson
         description: Get information about a teacher by their Auth Token.
@@ -87,40 +59,6 @@ functions:
                     parameters:
                         paths:
                             teacherId: true
-    deleteTeacher:
-        handler: src/delete.handler
-        description: Delete teacher with a certain ID.
-        events:
-            - http:
-                path: /{teacherId}
-                method: delete
-                cors: true
-                authorizer:
-                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
-                request:
-                    parameters:
-                        paths:
-                            teacherId: true
-    updateTeacher:
-        handler: src/update.handler
-        description: Update a teacher's information.
-        events:
-            - http:
-                path: /
-                method: put
-                cors: true
-                authorizer:
-                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
-    addTeacher:
-        handler: src/create.handler
-        description: Create a new teacher.
-        events:
-            - http:
-                path: /
-                method: post
-                cors: true
-                authorizer:
-                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
 
 resources:
     Resources:
