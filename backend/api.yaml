@@ -1239,6 +1239,40 @@ paths:
       security:
         - auth0_token: []
  
+  '/lesson/{courseId}/teacherMessages/{messageType}':
+    delete:
+      tags:
+        - lesson
+      summary: Clear the teacher's messages
+      description: At the end of the lesson, clear all messages the teacher got. This is so next lesson they can have a clear slate.
+      parameters:
+        - name: courseId
+          in: path
+          description: The ID of the lesson's course
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: messageType
+          in: path
+          description: The type of message to clear
+          required: true
+          schema:
+            type: string
+            enum: [MESSAGE_CONFUSED, MESSAGE_QUESTION, MESSAGE_NEED_TO_LEAVE, MESSAGE_ANSWER, MESSAGE_LOUDER]
+      responses:
+        '200':
+          description: All OK
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+        '400':
+          description: Validation exception. Invalid ID.
+          content: {}
+      security:
+        - auth0_token: []
+ 
   '/lesson/{courseId}/awardedEmons':
     get:
       tags:
@@ -1646,32 +1680,19 @@ components:
               enum: ["EMOJI_HAPPY", "EMOJI_THUMBS_UP", "EMOJI_ANGEL", "EMOJI_GRIN", "EMOJI_SHUSH", "EMOJI_ZZZ", "EMOJI_ANGRY", "EMOJI_THUMBS_DOWN"]
           
     TeacherMessage:
-      oneOf:
-        - type: object
-          properties:
-            studentId:
-              type: integer
-              format: int64
-            messageType:
-              type: string
-              enum: ["MESSAGE"]
-            content:
-              type: string
-              description: what message was sent
-              enum: ["MESSAGE_CONFUSED", "MESSAGE_QUESTION", "MESSAGE_NEED_TO_LEAVE"]
-        - type: object
-          properties:
-            studentId:
-              type: integer
-              format: int64
-            messageType:
-              type: string
-              enum: ["EMOJI"]
-            emojiType:
-              type: string
-              description: what emoji was sent
-              enum: ["EMOJI_HAPPY", "EMOJI_THUMBS_UP", "EMOJI_ANGEL", "EMOJI_GRIN", "EMOJI_SHUSH", "EMOJI_ZZZ", "EMOJI_ANGRY", "EMOJI_THUMBS_DOWN"]
-          
+      type: object
+      properties:
+        studentId:
+          type: integer
+          format: int64
+        messageType:
+          type: string
+          enum: ["MESSAGE"]
+        content:
+          type: string
+          description: what message was sent
+          enum: ['MESSAGE_CONFUSED', 'MESSAGE_QUESTION', 'MESSAGE_NEED_TO_LEAVE', 'MESSAGE_ANSWER', 'MESSAGE_LOUDER']
+      
     Log:
       oneOf:
         - type: object

@@ -15,9 +15,9 @@ provider:
         DB_NAME:                    ${self:custom.secrets.DB_NAME}
         DB_USER:                    ${self:custom.secrets.DB_USER}
         DB_PASSWORD:                ${self:custom.secrets.DB_PASSWORD}
-        DB_HOST:                    ${self:custom.secrets.DB_HOST}
+        DB_HOST:                    ${self:custom.secrets.DB_HOST.prod}
         DB_PORT:                    ${self:custom.secrets.DB_PORT}
-        LAMBDA_ENDPOINT:            ${self:custom.secrets.LAMBDA_ENDPOINT}
+        LAMBDA_ENDPOINT:            ${self:custom.secrets.LAMBDA_ENDPOINT.prod}
         LAMBDA_APIKEY:              ${self:custom.secrets.LAMBDA_APIKEY}
 
 #package:
@@ -190,6 +190,22 @@ functions:
                     parameters:
                         paths:
                             courseId: true
+
+    clearTeacherMessagesByType:
+        handler: src/teacherMessages.deleteByType
+        description: Add a student to the list of present students.
+        events:
+            - http:
+                path: /{courseId}/teacherMessages/{messageType}
+                method: delete
+                cors: true
+                authorizer:
+                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+                            messageType: true
     
     getStudentEmons:
         handler: src/emons.handler
