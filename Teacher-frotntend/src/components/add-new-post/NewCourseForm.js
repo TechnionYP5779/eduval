@@ -10,9 +10,9 @@ import {
   Button
 } from "shards-react";
 import server from "../../Server/Server";
+import { withTranslation } from "react-i18next";
 
-
-export default class NewCourseForm extends React.Component {
+class NewCourseForm extends React.Component {
 
   constructor(props){
     super(props);
@@ -80,6 +80,8 @@ export default class NewCourseForm extends React.Component {
   }
 
   render(){
+    const { t } = this.props;
+
     return (
       <ListGroup flush>
         <ListGroupItem className="p-3">
@@ -87,18 +89,18 @@ export default class NewCourseForm extends React.Component {
             <Col>
               <Form>
                 <FormGroup>
-                  <label htmlFor="feInputAddress">Course Name</label>
-                  <FormInput id="feInputAddress" placeholder="A name that your students will recognize" value={this.state.name} onChange={this.updateName} />
+                  <label htmlFor="feInputAddress">{t("Course Name")}</label>
+                  <FormInput id="feInputAddress" placeholder={t("A name that your students will recognize")} value={this.state.name} onChange={this.updateName} />
                 </FormGroup>
 
                 <FormGroup>
-                  <label htmlFor="feInputAddress">Course Description</label>
-                  <FormInput id="feInputAddress" placeholder="A short explanation of the course" value={this.state.description} onChange={this.updateDescription} />
+                  <label htmlFor="feInputAddress">{t("Course Description")}</label>
+                  <FormInput id="feInputAddress" placeholder={t("A short explanation of the course")} value={this.state.description} onChange={this.updateDescription} />
                 </FormGroup>
 
                 <Row form>
                   <Col md="6" className="form-group">
-                    <label htmlFor="feEmailAddress">Start Date</label>
+                    <label htmlFor="feEmailAddress">{t("Start Date")}</label>
                     <FormInput
                       id="feEmailAddress"
                       type="date"
@@ -106,7 +108,7 @@ export default class NewCourseForm extends React.Component {
                     />
                   </Col>
                   <Col md="6">
-                    <label htmlFor="fePassword">End Date</label>
+                    <label htmlFor="fePassword">{t("End Date")}</label>
                     <FormInput
                       id="fePassword"
                       type="date"
@@ -116,14 +118,14 @@ export default class NewCourseForm extends React.Component {
                 </Row>
 
                 <FormGroup>
-                  <label htmlFor="feInputAddress2">Class Room</label>
+                  <label htmlFor="feInputAddress2">{t("Class Room")}</label>
                   <FormInput
                     id="feInputAddress2"
-                    placeholder="Help your students find the class room"
+                    placeholder={t("Help your students find the class room")}
                     value={this.state.location} onChange={this.updateLocation}
                   />
                 </FormGroup>
-                <Button disabled={this.state.disabled} onClick={this.handleSubmit}>Create New Course</Button>              </Form>
+                <Button disabled={this.state.disabled} onClick={this.handleSubmit}>{t("Create New Course")}</Button>              </Form>
             </Col>
           </Row>
         </ListGroupItem>
@@ -131,3 +133,5 @@ export default class NewCourseForm extends React.Component {
     );
   }
 }
+
+export default withTranslation()(NewCourseForm);

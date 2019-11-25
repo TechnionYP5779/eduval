@@ -21,15 +21,13 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Icon from '@material-ui/core/Icon';
 import Button from '@material-ui/core/Button';
-import AccountCircle from '@material-ui/icons/AccountCircle';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import FormatListNumberedIcon from '@material-ui/icons/FormatListNumbered';
 import SchoolIcon from '@material-ui/icons/School';
 import PublicIcon from '@material-ui/icons/Public';
 import SubjectIcon from '@material-ui/icons/Subject';
 import LinkIcon from '@material-ui/icons/Link';
-
-
+import { withTranslation } from 'react-i18next';
 
 
 import server from "../../Server/Server";
@@ -147,6 +145,8 @@ class DemoLessonProperties extends React.Component {
 
   render(){
     const classes = this.props.classes;
+    const { t } = this.props;
+
     return (
       <ListGroup flush>
         <Card className={classes.card}>
@@ -154,12 +154,12 @@ class DemoLessonProperties extends React.Component {
             classes={{
             title: classes.title,
             }}
-            title={"Create a Trial Lesson"}
+            title={t("Create a Trial Lesson")}
           />
           <CardContent>
             <TextField
               id="standard-required"
-              label="Lesson Name (OPTIONAL)"
+              label={t("Lesson Name (OPTIONAL)")}
               className={classes.textField}
               margin="normal"
               InputProps={{
@@ -173,7 +173,7 @@ class DemoLessonProperties extends React.Component {
             />
             <TextField
               id="standard-required"
-              label="Location (OPTIONAL)"
+              label={t("Location (OPTIONAL)")}
               className={classes.textField}
               margin="normal"
               InputProps={{
@@ -190,7 +190,7 @@ class DemoLessonProperties extends React.Component {
               multiline
               rowsMax="4"
               id="standard-multiline-flexible"
-              label="Course Description (OPTIONAL)"
+              label={t("Course Description (OPTIONAL)")}
               className={classes.textField}
               margin="normal"
               InputProps={{
@@ -210,14 +210,14 @@ class DemoLessonProperties extends React.Component {
               endIcon={<Icon>send</Icon>}
               onClick={this.startDemoLesson}
             >
-              Create Trial Lesson
+              {t("Create Trial Lesson")}
             </Button>
             {
               this.state.invite_link != "" &&
               <TextField
                 readonly
                 id="standard-readonly"
-                label="Link"
+                label={t("Link")}
                 className={classes.textField}
                 margin="normal"
                 InputProps={{
@@ -241,4 +241,4 @@ class DemoLessonProperties extends React.Component {
   }
 }
 
-export default withStyles(styles)(DemoLessonProperties);
+export default withTranslation()(withStyles(styles)(DemoLessonProperties));

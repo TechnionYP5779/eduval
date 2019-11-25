@@ -24,8 +24,8 @@ import { red } from '@material-ui/core/colors';
 import Delete from '@material-ui/icons/Delete';
 import Collapse from '@material-ui/core/Collapse';
 import Typography from '@material-ui/core/Typography';
-
-
+import { withTranslation } from 'react-i18next'
+import { capitalize } from '../utils/strings';
 
 import CourseCard from "../components/common/CourseCard";
 
@@ -94,6 +94,7 @@ class MyCourses extends React.Component {
     const {
       courses
     } = this.state;
+    const { t } = this.props;
 
     return (
       <div class="main-content container-fluid">
@@ -103,7 +104,7 @@ class MyCourses extends React.Component {
       <Container fluid className="main-content-container px-4">
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title="My Courses" subtitle="Manage eveyrthing in one place"
+          <PageTitle sm="4" title={capitalize(t("My Courses"))} subtitle={t("Manage eveyrthing in one place")}
                      className="text-sm-left" />
         </Row>
 
@@ -114,13 +115,13 @@ class MyCourses extends React.Component {
             courses.length === 0 &&
             <Card small className="card-post mb-4">
               <CardBody>
-                <h4 className="card-title">No Courses?</h4>
-                <p className="card-text text-muted">Create a new course right now!</p>
+                <h4 className="card-title">{t("No Courses?")}</h4>
+                <p className="card-text text-muted">{t("Create a new course right now!")}</p>
               </CardBody>
               <CardFooter className="border-top d-flex">
                 <div className="card-post__author d-flex" style={{width:"100%"}}>
                   <a href="/add-new-course" style={{width:"100%"}}><Button style={{width:"100%"}}>
-                    <i className="far fa-edit mr-1" /> Try here
+                    <i className="far fa-edit mr-1" /> {t("Try here")}
                   </Button></a>
                 </div>
               </CardFooter>
@@ -183,4 +184,4 @@ class MyCourses extends React.Component {
   }
 }
 
-export default MyCourses;
+export default withTranslation()(MyCourses);
