@@ -181,6 +181,20 @@ functions:
                         paths:
                             courseId: true
                             studentId: true
+    getRegisteredWithEmons:
+        handler: src/registered/getEmons.handler
+        description: Get students registered to course.
+        events:
+            - http:
+                path: /{courseId}/registered/emons
+                method: get
+                cors: true
+                authorizer:
+                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
 
 resources:
     Resources:
