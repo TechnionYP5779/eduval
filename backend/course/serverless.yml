@@ -15,7 +15,7 @@ provider:
         DB_NAME:        ${self:custom.secrets.DB_NAME}
         DB_USER:        ${self:custom.secrets.DB_USER}
         DB_PASSWORD:    ${self:custom.secrets.DB_PASSWORD}
-        DB_HOST:        ${self:custom.secrets.DB_HOST}
+        DB_HOST:        ${self:custom.secrets.DB_HOST.prod}
         DB_PORT:        ${self:custom.secrets.DB_PORT}
         LAMBDA_ENDPOINT:        ${self:custom.secrets.LAMBDA_ENDPOINT}
         LAMBDA_APIKEY:        ${self:custom.secrets.LAMBDA_APIKEY}
@@ -179,6 +179,20 @@ functions:
                         paths:
                             courseId: true
                             studentId: true
+    getRegisteredWithEmons:
+        handler: src/registered/getEmons.handler
+        description: Get students registered to course.
+        events:
+            - http:
+                path: /{courseId}/registered/emons
+                method: get
+                cors: true
+                authorizer:
+                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
 
 resources:
     Resources:
