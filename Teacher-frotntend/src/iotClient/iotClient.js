@@ -45,12 +45,17 @@ class iotClient {
       host: this.iotKeys.iotEndpoint
     });
     const onConnect = () => {
+      console.log("Connect");
         this.client.subscribe(this.iotTopic);
         connectCallback();
     };
 
     const onMessage = (topic, message) => {
         message = new TextDecoder("utf-8").decode(message);
+        console.log("topic");
+        console.log(topic);
+        console.log("Message");
+        console.log(message);
         messageCallback();
     };
 

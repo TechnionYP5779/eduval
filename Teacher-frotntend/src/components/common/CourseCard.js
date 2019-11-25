@@ -126,9 +126,6 @@ class CourseCard extends React.Component
     this.setDeleteModalChange = this.setDeleteModalChange.bind(this)
     this.handleDeleteModalOpen = this.handleDeleteModalOpen.bind(this)
     this.handleDeleteModalClose = this.handleDeleteModalClose.bind(this)
-    console.log(this.state.name);
-    console.log("IS PLAY PUSHED?");
-    console.log(this.state.play_pushed);
   }
 
   handlePlayClick()

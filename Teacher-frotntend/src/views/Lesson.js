@@ -43,6 +43,10 @@ import DropdownInputGroups from "../components/components-overview/DropdownInput
 import CustomSelect from "../components/components-overview/CustomSelect";
 
 import PageTitle from "../components/common/PageTitle";
+import AttendStudentCard from "../components/lessonCards/AttendStudentCard";
+import RegisteredStudentsCard from "../components/lessonCards/RegisteredStudentsCard";
+import StudentMessageCard from "../components/lessonCards/StudentMessageCard";
+
 import {iotPresent, iotMessages} from "../iotClient/iotClient";
 import server from "../Server/Server";
 
@@ -179,11 +183,14 @@ class Lesson extends React.Component {
 
       students: [],
 
+      registered_students:[],
+
       course_name: ""
     };
 
     this.unchooseStudent = this.unchooseStudent.bind(this);
     this.handleShowUpdate = this.handleShowUpdate.bind(this);
+    this.handleSuccessTrue = this.handleSuccessTrue.bind(this);
   }
 
   handleShowUpdate(type, color){
@@ -208,22 +215,75 @@ class Lesson extends React.Component {
     this.setState({chosen_students : tmp_chosen});
   }
 
+  handleSuccessTrue = () => {
+    this.setState({success:true});
+
+    if(this.state.success==true) {
+        setTimeout(function(){
+             this.setState({success:false});
+        }.bind(this),10000);  // wait 5 seconds, then reset to false
+   }
+  };
+
+
   componentDidMount() {
 
     let self = this;
 
     let courseId = this.props.match.params.id;
+    server.getRegisteredStudents(function(responseReg){
+      console.log(responseReg.data);
+      console.log("REG");
+      self.setState({registered_students: responseReg.data});
+    }, (error)=>{}, courseId);
 
     let onConnectPresent = ()=>{
-      server.getAttendingStudents(function(response){
-        response.data.sort(function(a,b){
-          return parseInt(a.desk)-parseInt(b.desk);
+
+      server.getAttendingStudents(function(responseAtt){
+        responseAtt.data.sort(function(a,b){
+          return parseInt(a.id)-parseInt(b.id);
         });
-        self.setState({students: response.data});
+
+        server.getAttendingStudentsEmons(function(responseEmon){
+          responseEmon.data.sort(function(a,b){
+            return parseInt(a.studentId)-parseInt(b.studentId);
+          });
+          var tmp = [];
+          var index = 0;
+
+          for (index = 0; index<responseEmon.data.length; index++){
+            if((responseAtt.data[index]).id == (responseEmon.data[index]).studentId)
+            {
+              var newstud =
+              {
+                id: (responseAtt.data[index]).id,
+                authIdToken: (responseAtt.data[index]).authIdToken,
+                name: (responseAtt.data[index]).name,
+                email: (responseAtt.data[index]).email,
+                phoneNum: (responseAtt.data[index]).phoneNum,
+                desk: (responseAtt.data[index]).desk,
+                emons: (responseEmon.data[index]).emons
+              }
+              tmp.push(newstud);
+            }
+            else {
+              console.log("ERROR THERE ARE DIFFERENT ID's IN THE RESPONSES");
+            }
+          }
+          tmp.sort(function(a,b){
+            return parseInt(a.desk)-parseInt(b.desk);
+          });
+          self.setState({students: tmp});
+
+          }, function(error) { console.log("Error at Emons of Present Students");
+        console.log(error);}, courseId)
+
+
       }, (error)=>{}, courseId);
       if (!self.state.connected)
         self.setState({connected: true});
     }
+    console.log(this.state.students);
 
     let onConnectMessages = ()=>{
       server.getMessagesFromStudents(function(response){
@@ -289,129 +349,96 @@ class Lesson extends React.Component {
         {/* First Row of Posts */}
         <Row>
           <Col lg="8" className="mb-4">
-            <Card small className="mb-4">
-              <CardHeader className="border-bottom">
-                <Row>
-                  <Col sm="11">
-                    <h5 className="m-0">Attending Students</h5>
-                    <h6 style={{fontSize:"12px"}}>Pick the students you want to send E-Money too</h6>
-                  </Col>
-                  <Col sm="1">
-                    <Button style={{padding:"0px"}} onClick={()=>{this.setState({showing_student:!this.state.showing_student});}}>
-                      {this.state.showing_student && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CE;</i>}
-                      {!this.state.showing_student && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CF;</i>}
-                    </Button>
-                  </Col>
-                </Row>
-              </CardHeader>
+            <AttendStudentCard
+            title="Attending Students"
+            subtitle="Pick the students you want to send E-Money to"
+            students={this.state.students}
+            isChosen = {(id) =>
+            {
+              return (this.state.chosen_students.indexOf(id) >= 0);
+            }}
+            buttonClick = {(id) =>
+              {
+                if (this.state.chosen_students.indexOf(id) >= 0)
+                {
+                  unchooseStudent(id);
+                }
+                else {
+                  let tmp_chosen = this.state.chosen_students;
+                  tmp_chosen.push(id);
+                  this.setState({chosen_students : tmp_chosen, success: false, error: false});
+                }
+              }
+            }
 
-              {this.state.showing_student && <ListGroup flush>
-                <ListGroupItem className="p-0 px-3 pt-3">
-                  <Row>
-                      {this.state.students.map((student, idx) => {
-                        let color = "#007bff";
-                        if (messaged_students.has(student.id))
-                          color = show_messaged_color;
-                        return (<Col xs="3" key={idx}>
-                        {
-                          this.state.chosen_students.indexOf(student.id) >= 0 &&
-                          <Button disabled={this.state.disabled}
-                          style={{margin:"6px", fontWeight: "600", fontSize: "0.9em", width: "100%", "--mess-color" : color}}
-                          className="mb-2 mr-1 badge1 custom-active"
-                          data-badge={"Desk #" + student.desk}
-                          onClick={()=>{ unchooseStudent(student.id);}}>
-                            {student.name}
-                          </Button>
-                        }
-                        {
-                          this.state.chosen_students.indexOf(student.id) < 0 &&
-                          <Button outline disabled={this.state.disabled}
-                          style={{margin:"6px", fontWeight: "600", fontSize: "0.9em", borderWidth:"2px", width: "100%", "--mess-color" : color}}
-                          className="mb-2 mr-1 badge1 custom-button"
-                           data-badge={"Desk #" + student.desk} onClick={()=>{
-                            let tmp_chosen = this.state.chosen_students;
-                            tmp_chosen.push(student.id);
-                            this.setState({chosen_students : tmp_chosen, success: false, error: false});
-                          }}>
-                            {student.name}
-                          </Button>
-                        }
-                        </Col>
-                    )})}
+            isMessaged = {(id) =>
+              {
+                return(messaged_students.has(id));
+              }
+            }
 
-                  </Row>
-                </ListGroupItem>
-              </ListGroup>}
-            </Card>
+            messageColored = {() => {
+              return show_messaged_color;}}
+            />
+            <StudentMessageCard
+            title="Messages from Students"
+            subtitle={"Click button to see who sent the messages"}
+            show_questions={()=>{console.log("HEYY");handleShowUpdate(this.state.message_types[0].content, this.state.message_types[0].color);}}
+            show_go_out={()=>{handleShowUpdate(this.state.message_types[1].content, this.state.message_types[1].color);}}
+            show_answer={()=>{handleShowUpdate(this.state.message_types[2].content, this.state.message_types[2].color);}}
+            show_confused={()=>{handleShowUpdate(this.state.message_types[3].content, this.state.message_types[3].color);}}
+            show_louder={()=>{handleShowUpdate(this.state.message_types[4].content, this.state.message_types[4].color);}}
 
-            <Card small className="mb-4">
-              <CardHeader className="border-bottom">
-                <Row>
-                  <Col sm="11">
-                    <h5 className="m-0">Messages from Students</h5>
-                    <h6 style={{fontSize:"12px"}}>Click <i className="material-icons">&#xE8F4;</i> to see students who sent messages or <i className="material-icons">&#xE8F5;</i> to hide them.</h6>
-                  </Col>
-                  <Col sm="1">
-                    <Button style={{padding:"0px"}}
-                    onClick={()=>{this.setState({showing_messages:!this.state.showing_messages});}}>
-                      {this.state.showing_messages && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CE;</i>}
-                      {!this.state.showing_messages && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CF;</i>}
-                    </Button>
-                  </Col>
-                </Row>
-              </CardHeader>
+            count_questions={()=>
+{              var count = 0;
+              for (var i in this.state.messages){
+                if (this.state.messages[i].content == this.state.message_types[0].content)
+                  count ++;
+              }
+              return count;
+}            }
+            count_go_out={()=>
+{              var count = 0;
+              for (var i in this.state.messages){
+                if (this.state.messages[i].content == this.state.message_types[1].content)
+                  count ++;
+              }
+              return count;
+}            }
 
-              {this.state.showing_messages && <table className="table mb-0">
-                <thead className="bg-light" style={{color:"#485170", borderBottom: "solid 1px #eceeef"}}>
-                  <tr>
-                    <th scope="col" className="border-0" style={{fontWeight:"600", textAlign: "end"}}>#</th>
-                    <th scope="col" className="border-0" style={{fontWeight:"600", textAlign: "center"}}>Show Senders</th>
-                    <th scope="col" className="border-0" style={{fontWeight:"600", width: "45%"}}>Message Type</th>
-                    <th scope="col" className="border-0" style={{fontWeight:"600"}}>
-                    <Button onClick={()=>{
-                      this.setState({show_messaged: false});
-                      messaged_students.clear();
-                      server.deleteLessonMessages(()=>{
-                        server.getMessagesFromStudents((response)=>{
-                          self.setState({messages: response.data});
-                        }, (error)=>{}, this.props.match.params.id);
-                      }, ()=>{}, this.props.match.params.id)
-                    }}>
-                    Clear Messages
-                    </Button>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                {this.state.message_types.map((messtype, idx) => {
-                  var count = 0;
-                  for (var i in this.state.messages){
-                    if (this.state.messages[i].content == messtype.content)
-                      count ++;
-                  }
-                  return (
-                  <tr style={{color:messtype.color, "--mess-color" : messtype.color, borderBottom: "solid 1px #eceeef"}} key={idx}>
+            count_answer={()=>
+{              var count = 0;
+              for (var i in this.state.messages){
+                if (this.state.messages[i].content == this.state.message_types[2].content)
+                  count ++;
+              }
+              return count;
+}            }
 
-                    <td scope="col" className="border-0" style={{fontWeight:"600", textAlign: "end"}}>{count}</td>
-                    <td scope="col" className="border-0" style={{fontWeight:"600", textAlign: "center"}}>
-                      {show_messaged != messtype.content && <Button className="mb-2 mr-1 custom-button" onClick={()=>{handleShowUpdate(messtype.content, messtype.color);}}>
-                        <i className="material-icons">&#xE8F4;</i>
-                      </Button>}
-                      {show_messaged == messtype.content && <Button className="mb-2 mr-1 custom-active" onClick={()=>{handleShowUpdate(messtype.content, messtype.color);}}>
-                        <i className="material-icons">&#xE8F5;</i>
-                      </Button>}
-                    </td>
-                    <td scope="col" className="border-0" style={{fontWeight:"600"}}>{messtype.text}</td>
-                  </tr>
-                );}
-              )}
-              </tbody>
-              </table>}
-            </Card>
+            count_confused={()=>
+{              var count = 0;
+              for (var i in this.state.messages){
+                if (this.state.messages[i].content == this.state.message_types[3].content)
+                  count ++;
+              }
+              return count;
+}            }
+
+            count_louder={()=>
+{              var count = 0;
+              for (var i in this.state.messages){
+                if (this.state.messages[i].content == this.state.message_types[4].content)
+                  count ++;
+              }
+              return count;
+}            }
+
+
+            />
 
           </Col>
 
-          <Col lg="4" className="mb-4">
+          <Col lg="4" className="mb-4" >
             {/* Sliders & Progress Bars */}
             <Card small className="mb-4">
               <CardHeader className="border-bottom">
@@ -430,20 +457,21 @@ class Lesson extends React.Component {
                       this.setState({disabled: true});
                       let counter = 0;
                       let success = true;
-                      let error = false;
+                      let error_state = false;
                       let self = this;
                       server.sendEmoji(function(response){
                         counter ++;
                         if (counter === self.state.chosen_students.length){
-                          self.setState({chosen_students: [], success: success, error: error, disabled: false});
+                          self.handleSuccessTrue();
+                          self.setState({chosen_students: [], error: error_state, disabled: false});
                           window.scrollTo(0, 0);
                         }
                       }, function(error){
                         success = false;
-                        error = true;
+                        error_state = true;
                         counter ++;
                         if (counter === self.state.chosen_students.length){
-                          self.setState({chosen_students: [], success: success, error: error, disabled: false});
+                          self.setState({chosen_students: [], success: success, error: error_state, disabled: false});
                           window.scrollTo(0, 0);
                         }
                         console.log("error", error);
@@ -468,20 +496,41 @@ class Lesson extends React.Component {
                         this.setState({disabled: true});
                         let counter = 0;
                         let success = true;
-                        let error = false;
+                        let error_state = false;
                         let self = this;
+                        console.log("self.state.chosen_students");console.log(self.state.chosen_students);
+                        var tmpstudents = self.state.students;
+                        var index =  0;
+
+                        for (index = 0; index<self.state.chosen_students.length; index++)
+                        {
+                          var currindex = tmpstudents.findIndex(
+                            function(student, ind, array){
+                              console.log("Looking for");
+                              console.log(self.state.chosen_students[index]);
+                              return student.id==self.state.chosen_students[index];
+                          })
+                          var currstud = tmpstudents[currindex];
+                          console.log("currstud");
+                          console.log(currstud);
+                          currstud.emons += coin.value;
+                          tmpstudents[currindex] = currstud;
+                        }
+
                         server.sendEMoney(function(response){
                           counter ++;
                           if (counter === self.state.chosen_students.length){
-                            self.setState({chosen_students: [], success: success, error: error, disabled: false});
+                            self.handleSuccessTrue();
+                            self.setState({chosen_students: [], error: error_state, disabled: false, students: tmpstudents});
+
                             window.scrollTo(0, 0);
                           }
                         }, function(error){
                           success = false;
-                          error = true;
+                          error_state = true;
                           counter ++;
                           if (counter === self.state.chosen_students.length){
-                            self.setState({chosen_students: [], success: success, error: error, disabled: false});
+                            self.setState({chosen_students: [], success: success, error: error_state, disabled: false});
                             window.scrollTo(0, 0);
                           }
                           console.log("error", error);
@@ -535,8 +584,11 @@ class Lesson extends React.Component {
               </ListGroup>
             </Card>
           </Col>
-        </Row>
 
+        </Row>
+        <Row>
+          <RegisteredStudentsCard students={this.state.registered_students}/>
+        </Row>
       </Container>
       </div>
     );
