@@ -283,7 +283,7 @@ const clearTeacherMessagesByType = async (event, context, callback) => {
 	return knexConnection('TeacherLogs')
 		.where({
 			courseId: event.pathParameters.courseId,
-			msgType: 1,
+			msgType: 0,
 			val: messageTypeToNumber(event.pathParameters.messageType),
 			live: true,
 		})
