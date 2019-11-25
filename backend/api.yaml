@@ -677,7 +677,41 @@ paths:
           content: {}
       security:
         - auth0_token: []
-  
+
+  '/course/{courseId}/registered/emons':
+    get:
+      tags:
+        - course
+      summary: Get registered students with their monies
+      
+      description: Returns the registered students list and how much Emons they earned.
+      parameters:
+        - name: courseId
+          in: path
+          description: ID of the relevant course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: All OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentWithEmons'
+        '400':
+          description: Validation exception. Invalid ID.
+          content: {}
+        '404':
+          description: No such course
+          content: {}
+      security:
+        - auth0_token: []
+    
+
   '/course/{courseId}/registered/{studentId}':
     delete:
       tags:
@@ -1261,7 +1295,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/StudentWithEmons'
+                  $ref: '#/components/schemas/StudentIdWithEmons'
         '404':
           description: Course not found
           content: {}
@@ -1577,7 +1611,25 @@ components:
           format: email
         phoneNum:
           type: string
-          
+
+    StudentWithEmons:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        authIdToken:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phoneNum:
+          type: string
+        emons:
+          type: integer
+
     StudentWithDesk:
       type: object
       properties:
@@ -1820,7 +1872,7 @@ components:
               amountUsed:
                 type: integer
       additionalProperties: false
-    StudentWithEmons:
+    StudentIdWithEmons:
       type: object
       properties:
         studentId:
