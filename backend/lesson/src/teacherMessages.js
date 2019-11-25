@@ -82,6 +82,23 @@ function dbRowToProperObject(obj) {
 	return retObj;
 }
 
+function messageTypeToNumber(messageType) {
+	switch (messageType) {
+	case 'MESSAGE_CONFUSED':
+		return 0;
+	case 'MESSAGE_QUESTION':
+		return 1;
+	case 'MESSAGE_NEED_TO_LEAVE':
+		return 2;
+	case 'MESSAGE_ANSWER':
+		return 3;
+	case 'MESSAGE_LOUDER':
+		return 4;
+	default:
+		return -1;
+	}
+}
+
 function objToDBRow(obj, courseId) {
 	const retObj = { ...obj };		// shallow copy
 	retObj.courseId = courseId;
@@ -91,26 +108,7 @@ function objToDBRow(obj, courseId) {
 	switch (retObj.messageType) {
 	case 'MESSAGE':
 		retObj.msgType = 0;
-		switch (obj.content) {
-		case 'MESSAGE_CONFUSED':
-			retObj.val = 0;
-			break;
-		case 'MESSAGE_QUESTION':
-			retObj.val = 1;
-			break;
-		case 'MESSAGE_NEED_TO_LEAVE':
-			retObj.val = 2;
-			break;
-		case 'MESSAGE_ANSWER':
-			retObj.val = 3;
-			break;
-		case 'MESSAGE_LOUDER':
-			retObj.val = 4;
-			break;
-		default:
-			retObj.val = -1;
-			break;
-		}
+		retObj.val = messageTypeToNumber(obj.content);
 		delete retObj.content;
 
 		break;
@@ -208,10 +206,10 @@ const postTeacherMessages = async (event, context, callback) => {
 
 	return knexConnection('TeacherLogs')
 		.insert(objToInsert)
-		.then(async (result) => {
+		.then(async () => {
 			knexConnection.client.destroy();
 			iot.connect().then(() => {
-				iot.client.publish(`lesson/${event.pathParameters.courseId}/teacherMessages`, JSON.stringify(event.body), {}, (uneededResult) => {
+				iot.client.publish(`lesson/${event.pathParameters.courseId}/teacherMessages`, JSON.stringify(event.body), {}, () => {
 					iot.client.end(false);
 					return callback(null, {
 						statusCode: 200,
@@ -248,7 +246,49 @@ const clearTeacherMessages = async (event, context, callback) => {
 			live: true,
 		})
 		.update({ live: false })
-		.then(async (result) => {
+		.then(async () => {
+			knexConnection.client.destroy();
+			return callback(null, {
+				statusCode: 200,
+				body: '',
+			});
+		})
+		.catch((err) => {
+			// Disconnect
+			knexConnection.client.destroy();
+			// eslint-disable-next-line no-console
+			console.log(`ERROR clearing messages: ${err}`);
+			return callback(createError.InternalServerError('Error clearing messages.'));
+		});
+};
+
+// DELETE lesson/{courseId}/teacherMessages/{messageType}
+const clearTeacherMessagesByType = async (event, context, callback) => {
+	// context.callbackWaitsForEmptyEventLoop = false
+	if (!event.pathParameters.courseId || !event.pathParameters.messageType) {
+		return callback(createError.BadRequest("Course's ID & message type required."));
+	}
+	if (!isAnInteger(event.pathParameters.courseId)) {
+		return callback(createError.BadRequest('ID should be an integer.'));
+	}
+
+	const validMessageTypes = ['MESSAGE_CONFUSED', 'MESSAGE_QUESTION', 'MESSAGE_NEED_TO_LEAVE', 'MESSAGE_ANSWER', 'MESSAGE_LOUDER'];
+	if (!validMessageTypes.includes(event.pathParameters.messageType)) {
+		return callback(createError.BadRequest('Invalid message type.'));
+	}
+
+	// Connect
+	const knexConnection = knex(dbConfig);
+
+	return knexConnection('TeacherLogs')
+		.where({
+			courseId: event.pathParameters.courseId,
+			msgType: 1,
+			val: messageTypeToNumber(event.pathParameters.messageType),
+			live: true,
+		})
+		.update({ live: false })
+		.then(async () => {
 			knexConnection.client.destroy();
 			return callback(null, {
 				statusCode: 200,
@@ -289,4 +329,11 @@ const del = middy(clearTeacherMessages)
 	.use(httpErrorHandler())
 	.use(cors(corsConfig));
 
-module.exports = { get, post, delete: del };
+const deleteByType = middy(clearTeacherMessagesByType)
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
+
+module.exports = {
+	get, post, delete: del, deleteByType,
+};
