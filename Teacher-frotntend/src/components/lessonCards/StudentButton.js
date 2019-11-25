@@ -54,12 +54,12 @@ const styles = theme => ({
 
 
   regularUnChosen:{
-    color: "DarkBlue",
+    color: "#108782",
     backgroundColor: "white",
-    borderColor: "DarkBlue",
+    borderColor: "#108782",
   },
   regularChosen:{
-    backgroundColor: "DarkBlue",
+    backgroundColor: "#108782",
     color: "white",
     borderColor: "white",
   },
@@ -134,7 +134,7 @@ class StudentButton extends React.Component
   {
     const classes = this.props.classes;
     return(
-      <div style={{display: "inline-block", marginLeft: "1em", marginRight:"3em", marginBottom: "1em"}}>
+      <div style={{display: "inline-block", marginLeft: "1em", marginRight:"3em", marginBottom: "1em "}}>
         <Badge color="primary"
         badgeContent={"#" + this.state.student.desk}
         overlap="rectangle"
