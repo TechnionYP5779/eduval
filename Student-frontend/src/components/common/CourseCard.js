@@ -26,6 +26,17 @@ import Fade from '@material-ui/core/Fade';
 import Button from '@material-ui/core/Button';
 import ClearIcon from '@material-ui/icons/Clear';
 
+import Alert from 'react-bootstrap/Alert'
+
+import TextField from '@material-ui/core/TextField';
+
+
+
+import FormatListNumberedIcon from '@material-ui/icons/FormatListNumbered';
+
+import InputAdornment from '@material-ui/core/InputAdornment';
+
+import SendIcon from '@material-ui/icons/Send';
 
 const LightTooltip = withStyles(theme => ({
   tooltip: {
@@ -96,7 +107,47 @@ const styles = theme => ({
   {
     width: "50%",
     position: 'relative',
-  }
+  },
+
+  regularLesson:
+  {
+    marginLeft: 'auto',
+    borderWidth: "medium",
+    borderStyle: "solid",
+    display: "inline-block"
+  },
+
+  resumeLesson:
+  {
+    backgroundColor: "#77dd77"
+  },
+
+  joinLesson:
+  {
+    backgroundColor:"Orange",
+  },
+  textField: {
+    margin: "auto",
+    width: "100%",
+    marginBottom: '15px ',
+  },
+  title:{
+    color: "DarkBlue",
+    align: "center"
+  },
+  buttonModal:
+  {
+    width: "50%",
+    position: 'relative',
+  },
+
+  sendDesk:
+  {
+    backgroundColor: "LimeGreen",
+    color: "white",
+    borderColor: "white",
+  },
+
 });
 
 class CourseCard extends React.Component
@@ -110,14 +161,32 @@ class CourseCard extends React.Component
       id: this.props.id,
       play_pushed: this.props.play_pushed,
       disabled_play: this.props.disabled_play,
-      delete_modal_open: false
+      delete_modal_open: false,
+
+      student_seat: -1,
+      studentSeatTaken: this.props.studentSeatTaken,
+      emptySeat: this.props.emptySeat,
+
+      desk_modal_open: false,
+      desk_button_disabled: false,
+      errored: this.props.errored,
+
     };
 
     this.handlePlayClick = this.handlePlayClick.bind(this);
     this.handleDeleteCourse = this.handleDeleteCourse.bind(this);
-    this.setDeleteModalChange = this.setDeleteModalChange.bind(this)
-    this.handleDeleteModalOpen = this.handleDeleteModalOpen.bind(this)
-    this.handleDeleteModalClose = this.handleDeleteModalClose.bind(this)
+    this.setDeleteModalChange = this.setDeleteModalChange.bind(this);
+    this.handleDeleteModalOpen = this.handleDeleteModalOpen.bind(this);
+    this.handleDeleteModalClose = this.handleDeleteModalClose.bind(this);
+
+
+    this.setDeskModalChange = this.setDeskModalChange.bind(this)
+    this.handleDeskModalOpen = this.handleDeskModalOpen.bind(this)
+    this.handleDeskModalClose = this.handleDeskModalClose.bind(this)
+    this.updateStudentSeat = this.updateStudentSeat.bind(this);
+    this.enterLesson = this.enterLesson.bind(this);
+
+
     console.log(this.state.name);
     console.log("IS PLAY PUSHED?");
     console.log(this.state.play_pushed);
@@ -125,7 +194,12 @@ class CourseCard extends React.Component
 
   handlePlayClick()
   {
-    this.props.playClicked();
+    if(this.props.play_pushed)
+      this.props.playClicked();
+    else
+    {
+      this.handleDeskModalOpen()
+    }
   }
 
   setDeleteModalChange(value)
@@ -146,10 +220,140 @@ class CourseCard extends React.Component
     this.props.deleteCourse();
   }
 
+  setDeskModalChange(value)
+   {
+     this.setState({desk_modal_open: value})
+   }
+
+   handleDeskModalOpen = (id) =>
+   {
+     this.props.setPostWhenModalOpen();
+     this.setDeskModalChange(true);
+   };
+
+   handleDeskModalClose = () => {
+     this.setDeskModalChange(false);
+   };
+
+   updateStudentSeat(evnt){
+     if(evnt.target.value==""  )
+     {
+       this.setState({emptySeat: true});
+     }
+     else {
+       this.setState({emptySeat: false})
+     }
+     this.setState({student_seat: evnt.target.value});
+     this.setState({studentSeatTaken: false})
+     console.log(this.state.student_seat);
+   }
+   enterLesson()
+   {
+     this.setState({desk_button_disabled: true});
+     var self = this;
+     console.log(self.state)
+     self.props.insertDeskNumber(this.state.student_seat, this.bla);
+     self.setState({desk_button_disabled: false});
+   }
+
+   componentDidUpdate(prevProps, prevState) {
+     if(prevProps.studentSeatTaken!=this.props.studentSeatTaken ||
+       prevProps.emptySeat!=this.props.emptySeat ||
+       prevProps.play_pushed!=this.props.play_pushed ||
+       prevProps.disabled_play!=this.props.disabled_play ||
+       prevProps.play_text!=this.props.play_text ||
+       prevProps.errored!=this.props.errored)
+       {
+         this.setState({
+           studentSeatTaken:this.props.studentSeatTaken,
+           emptySeat: this.props.emptySeat,
+           errored: this.props.errored,
+           play_pushed: this.props.play_pushed,
+           play_text: this.props.play_text,
+           disabled_play: this.props.disabled_play,
+
+         })
+       }
+   }
+
   render(){
     const classes = this.props.classes;
     return(
       <div>
+      <Modal
+        aria-labelledby="transition-modal-title"
+        aria-describedby="transition-modal-description"
+        className={classes.modal}
+        open={this.state.desk_modal_open}
+        onClose={this.handleDeskModalClose}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <Fade in={this.state.desk_modal_open}>
+          <div className={classes.paper}>
+
+            {(this.state.studentSeatTaken) &&
+              <Alert variant = "warning">
+                <Alert.Heading style={{color:"white"} }>This {this.state.studentSeatTaken ? "Seat" : "Name"} is Taken!</Alert.Heading>
+                <p>
+                  Select another {this.state.studentSeatTaken ? "seat" : "name"} if you want to proceed. <br/> Contact the teacher in case of further problems.
+                </p>
+              </Alert>
+            }
+
+            {this.state.errored &&
+              <Alert variant = "dark">
+                <Alert.Heading style={{color:"white"}}>An unexpected error happened!</Alert.Heading>
+                  <p> Please contact system administrator</p>
+              </Alert>
+            }
+            <h3 style={{textAlign:"center"}} id="transition-modal-title">Enter Desk Number</h3>
+            <TextField
+              error={this.state.studentSeatTaken || this.state.emptySeat}
+              required
+              id="standard-number"
+              type="number"
+              InputLabelProps={{
+                shrink: true,
+              }}
+              label="Desk Number"
+              className={classes.textField}
+              margin="normal"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <FormatListNumberedIcon />
+                  </InputAdornment>
+                ),
+              }}
+              onChange={this.updateStudentSeat}
+            />
+
+            <Button
+              variant="contained"
+              color="primary"
+              className={classes.buttonModal}
+              endIcon={<ClearIcon />}
+              onClick={this.handleDeskModalClose}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              className={clsx([classes.buttonModal, classes.sendDesk])}
+              endIcon={<SendIcon />}
+              onClick={this.enterLesson}
+              disabled={this.state.desk_button_disabled || this.state.emptySeat || this.state.studentSeatTaken}
+            >
+              Enter Lesson
+            </Button>
+          </div>
+        </Fade>
+      </Modal>
+
         <Card className={this.state.play_pushed? classes.card_in_lesson : classes.card} >
           <CardHeader
           classes={{
@@ -170,7 +374,7 @@ class CourseCard extends React.Component
                 </a>
               </IconButton>
             </LightTooltip>
-            <LightTooltip title="Manage Store" placement="bottom-end">
+            <LightTooltip title="Enter Store" placement="bottom-end">
               <IconButton>
                 <a href={"/store/" + this.state.id}>
                 <ShoppingCartIcon />
@@ -180,19 +384,27 @@ class CourseCard extends React.Component
 
             <LightTooltip title={this.state.play_pushed? "Resume Lesson" : "Join Lesson"}
               placement="bottom-end">
-              <IconButton
+              <Button
               disabled={ this.state.disabled_play}
               className=
-                {
-                  this.state.disabled_play? classes.play_disabled :
-                  (this.state.play_pushed ? classes.play_pushed : classes.play )
-                }
+                  {clsx([classes.regularLesson],
+                    {
+                      [classes.joinLesson]:
+                      !this.state.disabled_play
+                      && !this.state.play_pushed,
+
+                      [classes.resumeLesson]:
+                      !this.state.disabled_play
+                      && this.state.play_pushed,
+                    }
+                    )}
                 aria-label="start"
                 onClick={this.handlePlayClick}
               >
+                {this.props.play_text}
                 {!this.state.play_pushed && <PlayArrowIcon />}
                 {this.state.play_pushed && <PlayCircleFilledWhiteRoundedIcon fontSize="large" />}
-              </IconButton>
+              </Button>
             </LightTooltip>
           </CardActions>
         </Card>
