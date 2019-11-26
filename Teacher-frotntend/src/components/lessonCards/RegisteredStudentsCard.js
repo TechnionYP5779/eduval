@@ -26,6 +26,7 @@ import Fade from '@material-ui/core/Fade';
 import Button from '@material-ui/core/Button';
 import ClearIcon from '@material-ui/icons/Clear';
 
+import { withTranslation } from "react-i18next";
 import RegisterStudentTable from "./RegisterStudentTable";
 
 
@@ -153,12 +154,14 @@ class RegisteredStudentsCard extends React.Component
   render()
   {
     const classes = this.props.classes;
+    const { t } = this.props;
+
     return (
 
       <Card className={classes.card}>
           <CardHeader
           classes={{title:classes.title}}
-          title="Registered Students to this Course"
+          title={t("Students Registered to this Course")}
           action={
             <IconButton
               className={clsx(classes.expand, {
@@ -189,4 +192,4 @@ RegisteredStudentsCard.propTypes = {
 };
 
 
-export default withStyles(styles)(RegisteredStudentsCard);
+export default withTranslation()(withStyles(styles)(RegisteredStudentsCard));

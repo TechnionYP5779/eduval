@@ -31,6 +31,7 @@ import MeetingRoomIcon from '@material-ui/icons/MeetingRoom';
 import RecordVoiceOverIcon from '@material-ui/icons/RecordVoiceOver';
 import SentimentDissatisfiedIcon from '@material-ui/icons/SentimentDissatisfied';
 import VolumeUpIcon from '@material-ui/icons/VolumeUp';
+import { withTranslation } from 'react-i18next';
 
 import {
   Row,
@@ -303,11 +304,13 @@ class StudentMessageCard extends React.Component
   render()
   {
     const classes = this.props.classes;
+    const { t } = this.props;
+
     return(
       <Card className={classes.card}>
         <CardHeader
-        title={this.state.title}
-        subheader={this.state.subtitle}
+        title={this.props.title}
+        subheader={this.props.subtitle}
         classes={{
           title: classes.title,
         }}
@@ -348,10 +351,10 @@ class StudentMessageCard extends React.Component
                 >
                   <HelpIcon />
                   <br/>
-                  Questions
+                  {t("Questions")}
                 </Button>
                 <Typography className={clsx([classes.text,classes.tomatoUnChosen])}>
-                <b>{this.props.count_questions()}</b> Students
+                <b>{this.props.count_questions()}</b> {t("Students")}
                 </Typography>
                 <IconButton aria-label="delete"
                 className={clsx([classes.delete_icon,classes.tomatoUnChosen])}
@@ -382,10 +385,10 @@ class StudentMessageCard extends React.Component
                 >
                   <MeetingRoomIcon  />
                   <br/>
-                  Go Out
+                  {t("Go Out")}
                 </Button>
                 <Typography className={clsx([classes.text,classes.orangeUnChosen])}>
-                <b>{this.props.count_go_out()}</b> Students
+                <b>{this.props.count_go_out()}</b> {t("Students")}
                 </Typography>
                 <IconButton aria-label="delete"
                 className={clsx([classes.delete_icon,classes.orangeUnChosen])}
@@ -414,10 +417,10 @@ class StudentMessageCard extends React.Component
                 >
                   <RecordVoiceOverIcon  />
                   <br/>
-                  Answer!
+                  {t("Answer")+"!"}
                 </Button>
                 <Typography className={clsx([classes.text,classes.greenUnChosen])}>
-                <b>{this.props.count_answer()}</b> Students
+                <b>{this.props.count_answer()}</b> {t("Students")}
                 </Typography>
                 <IconButton aria-label="delete"
                 className={clsx([classes.delete_icon,classes.greenUnChosen])}
@@ -448,10 +451,10 @@ class StudentMessageCard extends React.Component
                 >
                   <SentimentDissatisfiedIcon  />
                   <br/>
-                  Confused
+                  {t("Confused")}
                 </Button>
                 <Typography className={clsx([classes.text,classes.violetUnChosen])}>
-                <b>{this.props.count_confused()}</b> Students
+                <b>{this.props.count_confused()}</b> {t("Students")}
                 </Typography>
                 <IconButton aria-label="delete"
                 className={clsx([classes.delete_icon,classes.violetUnChosen])}
@@ -480,10 +483,10 @@ class StudentMessageCard extends React.Component
                 >
                   <VolumeUpIcon  />
                   <br/>
-                  Louder
+                  {t("Louder")}
                 </Button>
                 <Typography className={clsx([classes.text,classes.blueslateUnChosen])}>
-                  <b>{this.props.count_louder()}</b> Students
+                  <b>{this.props.count_louder()}</b> {t("Students")}
                 </Typography>
                 <IconButton aria-label="delete"
                 className={clsx([classes.delete_icon,classes.blueslateUnChosen])}
@@ -507,4 +510,4 @@ StudentMessageCard.propTypes = {
 };
 
 
-export default withStyles(styles)(StudentMessageCard);
+export default withTranslation()(withStyles(styles)(StudentMessageCard));

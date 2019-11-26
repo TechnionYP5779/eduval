@@ -47,6 +47,7 @@ import AttendStudentCard from "../components/lessonCards/AttendStudentCard";
 import RegisteredStudentsCard from "../components/lessonCards/RegisteredStudentsCard";
 import StudentMessageCard from "../components/lessonCards/StudentMessageCard";
 
+import { withTranslation } from "react-i18next";
 import {iotPresent, iotMessages} from "../iotClient/iotClient";
 import server from "../Server/Server";
 
@@ -333,25 +334,27 @@ class Lesson extends React.Component {
 
     let self = this;
 
+    const { t } = this.props;
+
     return (
       <div>
       {this.state.error &&
-      <TimeoutAlert className="mb-0" theme="danger" msg={"An error has occured!"} time={10000}/>
+      <TimeoutAlert className="mb-0" theme="danger" msg={t("An error has occured")+"!"} time={10000}/>
       }
       {this.state.success &&
-      <TimeoutAlert className="mb-0" theme="success" msg={"Messages sent successfully!"} time={10000}/>
+      <TimeoutAlert className="mb-0" theme="success" msg={t("Messages sent successfully!")} time={10000}/>
       }
       <Container fluid className="main-content-container px-4">
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title={this.state.course_name} subtitle="Lesson View" className="text-sm-left" />
+          <PageTitle sm="4" title={this.state.course_name} subtitle={t("Lesson View")} className="text-sm-left" />
         </Row>
         {/* First Row of Posts */}
         <Row>
           <Col lg="8" className="mb-4">
             <AttendStudentCard
-            title="Attending Students"
-            subtitle="Pick the students you want to send E-Money to"
+            title={t("Attending Students")}
+            subtitle={t("Pick the students you want to send E-Money to")}
             students={this.state.students}
             isChosen = {(id) =>
             {
@@ -381,8 +384,8 @@ class Lesson extends React.Component {
               return show_messaged_color;}}
             />
             <StudentMessageCard
-            title="Messages from Students"
-            subtitle={"Click button to see who sent the messages"}
+            title={t("Messages from Students")}
+            subtitle={t("Click button to see who sent the messages")}
             show_questions={()=>{console.log("HEYY");handleShowUpdate(this.state.message_types[0].content, this.state.message_types[0].color);}}
             show_go_out={()=>{handleShowUpdate(this.state.message_types[1].content, this.state.message_types[1].color);}}
             show_answer={()=>{handleShowUpdate(this.state.message_types[2].content, this.state.message_types[2].color);}}
@@ -442,11 +445,11 @@ class Lesson extends React.Component {
             {/* Sliders & Progress Bars */}
             <Card small className="mb-4">
               <CardHeader className="border-bottom">
-                <h6 className="m-0">Rewards & Emojis</h6>
+                <h6 className="m-0">{t("Rewards & Emojis")}</h6>
               </CardHeader>
               <ListGroup flush>
               <div className="mb-2 pb-1" style={{margin:"10px"}}>
-                <h6 style={{fontSize:"12px"}}>Choose an emoji to send</h6>
+                <h6 style={{fontSize:"12px"}}>{t("Choose an emoji to send")}</h6>
                 </div>
                 <Row style={{margin:"2px"}}>
                 {smileys.map((smile, idx) => (
@@ -485,7 +488,7 @@ class Lesson extends React.Component {
                 <hr style={{backgroundColor: "#a4a4a4", width: "95%"}} />
 
                 <div className="mb-2 pb-1" style={{margin:"10px"}}>
-                  <h6 style={{fontSize:"12px"}}>Or choose amount of E-Money to send</h6>
+                  <h6 style={{fontSize:"12px"}}>{t("Or choose amount of E-Money to send")}</h6>
                   </div>
                   <Row style={{margin:"2px"}}>
                   {this.state.coins.map((coin, idx) => (
@@ -577,7 +580,7 @@ class Lesson extends React.Component {
                       self.setState({disabled: false, error: true});
                     }, this.props.match.params.id, "LESSON_END");
                   }}>
-                    End Class
+                    {t("End Class")}
                   </Button>
                   </div>
 
@@ -595,4 +598,4 @@ class Lesson extends React.Component {
   }
 }
 
-export default Lesson;
+export default withTranslation()(Lesson);

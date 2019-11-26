@@ -167,8 +167,8 @@ class AttendStudentCard extends React.Component
           classes={{
             title: classes.title,
           }}
-          title={this.state.title}
-          subheader={this.state.subtitle}
+          title={this.props.title}
+          subheader={this.props.subtitle}
           action={
             <IconButton
               className={clsx(classes.expand, {
