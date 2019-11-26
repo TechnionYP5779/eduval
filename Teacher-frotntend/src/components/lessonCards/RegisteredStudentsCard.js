@@ -129,6 +129,7 @@ class RegisteredStudentsCard extends React.Component
     this.state = {
       expanded: true,
       students: this.props.students,
+      registered_students: this.props.registered_students,
     }
     this.setExpanded = this.setExpanded.bind(this)
     this.handleExpandClick = this.handleExpandClick.bind(this)
@@ -144,10 +145,15 @@ class RegisteredStudentsCard extends React.Component
   {
     this.setExpanded(!this.state.expanded);
   }
+
   componentDidUpdate(prevProps, prevState) {
     if(prevProps.students!=this.props.students)
     {
       this.setState({students: this.props.students});
+    }
+    if(prevProps.registered_students!=this.props.registered_students)
+    {
+      this.setState({registered_students: this.props.registered_students});
     }
   }
 
@@ -177,7 +183,9 @@ class RegisteredStudentsCard extends React.Component
           />
           <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
             <CardContent>
-               <RegisterStudentTable students={this.state.students} />
+               <RegisterStudentTable
+               registered_students={this.state.registered_students}
+               students={this.state.students} />
             </CardContent>
           </Collapse>
 

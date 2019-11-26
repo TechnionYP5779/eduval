@@ -46,9 +46,9 @@ import PageTitle from "../components/common/PageTitle";
 import AttendStudentCard from "../components/lessonCards/AttendStudentCard";
 import RegisteredStudentsCard from "../components/lessonCards/RegisteredStudentsCard";
 import StudentMessageCard from "../components/lessonCards/StudentMessageCard";
-
 import { withTranslation } from "react-i18next";
-import {iotPresent, iotMessages} from "../iotClient/iotClient";
+
+import iotclient from "../iotClient/iotClient";
 import server from "../Server/Server";
 
 
@@ -186,7 +186,12 @@ class Lesson extends React.Component {
 
       registered_students:[],
 
-      course_name: ""
+      course_id:this.props.match.params.id,
+
+      course_name: "",
+
+      student_message_counter: [0,0,0,0,0],
+
     };
 
     this.unchooseStudent = this.unchooseStudent.bind(this);
@@ -194,7 +199,9 @@ class Lesson extends React.Component {
     this.handleSuccessTrue = this.handleSuccessTrue.bind(this);
   }
 
-  handleShowUpdate(type, color){
+  handleShowUpdate(obj){
+    var type = obj.content;
+    var color = obj.color;
     let messaged_students = new Set([]);
     if (this.state.show_messaged == type){
       this.setState({show_messaged: false, messaged_students: messaged_students});
@@ -230,15 +237,15 @@ class Lesson extends React.Component {
   componentDidMount() {
 
     let self = this;
-
     let courseId = this.props.match.params.id;
+
+
+
     server.getRegisteredStudents(function(responseReg){
-      console.log(responseReg.data);
-      console.log("REG");
       self.setState({registered_students: responseReg.data});
     }, (error)=>{}, courseId);
 
-    let onConnectPresent = ()=>{
+    let onConnect = ()=>{
 
       server.getAttendingStudents(function(responseAtt){
         responseAtt.data.sort(function(a,b){
@@ -281,19 +288,75 @@ class Lesson extends React.Component {
 
 
       }, (error)=>{}, courseId);
+
+      server.getMessagesFromStudents(function(response){
+        self.setState({messages: response.data});
+
+        var count = [0,0,0,0,0];
+        for (var i in self.state.messages){
+          for (var c in [...Array(5).keys()])
+            {
+              if (self.state.messages[i].content == self.state.message_types[c].content)
+              count[c] ++;
+            }
+        }
+        self.setState({student_message_counter: count})
+
+      }, (error)=>{
+        console.log(error);
+      }, courseId);
+
       if (!self.state.connected)
         self.setState({connected: true});
     }
     console.log(this.state.students);
 
-    let onConnectMessages = ()=>{
-      server.getMessagesFromStudents(function(response){
-        self.setState({messages: response.data});
-      }, (error)=>{
+    let onMessages = (topic,message)=>
+    {
+      if(topic=="lesson/"+courseId+"/teacherMessages")
+      {
+        console.log(self.state.messages);
+        var tmp = self.state.student_message_counter;
+        console.log("new message");
+        console.log(JSON.parse(message));
+        for (var c in [...Array(5).keys()])
+        {
+          if (JSON.parse(message).content == self.state.message_types[c].content)
+          {
+            tmp[c]++;
+          }
+        }
+        console.log(tmp);
+        self.setState({student_message_counter: tmp});
+        /*Updated counter, now update message log*/
+
+        var tmpmessages = self.state.messages;
+        tmpmessages.push(JSON.parse(message));
+        self.setState({messages: tmpmessages});
+      }
+      else if (topic=="lesson/"+courseId+"/present")
+      {
+        server.getStudentById(function(response)
+      {
+        var tmpstudents = self.state.students;
+        var newstud = response.data;
+        newstud.emons=5;
+        newstud.desk=JSON.parse(message).desk;
+        tmpstudents.push(newstud);
+        self.setState({students:tmpstudents});
+
+      }, function(error)
+      {
+        console.log("error getting new logged student");
         console.log(error);
-      }, courseId);
+      },JSON.parse(message).id)
+      }
+
+      else {
+        console.log("Got Unexpected Topic???");
+      }
       if (!self.state.connected)
-        self.setState({connected: true});
+          self.setState({connected: true});
     }
 
     let onOffline = ()=>{
@@ -302,12 +365,9 @@ class Lesson extends React.Component {
     }
 
 
-    iotPresent.getKeys(function(response){
-      iotPresent.connect(courseId, onConnectPresent, onConnectPresent, onOffline);
-    }, (error)=>{});
-
-    iotMessages.getKeys(function(response){
-       iotMessages.connect(courseId, onConnectMessages, onConnectMessages, onOffline);
+    iotclient.getKeys(function(response){
+      console.log("GOT KEYS");
+      iotclient.connect(courseId, onConnect, onMessages, onOffline);
     }, (error)=>{});
 
     server.getCourse(function(response){
@@ -374,6 +434,7 @@ class Lesson extends React.Component {
               }
             }
 
+
             isMessaged = {(id) =>
               {
                 return(messaged_students.has(id));
@@ -386,56 +447,26 @@ class Lesson extends React.Component {
             <StudentMessageCard
             title={t("Messages from Students")}
             subtitle={t("Click button to see who sent the messages")}
-            show_questions={()=>{console.log("HEYY");handleShowUpdate(this.state.message_types[0].content, this.state.message_types[0].color);}}
-            show_go_out={()=>{handleShowUpdate(this.state.message_types[1].content, this.state.message_types[1].color);}}
-            show_answer={()=>{handleShowUpdate(this.state.message_types[2].content, this.state.message_types[2].color);}}
-            show_confused={()=>{handleShowUpdate(this.state.message_types[3].content, this.state.message_types[3].color);}}
-            show_louder={()=>{handleShowUpdate(this.state.message_types[4].content, this.state.message_types[4].color);}}
+            student_message_counter={self.state.student_message_counter}
+            show_questions={()=>{handleShowUpdate(this.state.message_types[0]);}}
+            show_go_out={()=>{handleShowUpdate(this.state.message_types[1])}}
+            show_answer={()=>{handleShowUpdate(this.state.message_types[2]);}}
+            show_confused={()=>{handleShowUpdate(this.state.message_types[3]);}}
+            show_louder={()=>{handleShowUpdate(this.state.message_types[4]);}}
 
-            count_questions={()=>
-{              var count = 0;
-              for (var i in this.state.messages){
-                if (this.state.messages[i].content == this.state.message_types[0].content)
-                  count ++;
-              }
-              return count;
-}            }
-            count_go_out={()=>
-{              var count = 0;
-              for (var i in this.state.messages){
-                if (this.state.messages[i].content == this.state.message_types[1].content)
-                  count ++;
-              }
-              return count;
-}            }
+            clearMessages = {(num)  =>
+              {
+                server.deleteLessonMessages(
+                  function(response){console.log("Deleted Messages "+ num)}, function(error)
+                  {
+                    console.log("Error clearing messages of type " + num);
+                  }, this.state.course_id, this.state.message_types[num].content
+                );
 
-            count_answer={()=>
-{              var count = 0;
-              for (var i in this.state.messages){
-                if (this.state.messages[i].content == this.state.message_types[2].content)
-                  count ++;
-              }
-              return count;
-}            }
-
-            count_confused={()=>
-{              var count = 0;
-              for (var i in this.state.messages){
-                if (this.state.messages[i].content == this.state.message_types[3].content)
-                  count ++;
-              }
-              return count;
-}            }
-
-            count_louder={()=>
-{              var count = 0;
-              for (var i in this.state.messages){
-                if (this.state.messages[i].content == this.state.message_types[4].content)
-                  count ++;
-              }
-              return count;
-}            }
-
+                var tmpcounter = this.state.student_message_counter;
+                tmpcounter[num]=0;
+                this.setState({student_message_counter: tmpcounter});
+              }}
 
             />
 
@@ -590,7 +621,10 @@ class Lesson extends React.Component {
 
         </Row>
         <Row>
-          <RegisteredStudentsCard students={this.state.registered_students}/>
+          <RegisteredStudentsCard
+          registered_students={this.state.registered_students}
+          students={this.state.students}
+          />
         </Row>
       </Container>
       </div>

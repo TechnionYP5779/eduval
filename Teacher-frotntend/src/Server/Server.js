@@ -326,14 +326,14 @@ class Server {
     - User should be logged in when called.
     - Lesson in session.
   */
-  deleteLessonMessages(callback, callbackError, courseId){
+  deleteLessonMessages(callback, callbackError, courseId, messageType){
     let teacher_id = localStorage.getItem('teacher_id');
     if (teacher_id == null || !auth.isAuthenticated()){
       let error = {response: {data: {error: "not logged in"}}};
       callbackError(error);
       return;
     }
-    axios.delete(SERVER_CONFIG.domain + "/lesson/" + courseId + "/teacherMessages", this.getConfig())
+    axios.delete(SERVER_CONFIG.domain + "/lesson/" + courseId + "/teacherMessages/"+messageType, this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -401,6 +401,28 @@ class Server {
       return;
     }
     axios.get(SERVER_CONFIG.domain + "/course/" + courseId + "/purchasedItems", this.getConfig())
+    .then(callback)
+    .catch(callbackError);
+  }
+  /*
+  =================== Get Student ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+      + response is {data: [student objects]}
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - courseId: the course id
+  @use conditions:
+    - User should be logged in when called.
+  */
+  getStudentById(callback, callbackError, studentId){
+    let teacher_id = localStorage.getItem('teacher_id');
+    if (teacher_id == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "not logged in"}}};
+      callbackError(error);
+      return;
+    }
+    axios.get(SERVER_CONFIG.domain + "/student/" + studentId , this.getConfig())
     .then(callback)
     .catch(callbackError);
   }

@@ -7,7 +7,8 @@ class iotClient {
 
 
   constructor(topic){
-    this.iotTopic = topic;
+    this.iotTopicPresent = IOT_CONFIG.topicPresent;
+    this.iotTopicMessage = IOT_CONFIG.topicMessages;
   }
 
   config = {
@@ -34,7 +35,8 @@ class iotClient {
   }
 
   connect(courseId, connectCallback, messageCallback, offlineCallback){
-    this.iotTopic = this.iotTopic(courseId);
+    this.messageTopic = this.iotTopicMessage(courseId);
+    this.presentTopic = this.iotTopicPresent(courseId);
     this.client = awsIot.device({
       region: this.iotKeys.region,
       protocol: 'wss',
@@ -46,17 +48,14 @@ class iotClient {
     });
     const onConnect = () => {
       console.log("Connect");
-        this.client.subscribe(this.iotTopic);
-        connectCallback();
+      this.client.subscribe(this.messageTopic);
+      this.client.subscribe(this.presentTopic);
+      connectCallback();
     };
 
     const onMessage = (topic, message) => {
         message = new TextDecoder("utf-8").decode(message);
-        console.log("topic");
-        console.log(topic);
-        console.log("Message");
-        console.log(message);
-        messageCallback();
+        messageCallback(topic,message);
     };
 
     const onError = (error) => {
@@ -84,9 +83,8 @@ class iotClient {
   }
 
 }
-
-let iotPresent = new iotClient(IOT_CONFIG.topicPresent);
-let iotMessages = new iotClient(IOT_CONFIG.topicMessages);
-
 // export default iotPresent;
-export {iotPresent, iotMessages};
+
+let iotclient = new iotClient();
+
+export default iotclient;

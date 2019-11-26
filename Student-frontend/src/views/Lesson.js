@@ -46,6 +46,7 @@ import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
 import Fade from '@material-ui/core/Fade';
 import { withStyles } from '@material-ui/core/styles';
+import StudentMessageCard from "../components/lessonCards/StudentMessageCard";
 
 import awsIot  from 'aws-iot-device-sdk';
 import "./Lesson.css";
@@ -151,7 +152,7 @@ class Lesson extends React.Component {
       location: "string",
       description: "string",
 
-        messageRows: [[{
+        messageRows: [{
             message: "I have a question",
             enum: "MESSAGE_QUESTION",
             color:"Tomato",
@@ -162,8 +163,8 @@ class Lesson extends React.Component {
             enum: "MESSAGE_CONFUSED",
             color:"Violet",
             id: 2
-        }],
-        [{
+        },
+        {
             message: "May I go out?",
             enum: "MESSAGE_NEED_TO_LEAVE",
             color:"Orange",
@@ -174,18 +175,23 @@ class Lesson extends React.Component {
             enum: "MESSAGE_ANSWER",
             color:"MediumSeaGreen",
             id: 4
-        }],
-        [{
+        },
+        {
             message: "Speak louder please",
             enum: "MESSAGE_LOUDER",
             color:"SlateBlue",
             id: 5
-        }]
-      ],currentEmojis: [],
+        }
+      ],
+
+      currentEmojis: [],
+
+      buttons_disabled: false,
      };
      this.setMessageModalChange = this.setMessageModalChange.bind(this)
      this.handleMessageModalOpen = this.handleMessageModalOpen.bind(this)
      this.handleMessageModalClose = this.handleMessageModalClose.bind(this)
+     this.handleMessageClick = this.handleMessageClick.bind(this)
 
    }
 
@@ -205,6 +211,7 @@ class Lesson extends React.Component {
   };
 
   handleMessageModalClose = () => {
+    this.setState({buttons_disabled: false});
     this.setMessageModalChange(false);
   };
 
@@ -351,7 +358,19 @@ class Lesson extends React.Component {
 
 }
 
-
+  handleMessageClick(message)
+  {
+    this.setState({chosen_message : message.id});
+    axios.post(
+    'https://api.emon-teach.com' + "/lesson/" + this.state.lesson_id + "/teacherMessages" ,
+    {messageType: "MESSAGE", studentId:  this.state.student_id, content: message.enum},
+    {headers: headers})
+  .then( (response) =>{
+      this.setState({buttons_disabled: true});
+      this.setState({message: "Your message sent to your teacher!", success: true});
+      this.handleMessageModalOpen();
+      window.scrollTo(0, 0)});
+  }
 
 
 
@@ -426,62 +445,16 @@ class Lesson extends React.Component {
 
           <Col lg="4" className="mb-4" >
             {/* Sliders & Progress Bars */}
-            <Card small className="mb-4" >
-              <CardHeader className="border-bottom">
-                <Row>
-                  <Col xs sm>
-                    <h5 className="m-0">Send a Message to the Teacher</h5>
-                  </Col>
-                  <Col xs="2" sm>
-                    <Button style={{padding:"0px"}}
-                    onClick={()=>{this.setState({showing_messages:!this.state.showing_messages});}}>
-                    {this.state.showing_messages && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CE;</i>}
-                    {!this.state.showing_messages && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CF;</i>}
-                    </Button>
-                  </Col>
-                </Row>
-              </CardHeader>
-              {this.state.showing_messages &&
-                <ListGroup flush>
-                    <div className="mb-2 pb-1" style={{margin:"10px"}}>
-                  <h7 style={{fontSize:"17px"}}>Choose a message to send</h7>
-                  </div>
-                  {messageRows.map((messages, idx) => (
-                  <Row style={{margin:"2px"}}>
-                  {messages.map((message, idx) => (
-                    <Col>
-                    {
-                      (this.state.chosen_message == message.id) &&
-                      <Button outline="none" style={{fontSize:"13px", borderColor:message.color ,color:message.color, background:'white'}} className="mb-2 mr-1" onClick={()=>{
-                        this.setState({chosen_message : -1});
-                      }}>
-                        {message.message}
-                      </Button>
-                    }
-                    {
-                      (this.state.chosen_message != message.id) &&
-                      <Button outline style={{fontSize:"13px", borderColor:message.color ,color:message.color, background:'white'}} className="mb-2 mr-1" onClick={()=>{;
-                        this.setState({chosen_message : message.id});
-                        axios.post(
-                        'https://api.emon-teach.com' + "/lesson/" + this.state.lesson_id + "/teacherMessages" ,
-                        {messageType: "MESSAGE", studentId:  this.state.student_id, content: message.enum},
-                        {headers: headers})
-                      .then( (response) =>{
-                          this.setState({message: "Your message sent to your teacher!", success: true});
-                          this.handleMessageModalOpen();
-                          window.scrollTo(0, 0)});
-                      }} >
-                        {message.message}
-                      </Button>
-                    }
+            <StudentMessageCard
+            title="Send a Message to the Teacher"
+            subtitle="Choose a Message to Send"
+            send_questions={()=>{this.handleMessageClick(this.state.messageRows[0]);}}
+            send_go_out={()=>{this.handleMessageClick(this.state.messageRows[1])}}
+            send_answer={()=>{this.handleMessageClick(this.state.messageRows[2]);}}
+            send_confused={()=>{this.handleMessageClick(this.state.messageRows[3]);}}
+            send_louder={()=>{this.handleMessageClick(this.state.messageRows[4]);}}
 
-                  </Col>))}
-                  </Row>
-                  ))}
-                </ListGroup>
-                }
-            </Card>
-
+            />
           </Col>
         </Row>
 

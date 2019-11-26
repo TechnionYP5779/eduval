@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import clsx from 'clsx';
 
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
@@ -10,17 +11,22 @@ import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import { withTranslation } from "react-i18next";
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+
 
 const columns = [
+  { id: 'check', label: '', minWidth: 33 },
   { id: 'name', label: 'Name', minWidth: 70 },
   { id: 'phoneNum', label: 'Phone Number', minWidth: 70 },
   { id: 'emons', label: 'Emons', minWidth: 70 },
   { id: 'email', label: 'Email', minWidth: 70 },
+  { id: 'id', label: 'Email', minWidth: 70 },
+  { id: 'missing', label: 'Email', minWidth: 70 },
 ];
 
 
-function createData(name, email, phoneNum, emons) {
-  return { name, email, phoneNum, emons};
+function createData(name, email, phoneNum, emons, id, missing) {
+  return { name, email, phoneNum, emons, id, missing};
 }
 
 
@@ -32,6 +38,20 @@ const styles = theme => ({
     maxHeight: 440,
     overflow: 'auto',
   },
+
+  loggedOn: {
+    backgroundColor: "white ",
+  },
+
+
+  missing: {
+    backgroundColor: "#BEBEBE",
+  },
+
+  icon:{
+    color:"LimeGreen",
+  }
+
 });
 
 class RegisterStudentTable extends React.Component {
@@ -43,18 +63,17 @@ class RegisterStudentTable extends React.Component {
     {
       page: 0,
       rowsPerPage: 5,
+      registered_students: this.props.registered_students,
       students: this.props.students,
       rows: [],
     }
-    console.log("Table PRops");
-    console.log(props);
 
     var index = 0;
 
-    for(index = 0; index<this.state.students.lengtH; index++)
+    for(index = 0; index<this.state.registered_students.length; index++)
     {
       var student = this.state.students[index];
-      this.state.rows.push(createData(student.name, student.phoneNum, student.emons, student.email));
+      this.state.rows.push(createData(student.name, student.phoneNum, student.emons, student.email, student.id, true));
 
     }
 
@@ -65,28 +84,34 @@ class RegisterStudentTable extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    console.log(prevProps);
-    console.log("PREVV");
-    console.log(this.props);
-    console.log("NOW");
-    if(prevProps.students!=this.props.students)
+
+    if(prevProps.registered_students!=this.props.registered_students
+    || prevProps.students != this.props.students)
     {
+      this.setState({registered_students: this.props.registered_students});
       this.setState({students: this.props.students});
-      console.log("Table update!");
-      console.log(this.props);
+      console.log("Curr Reg");
+      console.log(this.state.registered_students);
+      console.log("Curr Att");
+      console.log(this.state.students);
+
       var tmprows = [];
       var index;
-      for(index = 0; index<this.props.students.length; index++)
+      for(index = 0; index<this.props.registered_students.length; index++)
       {
-        var student = this.props.students[index];
-        tmprows.push(createData(student.name, student.email, student.phoneNum, student.emons));
-        console.log("Pushed "+index);
-        console.log(student);
+        var student = this.props.registered_students[index];
+        var student_missing = this.props.students.findIndex(
+          (s) =>
+          {
+            return s.id==student.id;
+          })==-1;
+        console.log("Student " + student.name + " is missing? " + student_missing);
+        tmprows.push(createData(student.name, student.email, student.phoneNum,
+          student.emons, student.id, student_missing));
       }
 
       this.setState({rows:tmprows});
     }
-    console.log(this.state);
   }
 
 
@@ -124,7 +149,9 @@ class RegisterStudentTable extends React.Component {
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
               <TableRow>
-                {columns.map(column => (
+                {columns.map(column =>
+                  {if(column.id=="id" || column.id=="missing") return;
+                  return (
                   <TableCell
                     key={column.id}
                     align={column.align}
@@ -132,18 +159,38 @@ class RegisterStudentTable extends React.Component {
                   >
                     {t(column.label)}
                   </TableCell>
-                ))}
+                )})}
               </TableRow>
             </TableHead>
             <TableBody>
               {this.state.rows.slice(this.state.page * this.state.rowsPerPage,
                 this.state.page * this.state.rowsPerPage + this.state.rowsPerPage).map(row => {
+                console.log("Student " + row.name+ " is missing? " + row.missing);
                 return (
                   <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
                     {columns.map(column => {
                       const value = row[column.id];
+                      if(column.id=="id"  || column.id=="missing") return;
+                      if(column.id=="check" && !row.missing)
+                      {
+                        return(
+                          <TableCell key={column.id} align={column.align}>
+                            <CheckCircleIcon className={classes.icon}/>
+                          </TableCell>
+
+                        )
+                      }
                       return (
-                        <TableCell key={column.id} align={column.align}>
+                        <TableCell key={column.id} align={column.align}
+                        className=
+                          {
+                            clsx([classes.loggedOn],
+                              {
+                                [classes.missing]: row.missing
+                              }
+                            )
+                          }
+                        >
                           {column.format && typeof value === 'number' ? column.format(value) : value}
                         </TableCell>
                       );

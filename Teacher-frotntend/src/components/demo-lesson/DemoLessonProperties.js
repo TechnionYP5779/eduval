@@ -204,6 +204,7 @@ class DemoLessonProperties extends React.Component {
             />
 
             <Button
+              disabled={this.state.disabled}
               variant="contained"
               color="primary"
               className={classes.button}

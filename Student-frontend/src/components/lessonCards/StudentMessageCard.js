@@ -31,7 +31,6 @@ import MeetingRoomIcon from '@material-ui/icons/MeetingRoom';
 import RecordVoiceOverIcon from '@material-ui/icons/RecordVoiceOver';
 import SentimentDissatisfiedIcon from '@material-ui/icons/SentimentDissatisfied';
 import VolumeUpIcon from '@material-ui/icons/VolumeUp';
-import { withTranslation } from 'react-i18next';
 
 import {
   Row,
@@ -81,7 +80,7 @@ const styles = theme => ({
 
   icon:
   {
-    margin: "auto",
+    margin: "10px auto ",
     display: "block",
     textTransform: "none",
     width: "7em",
@@ -182,14 +181,15 @@ class StudentMessageCard extends React.Component
       title: this.props.title,
       subtitle: this.props.subtitle,
 
-      expanded:true,
+      expanded:false,
 
       question_clicked: false,
       go_out_clicked: false,
       answer_clicked: false,
       confused_clicked: false,
       louder_clicked: false,
-      student_message_counter: this.props.student_message_counter,
+
+      buttons_disabled: false,
     }
 
     this.setQuestionClick = this.setQuestionClick.bind(this);
@@ -210,7 +210,6 @@ class StudentMessageCard extends React.Component
     this.setExpanded = this.setExpanded.bind(this);
     this.handleExpandClick = this.handleExpandClick.bind(this);
 
-    this.handleClearMessages = this.handleClearMessages.bind(this);
     this.unClickAll = this.unClickAll.bind(this);
   }
 
@@ -293,29 +292,16 @@ class StudentMessageCard extends React.Component
     this.setExpanded(!this.state.expanded);
   }
 
-  handleClearMessages(number)
-  {
-    this.props.clearMessages(number);
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if(prevProps.student_message_counter!=this.props.student_message_counter)
-    {
-      this.setState({student_message_counter: this.props.student_message_counter});
-    }
-  }
 
 
   render()
   {
     const classes = this.props.classes;
-    const { t } = this.props;
-
     return(
       <Card className={classes.card}>
         <CardHeader
-        title={this.props.title}
-        subheader={this.props.subtitle}
+        title={this.state.title}
+        subheader={this.state.subtitle}
         classes={{
           title: classes.title,
         }}
@@ -335,172 +321,127 @@ class StudentMessageCard extends React.Component
         <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
           <CardContent className={classes.content}>
             <Row>
-              <Col className={classes.columns}>
-                <Button className={clsx([classes.icon, classes.tomatoChosen]
-                  ,
-                    {
-                      [ classes.tomatoUnChosen]:
-                      this.state.question_clicked,
-                      [classes.disabled]: this.state.student_message_counter[0]==0
-                    }
-                )}
-                onClick={()=>
-                {
-                  this.unClickAll();
-                  this.handleQuestionClick();
-                  this.props.show_questions();
-                }
-                }
-
-                disabled={this.state.student_message_counter[0]==0}
-                >
-                  <HelpIcon />
-                  <br/>
-                  {t("Questions")}
-                </Button>
-                <Typography className={clsx([classes.text,classes.tomatoUnChosen])}>
-                <b>{this.state.student_message_counter[0]}</b> {t("Students")}
-                </Typography>
-                <IconButton aria-label="delete"
-                className={clsx([classes.delete_icon,classes.tomatoUnChosen])}
-                onClick={() => {this.handleClearMessages(0)}}
-                >
-                  <Delete  />
-                </IconButton>
-              </Col>
-              <Col className={classes.columns}>
-                <Button className={clsx([classes.icon, classes.orangeChosen]
-                  ,
-                    {
-                      [ classes.orangeUnChosen]:
-                      this.state.go_out_clicked,
-                      [classes.disabled]: this.state.student_message_counter[1]==0
-                    }
-                )}
-                onClick={()=>
-                {
-                  this.unClickAll();
-                  this.handleGoOutClick();
-                  this.props.show_go_out();
-                }
-
-                }
-                disabled={this.state.student_message_counter[1]==0}
-
-                >
-                  <MeetingRoomIcon  />
-                  <br/>
-                  {t("Go Out")}
-                </Button>
-                <Typography className={clsx([classes.text,classes.orangeUnChosen])}>
-                <b>{this.state.student_message_counter[1]}</b> {t("Students")}
-                </Typography>
-                <IconButton aria-label="delete"
-                className={clsx([classes.delete_icon,classes.orangeUnChosen])}
-                disabled={this.state.play_pushed}
-                onClick={() => {this.handleClearMessages(1)}}
-                >
-                  <Delete  />
-                </IconButton>
-              </Col>
-              <Col className={classes.columns}>
-                <Button className={clsx([classes.icon, classes.greenChosen]
-                  ,
-                    {
-                      [ classes.greenUnChosen]:
-                      this.state.answer_clicked,
-                      [classes.disabled]: this.state.student_message_counter[2]==0
-                    }
-                )}
-                onClick={()=>
-                {
-                  this.unClickAll();
-                  this.handleAnswerClick();
-                  this.props.show_answer();
-                }}
-                disabled={this.state.student_message_counter[2]==0}
-                >
-                  <RecordVoiceOverIcon  />
-                  <br/>
-                  {t("Answer")+"!"}
-                </Button>
-                <Typography className={clsx([classes.text,classes.greenUnChosen])}>
-                <b>{this.state.student_message_counter[2]}</b> {t("Students")}
-                </Typography>
-                <IconButton aria-label="delete"
-                className={clsx([classes.delete_icon,classes.greenUnChosen])}
-                disabled={this.state.play_pushed}
-                onClick={() => {this.handleClearMessages(2)}}
-                >
-                  <Delete  />
-                </IconButton>
-              </Col>
-              <Col className={classes.columns}>
-                <Button className={clsx([classes.icon, classes.violetChosen]
-                  ,
-                    {
-                      [ classes.violetUnChosen]:
-                      this.state.confused_clicked,
-                      [classes.disabled]: this.state.student_message_counter[3]==0
-
-                    }
-                )}
-                onClick={()=>
-                {
-                  this.unClickAll();
-                  this.handleConfusedClick();
-                  this.props.show_confused();
-                }}
-                disabled={this.state.student_message_counter[3]==0}
-
-                >
-                  <SentimentDissatisfiedIcon  />
-                  <br/>
-                  {t("Confused")}
-                </Button>
-                <Typography className={clsx([classes.text,classes.violetUnChosen])}>
-                <b>{this.state.student_message_counter[3]}</b> {t("Students")}
-                </Typography>
-                <IconButton aria-label="delete"
-                className={clsx([classes.delete_icon,classes.violetUnChosen])}
-                disabled={this.state.play_pushed}
-                onClick={() => {this.handleClearMessages(3)}}
-                >
-                  <Delete  />
-                </IconButton>
-              </Col>
-              <Col className={classes.columns}>
-                <Button className={clsx([classes.icon, classes.blueslateChosen]
-                  ,
-                    {
-                      [ classes.blueslateUnChosen]:
-                      this.state.louder_clicked,
-                      [classes.disabled]: this.state.student_message_counter[4]==0
-                    }
-                )}
-                onClick={()=>
+              <Button className={clsx([classes.icon, classes.tomatoChosen]
+                ,
                   {
+                    [ classes.tomatoUnChosen]:
+                    this.state.question_clicked,
+                    [classes.disabled]: this.state.buttons_disabled
+                  }
+              )}
+              onClick={()=>
+              {
+                this.unClickAll();
+                this.handleQuestionClick();
+                this.props.send_questions();
+                setTimeout(function(){
                   this.unClickAll();
-                  this.handleLouderClick();
-                  this.props.show_louder();
-                }}
-                disabled={this.state.student_message_counter[4]==0}
-                >
-                  <VolumeUpIcon  />
-                  <br/>
-                  {t("Louder")}
-                </Button>
-                <Typography className={clsx([classes.text,classes.blueslateUnChosen])}>
-                  <b>{this.state.student_message_counter[4]}</b> {t("Students")}
-                </Typography>
-                <IconButton aria-label="delete"
-                className={clsx([classes.delete_icon,classes.blueslateUnChosen])}
-                disabled={this.state.play_pushed}
-                onClick={() => {this.handleClearMessages(4)}}
-                >
-                  <Delete  />
-                </IconButton>
-              </Col>
+                }.bind(this),2000);
+              }
+              }
+
+              disabled={this.state.question_clicked}
+              >
+                <HelpIcon />
+                <br/>
+                Questions
+              </Button>
+              <Button className={clsx([classes.icon, classes.orangeChosen]
+                ,
+                  {
+                    [ classes.orangeUnChosen]:
+                    this.state.go_out_clicked,
+                    [classes.disabled]: this.state.buttons_disabled
+                  }
+              )}
+              onClick={()=>
+              {
+                this.unClickAll();
+                this.handleGoOutClick();
+                this.props.send_go_out();
+                setTimeout(function(){
+                  this.unClickAll();
+                }.bind(this),2000);
+              }}
+              disabled={this.state.go_out_clicked}
+
+              >
+                <MeetingRoomIcon  />
+                <br/>
+                Go Out
+              </Button>
+              <Button className={clsx([classes.icon, classes.greenChosen]
+                ,
+                  {
+                    [ classes.greenUnChosen]:
+                    this.state.answer_clicked,
+                    [classes.disabled]: this.state.buttons_disabled
+                  }
+              )}
+              onClick={()=>
+              {
+                this.unClickAll();
+                this.handleAnswerClick();
+                this.props.send_answer();
+                setTimeout(function(){
+                  this.unClickAll();
+                }.bind(this),2000);
+              }}
+              disabled={this.state.answer_clicked}
+              >
+                <RecordVoiceOverIcon  />
+                <br/>
+                Answer!
+              </Button>
+              <Button className={clsx([classes.icon, classes.violetChosen]
+                ,
+                  {
+                    [ classes.violetUnChosen]:
+                    this.state.confused_clicked,
+                    [classes.disabled]: this.state.buttons_disabled
+
+                  }
+              )}
+              onClick={()=>
+              {
+                this.unClickAll();
+                this.handleConfusedClick();
+                this.props.send_confused();
+                setTimeout(function(){
+                  this.unClickAll();
+                }.bind(this),2000);
+              }}
+              disabled={this.state.confused_clicked}
+
+              >
+                <SentimentDissatisfiedIcon  />
+                <br/>
+                Confused
+              </Button>
+              <Button className={clsx([classes.icon, classes.blueslateChosen]
+                ,
+                  {
+                    [ classes.blueslateUnChosen]:
+                    this.state.louder_clicked,
+                    [classes.disabled]: this.state.louder_clicked
+                  }
+              )}
+              onClick={()=>
+              {
+                this.unClickAll();
+                this.handleLouderClick();
+                this.props.send_louder();
+                setTimeout(function(){
+                  this.unClickAll();
+                }.bind(this),2000);
+
+              }}
+              disabled={this.state.buttons_disabled}
+              >
+                <VolumeUpIcon  />
+                <br/>
+                Louder
+              </Button>
             </Row>
           </CardContent>
         </Collapse>
@@ -515,4 +456,4 @@ StudentMessageCard.propTypes = {
 };
 
 
-export default withTranslation()(withStyles(styles)(StudentMessageCard));
+export default withStyles(styles)(StudentMessageCard);

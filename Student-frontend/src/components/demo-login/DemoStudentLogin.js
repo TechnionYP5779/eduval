@@ -62,6 +62,7 @@ class DemoStudentLogin extends React.Component {
       emptySeat: true,
       emptyName: true,
       errored: false,
+      disabled: false,
     }
 
     axios.get('https://api.emon-teach.com/demo/'+this.state.lessonHash)
@@ -254,7 +255,8 @@ render(){
             onChange={this.updateStudentSeat}
           />
           <Button
-            disabled={ this.state.studentSeatTaken || this.state.emptySeat || this.state.emptyName}
+            disabled={ this.state.studentSeatTaken || this.state.emptySeat
+              || this.state.emptyName || this.state.disabled}
             variant="contained"
             color="primary"
             className={classes.button}
