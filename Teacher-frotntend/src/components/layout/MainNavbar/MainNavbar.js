@@ -17,10 +17,10 @@ const MainNavbar = ({ layout, stickyTop }) => {
   return (
     <div className={classes}>
       <Container className="p-0">
-        <Navbar type="light" className="flex p-0" style={{justifyContent: 'flex-start', flexDirection:'row-reverse'}}>
+        <Navbar type="light" className="flex p-0" style={{justifyContent: 'flex-start', flexDirection:'row', flexWrap:'nowrap'}}>
           <NavbarToggle />
-          <NavbarNav style={{flexDirection: 'row', justifyContent: 'flex-end'}} />
-          <NavbarLang style={{flexDirection: 'row', justifyContent: 'flex-end'}} />
+          <NavbarLang/>
+          <NavbarNav/>
         </Navbar>
       </Container>
     </div>

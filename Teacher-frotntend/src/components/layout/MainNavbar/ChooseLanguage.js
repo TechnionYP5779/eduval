@@ -17,12 +17,17 @@ class ChooseLanguage extends React.Component {
 
   _isMounted = false;
 
+  langToFlag = {
+    'en': 'US',
+    'ru': 'RU',
+  };
+
   constructor(props) {
     super(props);
 
     this.state = {
       visible: false,
-      flag: this.props.i18n.language || 'US'
+      flag: this.langToFlag[this.props.i18n.language] || 'US'
     };
 
     this.toggleDropdown = this.toggleDropdown.bind(this);
@@ -32,15 +37,9 @@ class ChooseLanguage extends React.Component {
   }
 
   updateFlag() {
-    if (this.props.i18n.language === 'en')
-      this.setState({
-        flag: 'US',
-      });
-
-    if (this.props.i18n.language === 'ru')
-      this.setState({
-        flag: 'RUS',
-      });
+    this.setState({
+      flag: this.langToFlag[this.props.i18n.language],
+    });
   }
 
   changeLang(lang) {
