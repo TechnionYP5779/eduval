@@ -89,10 +89,6 @@ class RegisterStudentTable extends React.Component {
     {
       this.setState({registered_students: this.props.registered_students});
       this.setState({students: this.props.students});
-      console.log("Curr Reg");
-      console.log(this.state.registered_students);
-      console.log("Curr Att");
-      console.log(this.state.students);
 
       var tmprows = [];
       var index;
@@ -104,7 +100,6 @@ class RegisterStudentTable extends React.Component {
           {
             return s.id==student.id;
           })==-1;
-        console.log("Student " + student.name + " is missing? " + student_missing);
         tmprows.push(createData(student.name, student.email, student.phoneNum,
           student.emons, student.id, student_missing));
       }
@@ -140,8 +135,6 @@ class RegisterStudentTable extends React.Component {
   render()
   {
     const classes = this.props.classes;
-    console.log("Rows")
-    console.log(this.state.rows);
     return (
       <Paper className={classes.root}>
         <div className={classes.tableWrapper}>
@@ -164,7 +157,6 @@ class RegisterStudentTable extends React.Component {
             <TableBody>
               {this.state.rows.slice(this.state.page * this.state.rowsPerPage,
                 this.state.page * this.state.rowsPerPage + this.state.rowsPerPage).map(row => {
-                console.log("Student " + row.name+ " is missing? " + row.missing);
                 return (
                   <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
                     {columns.map(column => {

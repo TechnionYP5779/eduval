@@ -41,6 +41,8 @@ export default class UserActions extends React.Component {
           self.setState({username: response.data.name});
         }
       }, function(error){
+        console.log("Error in getting Teacher Profile for Nav Bar");
+        console.log(error);
     });
 
 

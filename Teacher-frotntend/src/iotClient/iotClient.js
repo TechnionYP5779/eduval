@@ -47,7 +47,6 @@ class iotClient {
       host: this.iotKeys.iotEndpoint
     });
     const onConnect = () => {
-      console.log("Connect");
       this.client.subscribe(this.messageTopic);
       this.client.subscribe(this.presentTopic);
       connectCallback();

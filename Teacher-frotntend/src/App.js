@@ -16,7 +16,6 @@ export default () => {
     <Router basename={process.env.REACT_APP_BASENAME || ""}>
 
       <div>
-        {console.log("MEOW by Team #3 2019")}
         {routes.map((route, index) => {
           return (
             <Route
