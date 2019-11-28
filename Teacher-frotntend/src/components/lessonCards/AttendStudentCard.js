@@ -132,8 +132,6 @@ class AttendStudentCard extends React.Component
         students: this.props.students,
 
       }
-      console.log("Attend Student Props");
-      console.log(this.props);
       this.setExpanded = this.setExpanded.bind(this);
       this.handleExpandClick = this.handleExpandClick.bind(this);
 

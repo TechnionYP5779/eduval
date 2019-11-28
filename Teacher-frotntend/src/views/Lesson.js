@@ -366,9 +366,8 @@ class Lesson extends React.Component {
 
 
     iotclient.getKeys(function(response){
-      console.log("GOT KEYS");
       iotclient.connect(courseId, onConnect, onMessages, onOffline);
-    }, (error)=>{});
+    }, (error)=>{console.log("Didn't get keys for socket")});
 
     server.getCourse(function(response){
       self.setState({course_name: response.data.name});
@@ -598,7 +597,10 @@ class Lesson extends React.Component {
               // </div>
             }
                     <div className="mb-2 pb-1" style={{margin:"10px"}}>
-                  <Button theme="primary" disabled={this.state.disabled} style={{float:"right"}} className="mb-2 mr-1" onClick={()=>{
+                  <Button theme="primary" disabled={this.state.disabled}
+                  style={{float:"right"}}
+                  className="mb-2 mr-1"
+                  onClick={()=>{
                     this.setState({disabled: true});
                     let self = this;
                     server.changeLessonStatus(function(response){

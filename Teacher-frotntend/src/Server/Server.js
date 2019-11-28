@@ -327,13 +327,18 @@ class Server {
     - Lesson in session.
   */
   deleteLessonMessages(callback, callbackError, courseId, messageType){
+    var type=messageType;
+    if (!type)
+    {
+      type=""
+    }
     let teacher_id = localStorage.getItem('teacher_id');
     if (teacher_id == null || !auth.isAuthenticated()){
       let error = {response: {data: {error: "not logged in"}}};
       callbackError(error);
       return;
     }
-    axios.delete(SERVER_CONFIG.domain + "/lesson/" + courseId + "/teacherMessages/"+messageType, this.getConfig())
+    axios.delete(SERVER_CONFIG.domain + "/lesson/" + courseId + "/teacherMessages/"+type, this.getConfig())
     .then(callback)
     .catch(callbackError);
   }

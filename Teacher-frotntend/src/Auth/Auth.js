@@ -36,6 +36,7 @@ class Auth {
     let idToken = localStorage.getItem('idToken');
     let expiresAt = localStorage.getItem('expiresAt');
     let sub = localStorage.getItem('sub');
+    let payload = localStorage.getItem('payload');
 
     if (accessToken != null)
       this.accessToken = accessToken;
@@ -49,12 +50,14 @@ class Auth {
 
   login() {
     this.auth0.authorize();
+    console.log("Auth0 Login");
   }
 
   handleAuthentication() {
     this.auth0.parseHash((err, authResult) => {
       if (authResult && authResult.accessToken && authResult.idToken) {
         this.setSession(authResult);
+        console.log("Auth0 handled authentication");
       } else if (err) {
         history.replace('/');
         console.log(err);
@@ -72,6 +75,7 @@ class Auth {
   }
 
   setSession(authResult) {
+    console.log("Set Session Called");
     // Set the time that the access token will expire at
     let expiresAt = (authResult.expiresIn * 1000) + new Date().getTime();
     this.accessToken = authResult.accessToken;
@@ -84,6 +88,7 @@ class Auth {
     localStorage.setItem('accessToken', authResult.accessToken);
     localStorage.setItem('idToken', authResult.idToken);
     localStorage.setItem('sub', authResult.idTokenPayload.sub);
+    localStorage.setItem('payload', JSON.stringify(authResult.idTokenPayload));
 
     // navigate to the home route
     this.registerTeacher();
@@ -150,6 +155,7 @@ class Auth {
 
 
   renewSession() {
+    console.log("Renew Session Called");
     this.auth0.checkSession({}, (err, authResult) => {
        if (authResult && authResult.accessToken && authResult.idToken) {
          this.setSession(authResult);
@@ -173,6 +179,8 @@ class Auth {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('idToken');
     localStorage.removeItem('sub');
+
+    localStorage.removeItem('payload');
     localStorage.removeItem('teacher_id');
 
     this.auth0.logout({
