@@ -37,6 +37,8 @@ import FormatListNumberedIcon from '@material-ui/icons/FormatListNumbered';
 import InputAdornment from '@material-ui/core/InputAdornment';
 
 import SendIcon from '@material-ui/icons/Send';
+import { withTranslation } from 'react-i18next';
+
 
 const LightTooltip = withStyles(theme => ({
   tooltip: {
@@ -185,11 +187,6 @@ class CourseCard extends React.Component
     this.handleDeskModalClose = this.handleDeskModalClose.bind(this)
     this.updateStudentSeat = this.updateStudentSeat.bind(this);
     this.enterLesson = this.enterLesson.bind(this);
-
-
-    console.log(this.state.name);
-    console.log("IS PLAY PUSHED?");
-    console.log(this.state.play_pushed);
   }
 
   handlePlayClick()
@@ -278,6 +275,8 @@ class CourseCard extends React.Component
 
   render(){
     const classes = this.props.classes;
+    const { t } = this.props;
+
     return(
       <div>
       <Modal
@@ -297,20 +296,20 @@ class CourseCard extends React.Component
 
             {(this.state.studentSeatTaken) &&
               <Alert variant = "warning">
-                <Alert.Heading style={{color:"white"} }>This {this.state.studentSeatTaken ? "Seat" : "Name"} is Taken!</Alert.Heading>
+                <Alert.Heading style={{color:"white"} }>{t(this.state.studentSeatTaken ? "seatIsTaken" : "nameIsTaken")}</Alert.Heading>
                 <p>
-                  Select another {this.state.studentSeatTaken ? "seat" : "name"} if you want to proceed. <br/> Contact the teacher in case of further problems.
+                  {t(this.state.studentSeatTaken ? "selectAnotherSeat" : "selectAnotherName")} <br/> {t("Contact the teacher in case of further problems.")}
                 </p>
               </Alert>
             }
 
             {this.state.errored &&
               <Alert variant = "dark">
-                <Alert.Heading style={{color:"white"}}>An unexpected error happened!</Alert.Heading>
-                  <p> Please contact system administrator</p>
+                <Alert.Heading style={{color:"white"}}>{t("An error has occured")+"!"}</Alert.Heading>
+                  <p>{t("Please contact system administrator")}</p>
               </Alert>
             }
-            <h3 style={{textAlign:"center"}} id="transition-modal-title">Enter Desk Number</h3>
+            <h3 style={{textAlign:"center"}} id="transition-modal-title">{t("Enter Desk Number")}</h3>
             <TextField
               error={this.state.studentSeatTaken || this.state.emptySeat}
               required
@@ -319,7 +318,7 @@ class CourseCard extends React.Component
               InputLabelProps={{
                 shrink: true,
               }}
-              label="Desk Number"
+              label={t("Desk Number")}
               className={classes.textField}
               margin="normal"
               InputProps={{
@@ -339,7 +338,7 @@ class CourseCard extends React.Component
               endIcon={<ClearIcon />}
               onClick={this.handleDeskModalClose}
             >
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button
               variant="contained"
@@ -348,7 +347,7 @@ class CourseCard extends React.Component
               onClick={this.enterLesson}
               disabled={this.state.desk_button_disabled || this.state.emptySeat || this.state.studentSeatTaken}
             >
-              Enter Lesson
+              {t("Enter Lesson")}
             </Button>
           </div>
         </Fade>
@@ -359,7 +358,7 @@ class CourseCard extends React.Component
           classes={{
             title: classes.title,
           }}
-          title={this.state.name + (this.state.play_pushed? " [In Progress!]" : "")}
+          title={this.state.name + (this.state.play_pushed? " " + t("[In Progress!]") : "")}
           />
           <CardContent>
             <Typography paragraph>{this.state.description}</Typography>
@@ -367,14 +366,14 @@ class CourseCard extends React.Component
 
 
           <CardActions disableSpacing>
-            <LightTooltip title="Course Details" placement="bottom-end">
+            <LightTooltip title={t("Course Details")} placement="bottom-end">
               <IconButton>
                 <a href={"/course-details/" + this.state.id}>
                 <MenuBookIcon />
                 </a>
               </IconButton>
             </LightTooltip>
-            <LightTooltip title="Enter Store" placement="bottom-end">
+            <LightTooltip title={t("Enter Store")} placement="bottom-end">
               <IconButton>
                 <a href={"/store/" + this.state.id}>
                 <ShoppingCartIcon />
@@ -382,7 +381,7 @@ class CourseCard extends React.Component
               </IconButton>
             </LightTooltip>
 
-            <LightTooltip title={this.state.play_pushed? "Resume Lesson" : "Join Lesson"}
+            <LightTooltip title={this.state.play_pushed? t("Resume Lesson") : t("Join Lesson")}
               placement="bottom-end">
               <Button
               disabled={ this.state.disabled_play}
@@ -419,4 +418,4 @@ CourseCard.propTypes = {
 };
 
 
-export default withStyles(styles)(CourseCard);
+export default withTranslation()(withStyles(styles)(CourseCard));

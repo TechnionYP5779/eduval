@@ -40,6 +40,7 @@ import TextField from '@material-ui/core/TextField';
 import FormatListNumberedIcon from '@material-ui/icons/FormatListNumbered';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import SendIcon from '@material-ui/icons/Send';
+import { withTranslation } from 'react-i18next';
 
 
 const customStyles = {
@@ -363,7 +364,7 @@ class MyCourses extends React.Component {
     } = this.state;
     let showModal = this.showModal;
     let closeModal = this.closeModal;
-
+    const { t } = this.props;
 
     return (
     <div>
@@ -372,7 +373,7 @@ class MyCourses extends React.Component {
       <Container fluid className="main-content-container px-4">
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title="My Courses" subtitle="Manage eveyrthing in one place"
+          <PageTitle sm="4" title={t("My Courses")} subtitle={t("Manage eveyrthing in one place")}
                      className="text-sm-left" />
         </Row>
 
@@ -390,7 +391,7 @@ class MyCourses extends React.Component {
               name={post.name}
               description={post.description}
               disabled_play={this.state.lessons_status[post.id]}
-              play_text={this.state.lessons_student_status[post.id] ? "Resume" : "Join" }
+              play_text={this.state.lessons_student_status[post.id] ? t("Resume") : t("Join") }
               play_pushed={this.state.lessons_student_status[post.id]}
               id={post.id}
               play_errored={this.state.errored}
@@ -428,7 +429,7 @@ MyCourses.propTypes = {
 };
 
 
-export default withStyles(styles)(MyCourses);
+export default withTranslation()(withStyles(styles)(MyCourses));
 
 // <CourseCard
 //   name={post.name}

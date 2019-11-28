@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import axios from 'axios';
-import SmallStats from "./../components/common/SmallStats";
+import SmallStats from "../components/common/SmallStats";
 import { SERVER_CONFIG } from '../Server/server-variables';
 import {
   Card,
@@ -22,6 +22,7 @@ import {
 } from "shards-react";
 import PageTitle from "../components/common/PageTitle";
 import StudentLessonGraph from "../components/Graphs/StudentLessonGraph";
+import { Trans, withTranslation }  from "react-i18next";
 
 import CoinImage from "../images/midEcoin.png"
 import "./CourseDetails.css"
@@ -120,12 +121,14 @@ class CourseDetails extends React.Component {
       }
 
     render(){
-      console.log("Render");
+      const { t } = this.props;
+      const { balance } = this.state;
+
         return(
             <Container fluid className="main-content-container px-4 pb-4">
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title={this.state.courseName} subtitle="Course Details" className="text-sm-left" />
+          <PageTitle sm="4" title={this.state.courseName} subtitle={t("Course Details")} className="text-sm-left" />
         </Row>
 
 
@@ -135,19 +138,17 @@ class CourseDetails extends React.Component {
           {/* Editor */}
   <Card style = {{height:"100%",width:"100%",marginLeft:"16px"}} className="mb-4">
     <CardHeader className="border-bottom">
-      <h6 className="m-0">Details</h6>
+      <h6 className="m-0">{t("Details")}</h6>
     </CardHeader>
     <ListGroup flush>
       <ListGroupItem className="p-3">
         <Row>
-            <Col >
-            <div style={{fontWeight: 600}}>
-            You have a Balance of <span style={{fontWeight: 800}}>{this.state.balance}<img alt="Emons" style={{width:"1.5em", marginLeft:"0.2em", marginBottom:"0.2em"}} src={CoinImage} /></span> in this course.<br /><br />
-            Keep up the good work!
-            </div>
+            <Col>
+              <Trans i18nKey="emonBalance" count={{balance}}>
+                You have a Balance of <strong>{{balance}}</strong><img alt="Emons" style={{width:"1.5em", marginLeft:"0.2em", marginBottom:"0.2em"}} src={CoinImage} /> in this course.<br /><br />
+                Keep up the good work!
+              </Trans>
             </Col>
-
-
         </Row>
       </ListGroupItem>
     </ListGroup>
@@ -156,7 +157,7 @@ class CourseDetails extends React.Component {
 <Row>
   <Card style = {{height:"100%",width:"100%",marginLeft:"16px"}} className="mb-4">
     <CardHeader className="border-bottom">
-      <h6 className="m-0">Items bought</h6>
+      <h6 className="m-0">{t("Items bought")}</h6>
     </CardHeader>
     <CardBody className="p-0 pb-3">
             <table className="table mb-0">
@@ -165,13 +166,13 @@ class CourseDetails extends React.Component {
                 <tr>
 
                   <th scope="col" className="border-0">
-                    Item
+                    {t("Item")}
                   </th>
                   <th scope="col" className="border-0">
-                    Purchase date
+                    {t("Purchase date")}
                   </th>
                   <th scope="col" className="border-0">
-                    Price
+                    {t("Price")}
                   </th>
 
                 </tr>
@@ -192,7 +193,7 @@ class CourseDetails extends React.Component {
 <Row>
 {
   !this.state.condensed &&
-  <h2 style = {{margin:"auto"}}> Waiting For Graph</h2>
+  <h2 style = {{margin:"auto"}}>{t("Waiting For Graph")}</h2>
 }
 {
   this.state.condensed &&
@@ -206,7 +207,7 @@ class CourseDetails extends React.Component {
       <Col>
         <Card small className="mb-4">
           <CardHeader className="border-bottom">
-            <h6 className="m-0">Recent Activity</h6>
+            <h6 className="m-0">{t("Recent Activity")}</h6>
           </CardHeader>
           <CardBody className="p-0 pb-3">
             <table className="table mb-0">
@@ -215,13 +216,13 @@ class CourseDetails extends React.Component {
                 <tr>
 
                   <th scope="col" className="border-0">
-                    Day
+                    {t("Day")}
                   </th>
                   <th scope="col" className="border-0">
-                    Hour
+                    {t("Hour")}
                   </th>
                   <th scope="col" className="border-0">
-                    Got
+                    {t("Got")}
                   </th>
 
                 </tr>
@@ -247,4 +248,4 @@ class CourseDetails extends React.Component {
 }
 
 
-export default CourseDetails;
+export default withTranslation()(CourseDetails);

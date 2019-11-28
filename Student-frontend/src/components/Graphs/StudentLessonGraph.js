@@ -27,6 +27,7 @@ import Button from '@material-ui/core/Button';
 import ClearIcon from '@material-ui/icons/Clear';
 import { Row, Form,FormInput,FormGroup, Col} from 'shards-react';
 import {Line} from 'react-chartjs-2';
+import { withTranslation } from 'react-i18next';
 
 const initialState = {
   labels: ['08/09/2019', '', '', '','',
@@ -61,7 +62,7 @@ const initialState = {
 
     },
     {
-      label: 'Emoj Per Lesson',
+      label: 'Emoji Per Lesson',
       fill: true,
       lineTension: 0.1,
       backgroundColor: 'rgba(191,191,63,0.4)',
@@ -92,7 +93,6 @@ class StudentLessonGraph extends React.Component {
   constructor(props)
   {
     super(props)
-    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAA " + this.props.condensed)
     this.state = {
       courseName:this.props.courseName,
       condensed: this.props.condensed
@@ -110,7 +110,8 @@ class StudentLessonGraph extends React.Component {
 
     console.log(this.state);
     var tmp = this.state.datasets;
-    tmp[0].label="Emons Per Lesson";
+    tmp[0].label=this.props.t("Emons Per Lesson");
+    tmp[1].label=this.props.t("Emoji Per Lesson");
     var lbl = []
     var arr = []
     var arr2 = []
@@ -120,22 +121,19 @@ class StudentLessonGraph extends React.Component {
       lbl.push(j+1);
       arr.push(this.state.condensed[j].emons);
       arr2.push(this.state.condensed[j].emojis.length);
-      console.log("PUSHING EMONS");
-      console.log(this.state.condensed[j].emons);
     }
     tmp[0].data = arr;
     tmp[1].data = arr2;
-    console.log("TMP");
-    console.log(tmp);
     this.setState({datasets: tmp})
     this.setState({labels: lbl});
   };
 
 
   render() {
+    const { t } = this.props;
 		return (
       <div style = {{margin:"5px 10px"}}>
-        <h4 style = {{margin:"10px"}}> Emons and Emoji per Lesson in {this.state.courseName}</h4>
+        <h4 style = {{margin:"10px"}}> {t("graphTitle", {courseName: this.state.courseName})}</h4>
 		    <Line data={this.state}/>
       </div>
 		);
@@ -144,4 +142,4 @@ class StudentLessonGraph extends React.Component {
 
 
 
-export default StudentLessonGraph;
+export default withTranslation()(StudentLessonGraph);

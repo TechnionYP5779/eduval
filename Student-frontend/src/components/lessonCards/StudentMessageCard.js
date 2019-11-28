@@ -31,6 +31,7 @@ import MeetingRoomIcon from '@material-ui/icons/MeetingRoom';
 import RecordVoiceOverIcon from '@material-ui/icons/RecordVoiceOver';
 import SentimentDissatisfiedIcon from '@material-ui/icons/SentimentDissatisfied';
 import VolumeUpIcon from '@material-ui/icons/VolumeUp';
+import { withTranslation } from 'react-i18next';
 
 import {
   Row,
@@ -297,6 +298,8 @@ class StudentMessageCard extends React.Component
   render()
   {
     const classes = this.props.classes;
+    const { t } = this.props;
+
     return(
       <Card className={classes.card}>
         <CardHeader
@@ -344,7 +347,7 @@ class StudentMessageCard extends React.Component
               >
                 <HelpIcon />
                 <br/>
-                Questions
+                {t("Questions")}
               </Button>
               <Button className={clsx([classes.icon, classes.orangeChosen]
                 ,
@@ -368,7 +371,7 @@ class StudentMessageCard extends React.Component
               >
                 <MeetingRoomIcon  />
                 <br/>
-                Go Out
+                {t("Go Out")}
               </Button>
               <Button className={clsx([classes.icon, classes.greenChosen]
                 ,
@@ -391,7 +394,7 @@ class StudentMessageCard extends React.Component
               >
                 <RecordVoiceOverIcon  />
                 <br/>
-                Answer!
+                {t("Answer")}!
               </Button>
               <Button className={clsx([classes.icon, classes.violetChosen]
                 ,
@@ -416,7 +419,7 @@ class StudentMessageCard extends React.Component
               >
                 <SentimentDissatisfiedIcon  />
                 <br/>
-                Confused
+                {t("Confused")}
               </Button>
               <Button className={clsx([classes.icon, classes.blueslateChosen]
                 ,
@@ -440,7 +443,7 @@ class StudentMessageCard extends React.Component
               >
                 <VolumeUpIcon  />
                 <br/>
-                Louder
+                {t("Louder")}
               </Button>
             </Row>
           </CardContent>
@@ -456,4 +459,4 @@ StudentMessageCard.propTypes = {
 };
 
 
-export default withStyles(styles)(StudentMessageCard);
+export default withTranslation()(withStyles(styles)(StudentMessageCard));

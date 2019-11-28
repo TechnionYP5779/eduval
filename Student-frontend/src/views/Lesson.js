@@ -50,6 +50,7 @@ import StudentMessageCard from "../components/lessonCards/StudentMessageCard";
 
 import awsIot  from 'aws-iot-device-sdk';
 import "./Lesson.css";
+import { withTranslation } from 'react-i18next';
 
 const headers = {
     'Authorization': 'Bearer ' + localStorage.getItem('idToken')
@@ -376,9 +377,9 @@ class Lesson extends React.Component {
 
   render() {
 
-   const {messageRows, smileys} = this.state;
-   const classes = this.props.classes;
-
+    const {messageRows, smileys} = this.state;
+    const classes = this.props.classes;
+    const { t } = this.props;
 
     return (
       <div>
@@ -414,26 +415,25 @@ class Lesson extends React.Component {
 
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title={this.state.name} subtitle="Lesson View" className="text-sm-left" />
+          <PageTitle sm="4" title={this.state.name} subtitle={t("Lesson View")} className="text-sm-left" />
         </Row>
         {/* First Row of Posts */}
         <Row>
           <Col lg="8" className="mb-4">
           <Card small className="mb-4 p-0 px-3 pt-1">
               <CardHeader >
-                <h5 className="m-0">Information </h5>
+                <h5 className="m-0">{t("Information")}</h5>
 
                 <div className="mt-2">
                 <p></p>
-                  <p style={{fontSize:"20px" ,textAlign:"center"}}> Current E-Money Earned: {this.state.reward_money} <img style={{width:"2em", marginLeft:"0.2em", marginBottom:"0.2em"}} src={CoinImage} /></p>
+                  <p style={{fontSize:"20px" ,textAlign:"center"}}>{t("Current E-Money Earned") + ":"} {this.state.reward_money} <img style={{width:"2em", marginLeft:"0.2em", marginBottom:"0.2em"}} src={CoinImage} /></p>
                 </div>
               </CardHeader>
 
             </Card>
             <Card small className="p-0 px-3 pt-3">
               <CardHeader className="border-bottom">
-                <h5 className="m-0">Teacher's Messages</h5>
-                <h7 style={{fontSize:"17px"}}>Emojis from Teacher:</h7><br /><br />
+                <h5 className="m-0">{t("Emojis from Teacher")}:</h5><br /><br />
                 <ul className='rows' style={{textAlign:'center', padding:'0'}}>
                 {this.state.currentEmojis.map((smile) => (<li style={{display:'inline', margin:'5px', fontSize:'2em'}} className='row'>{smile}</li>))}
                 </ul>
@@ -446,8 +446,8 @@ class Lesson extends React.Component {
           <Col lg="4" className="mb-4" >
             {/* Sliders & Progress Bars */}
             <StudentMessageCard
-            title="Send a Message to the Teacher"
-            subtitle="Choose a Message to Send"
+            title={t("Send a Message to the Teacher")}
+            subtitle={t("Choose a Message to Send")}
             send_questions={()=>{this.handleMessageClick(this.state.messageRows[0]);}}
             send_go_out={()=>{this.handleMessageClick(this.state.messageRows[1])}}
             send_answer={()=>{this.handleMessageClick(this.state.messageRows[2]);}}
@@ -464,4 +464,4 @@ class Lesson extends React.Component {
   }
 }
 
-export default withStyles(styles)(Lesson);
+export default withTranslation()(withStyles(styles)(Lesson));
