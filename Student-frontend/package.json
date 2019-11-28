@@ -27,6 +27,7 @@
     "react-chartjs-2": "^2.8.0",
     "react-dom": "^16.6.3",
     "react-dropdown": "^1.6.4",
+    "react-flags": "^0.1.18",
     "react-ga": "^2.5.6",
     "react-i18next": "^11.2.3",
     "react-modal": "^3.8.1",
