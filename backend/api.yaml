@@ -5,6 +5,8 @@ info:
 servers:
   - url: 'https://api.emon-teach.com'
 tags:
+  - name: user
+    description: deals with generic users
   - name: teacher
     description: stuff related to the teachers
   - name: student
@@ -35,7 +37,44 @@ tags:
     description: stuff related to demo lessons
 
 paths:
-
+  '/user/{userId}':
+    put:
+      tags:
+        - user
+      summary: Update a users's profile
+      description: Uses an item in a student's inventory.
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: The fields to update. `oldPassword` required, the rest are optional.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDetails'
+      responses:
+        '200':
+          description: successful operation
+          content: {}
+        '401':
+          description: Trying to edit a different user
+          content: {}
+        '400':
+          description: JSON validation error / Invalid ID.
+          content: {}
+        '404':
+          description: User not found
+          content: {}
+        '403':
+          description: Incorrect password
+          content: {}
+      security:
+        - auth0_token: []
+ 
   '/teacher/{teacherId}/activeLesson':
     get:
       tags:
@@ -68,7 +107,7 @@ paths:
           content: {}
       security:
         - auth0_token: [] 
- 
+
   '/student/{studentId}/courseInventory/{courseId}':
     get:
       tags:
@@ -1594,6 +1633,27 @@ components:
           type: integer
       additionalProperties: false
     
+    UserDetails:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phoneNum:
+          type: string
+        oldPassword:
+          type: string
+          format: password
+        newPassword:
+          type: string
+          format: password
+      required:
+        - oldPassword
+
  
   securitySchemes:
     auth0_token:

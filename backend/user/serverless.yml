@@ -1,0 +1,91 @@
+# For full config options, check the docs:
+#    docs.serverless.com
+
+service:        user
+
+provider:
+    name:       aws
+    runtime:    nodejs8.10
+    stage:      dev
+    region:     eu-central-1
+
+    # defines environment variables for connecting to DB
+    environment:
+        AUTHORIZER_ARN:             ${self:custom.secrets.AUTHORIZER_ARN}
+        DB_NAME:        ${self:custom.secrets.DB_NAME}
+        DB_USER:        ${self:custom.secrets.DB_USER}
+        DB_PASSWORD:    ${self:custom.secrets.DB_PASSWORD}
+        DB_HOST:        ${self:custom.secrets.DB_HOST.${self:provider.stage}}
+        DB_PORT:        ${self:custom.secrets.DB_PORT}
+        LAMBDA_ENDPOINT:            ${self:custom.secrets.LAMBDA_ENDPOINT.${self:provider.stage}}
+        LAMBDA_APIKEY:        ${self:custom.secrets.LAMBDA_APIKEY}
+        BITLY_APIKEY:        ${self:custom.secrets.BITLY_APIKEY}
+        BITLY_GROUP_GUID:        ${self:custom.secrets.BITLY_GROUP_GUID}
+        AUTH0_CLIENT_ID:        ${self:custom.secrets.AUTH0_CLIENT_ID}
+        AUTH0_CLIENT_SECRET:        ${self:custom.secrets.AUTH0_CLIENT_SECRET}
+        AUTH0_MANAGEMENT_CLIENT_ID:        ${self:custom.secrets.AUTH0_MANAGEMENT_CLIENT_ID}
+        AUTH0_MANAGEMENT_CLIENT_SECRET:        ${self:custom.secrets.AUTH0_MANAGEMENT_CLIENT_SECRET}
+
+#package:
+#    individually: true
+
+plugins:
+    - serverless-domain-manager
+
+custom:
+    domains:
+        prod: api.emon-teach.com
+        dev: dev-api.emon-teach.com
+    
+    # contains the credentials needed to connect to the DB
+    secrets:    ${file(secrets.json)}
+    customDomainEnabled:
+        dev: true
+        prod: true
+    customDomain:
+        domainName: ${self:custom.domains.${self:provider.stage}}
+        basePath: 'user' # This will be prefixed to all routes
+        stage: ${self:provider.stage}
+        createRoute53Record: true
+        enabled: ${self:custom.customDomainEnabled.${self:provider.stage}}
+
+#TODO: Implement a more strict CORS policy
+functions:
+    updateUser:
+        handler: src/update.handler
+        description: Update userinfo.
+        events:
+            - http:
+                path: /{userId}/
+                method: put
+                cors: true
+                authorizer:
+                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
+                request:
+                    parameters:
+                        paths:
+                            userId: true
+
+resources:
+    Resources:
+        # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
+        GatewayResponse:
+            Type: 'AWS::ApiGateway::GatewayResponse'
+            Properties:
+                ResponseParameters:
+                    gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+                    gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+                ResponseType: EXPIRED_TOKEN
+                RestApiId:
+                    Ref: 'ApiGatewayRestApi'
+                StatusCode: '401'
+        AuthFailureGatewayResponse:
+            Type: 'AWS::ApiGateway::GatewayResponse'
+            Properties:
+                ResponseParameters:
+                    gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+                    gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+                ResponseType: UNAUTHORIZED
+                RestApiId:
+                    Ref: 'ApiGatewayRestApi'
+                StatusCode: '401'
