@@ -25,7 +25,7 @@ provider:
         AUTH0_CLIENT_SECRET:        ${self:custom.secrets.AUTH0_CLIENT_SECRET}
         AUTH0_MANAGEMENT_CLIENT_ID:        ${self:custom.secrets.AUTH0_MANAGEMENT_CLIENT_ID}
         AUTH0_MANAGEMENT_CLIENT_SECRET:        ${self:custom.secrets.AUTH0_MANAGEMENT_CLIENT_SECRET}
-        NEW_DEMO_REDIRECT_DOMAIN:               ${self:custom.newDemoRedirectDomain.${self:provider.stage}}
+        NEW_DEMO_REDIRECT_DOMAIN:               ${self:custom.newDemoRedirectDomain.prod}
 
 #package:
 #    individually: true
