@@ -126,8 +126,11 @@ const registerDemoStudent = async (event, context, callback) => {
 			username,
 			nickname: event.body.nickname,
 			given_name,
-			family_name,
-			phone_number: '000-0000000',
+			user_metadata: {
+				phone_number: '0000000000',
+				first_name: given_name,
+				last_name: family_name,
+			},
 			connection: 'Username-Password-Authentication',
 		}))
 		.then(() => {
@@ -155,7 +158,7 @@ const registerDemoStudent = async (event, context, callback) => {
 			knexConnection.client.destroy();
 
 			return axios({
-				url: `https://api.emon-teach.com/course/${courseId}/registered`,
+				url: `${process.env.LAMBDA_ENDPOINT}/course/${courseId}/registered`,
 				method: 'post',
 				data: [email],
 				headers: {
@@ -163,7 +166,7 @@ const registerDemoStudent = async (event, context, callback) => {
 				},
 			});
 		})
-		.then(() => axios.post(`https://api.emon-teach.com/lesson/${courseId}/present`, {
+		.then(() => axios.post(`${process.env.LAMBDA_ENDPOINT}/lesson/${courseId}/present`, {
 			id: decodedToken.sub,
 			desk: event.body.seatNumber,
 		}, {

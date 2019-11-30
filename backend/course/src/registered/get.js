@@ -46,6 +46,10 @@ const getCourseRegistered = async (event, context, callback) => {
 		})
 		.select('studentId')
 		.then((result) => {
+			if (result.length === 0) {
+				return result;
+			}
+
 			let queryString = '';
 
 			result.forEach((x) => {

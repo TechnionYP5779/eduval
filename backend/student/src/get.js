@@ -1,7 +1,7 @@
 const knex = require('knex');
 const middy = require('middy');
 const {
-	cors, httpErrorHandler, httpEventNormalizer, jsonBodyParser,
+	cors, httpErrorHandler, httpEventNormalizer, jsonBodyParser, validator,
 } = require('middy/middlewares');
 const createError = require('http-errors');
 const dbConfig = require('../db');
@@ -205,9 +205,11 @@ const inventory = middy(getInventory)
 const useItem = middy(useShopItem)
 	.use(httpEventNormalizer())
 	.use(jsonBodyParser())
-	.validator({
-		type: 'integer',
-	})
+	.use(validator({
+		inputSchema: {
+			type: 'integer',
+		},
+	}))
 	.use(httpErrorHandler())
 	.use(cors(corsConfig));
 

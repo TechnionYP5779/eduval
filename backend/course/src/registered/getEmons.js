@@ -46,16 +46,21 @@ const getRegisteredWithEmons = async (event, context, callback) => {
 			courseId: event.pathParameters.courseId,
 		})
 		// .select('Registered.studentId')
-		.join(knexConnection('Logs')
+		.leftJoin(knexConnection('Logs')
 			.sum('val')
-			.select('studentId')
+			.select(knexConnection.ref('studentId').as('studentLogId'))
 			.where('msgType', 0)	// EMon messages
 			.andWhere('live', false)
 			.groupBy('studentId')
 			.as('Table1'),
 		'Registered.studentId',
-		'Table1.studentId')
+		'Table1.studentLogId')
 		.then((result) => {
+			// if no registered students
+			if (result.length === 0) {
+				return result;
+			}
+
 			let queryString = '';
 
 			result.forEach((x) => {
@@ -71,7 +76,8 @@ const getRegisteredWithEmons = async (event, context, callback) => {
 				q: queryString,
 			}).then(authResult => authResult.map((student) => {
 				const studentWithEmons = student;
-				studentWithEmons.emons = result.find(element => element.studentId === student.user_id)['sum(`val`)'];
+				const emons = result.find(element => element.studentId === student.user_id)['sum(`val`)'];
+				studentWithEmons.emons = emons == null ? 0 : emons;
 
 				return studentWithEmons;
 			}));

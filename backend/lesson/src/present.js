@@ -49,6 +49,10 @@ const getPresentStudents = async (event, context, callback) => {
 		})
 		.select()
 		.then((result) => {
+			if (result.length === 0) {
+				return result;
+			}
+
 			let queryString = '';
 
 			result.forEach((x) => {

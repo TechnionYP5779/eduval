@@ -45,7 +45,7 @@ function isAnInteger(obj) {
 }
 
 // GET log/condensed/{studentId}/byCourse/{courseId}
-const getStudentLog = async (event, context, callback) => {
+const getCondensedLog = async (event, context, callback) => {
 	if (!event.pathParameters.courseId || !event.pathParameters.studentId) {
 		return callback(createError.BadRequest("Student's and course's IDs required."));
 	}
@@ -76,7 +76,7 @@ const getStudentLog = async (event, context, callback) => {
 		.then(() => knexConnection('Logs')
 			.where({
 				courseId: event.pathParameters.courseId,
-				studentId: event.pathParameters.studentId,
+				studentId,
 				msgType: 0,	// emon messages
 			})
 			.select('lessonNumber')
@@ -120,7 +120,7 @@ const getStudentLog = async (event, context, callback) => {
 		});
 };
 
-const handler = middy(getStudentLog)
+const handler = middy(getCondensedLog)
 	.use(httpEventNormalizer())
 	.use(httpErrorHandler())
 	.use(cors(corsConfig));

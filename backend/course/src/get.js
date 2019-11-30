@@ -199,6 +199,10 @@ const getPurchasedItems = async (event, context, callback) => {
 			'OwnedItems.amountUsed',
 		)
 		.then((result) => {
+			if (result.length === 0) {
+				return result;
+			}
+
 			let queryString = '';
 
 			result.forEach((x) => {
