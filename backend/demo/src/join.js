@@ -131,6 +131,9 @@ const registerDemoStudent = async (event, context, callback) => {
 				first_name: given_name,
 				last_name: family_name,
 			},
+			app_metadata: {
+				demo_student: true,
+			},
 			connection: 'Username-Password-Authentication',
 		}))
 		.then(() => {

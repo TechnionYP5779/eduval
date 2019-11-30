@@ -22,5 +22,4 @@ exports.UserInfo = {
 		},
 	},
 	additionalProperties: false,
-	required: ['oldPassword'],
 };

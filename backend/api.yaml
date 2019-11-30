@@ -42,7 +42,7 @@ paths:
       tags:
         - user
       summary: Update a users's profile
-      description: Uses an item in a student's inventory.
+      description: Updates a user's profile, including password.
       parameters:
         - name: userId
           in: path
@@ -51,7 +51,11 @@ paths:
           schema:
             type: string
       requestBody:
-        description: The fields to update. `oldPassword` required, the rest are optional.
+        description: >-
+          The fields to update. `oldPassword` required, the rest are optional.
+
+
+          In case of demo user, no old password is required, but a new one *must* be set. This status is lost after the first update.
         content:
           application/json:
             schema:
@@ -64,7 +68,7 @@ paths:
           description: Trying to edit a different user
           content: {}
         '400':
-          description: JSON validation error / Invalid ID.
+          description: JSON validation error / Invalid ID / missing new password for demo user.
           content: {}
         '404':
           description: User not found

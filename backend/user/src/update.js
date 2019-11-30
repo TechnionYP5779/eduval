@@ -44,6 +44,22 @@ function objectToUserInfo(obj) {
 	return retObj;
 }
 
+class NoPasswordAfterDemoError extends Error {
+	constructor(message) {
+		super(message); // (1)
+		this.name = 'NoPasswordAfterDemoError'; // (2)
+		this.statusCode = 998;
+	}
+}
+
+class NoPasswordError extends Error {
+	constructor(message) {
+		super(message); // (1)
+		this.name = 'NoPasswordError'; // (2)
+		this.statusCode = 999;
+	}
+}
+
 // PUT user/{userId}
 const updateUser = async (event, context, callback) => {
 	if (!event.pathParameters.userId) {
@@ -79,12 +95,28 @@ const updateUser = async (event, context, callback) => {
 		.then((profile) => {
 			// eslint-disable-next-line prefer-destructuring
 			username = profile.username;
+			if ('demo_student' in profile.app_metadata && profile.app_metadata.demo_student === true) {
+				if (!('newPassword' in event.body)) {
+					throw new NoPasswordAfterDemoError();
+				} else {
+					return management.updateUser({ id: userId }, {
+						app_metadata: {
+							demo_student: null,
+						},
+					});
+				}
+			}
+
+			if (!('oldPassword' in event.body)) {
+				throw new NoPasswordError();
+			}
+
+			return authentication.passwordGrant({
+				username,
+				password: event.body.oldPassword,
+				realm: 'Username-Password-Authentication',
+			});
 		})
-		.then(() => authentication.passwordGrant({
-			username,
-			password: event.body.oldPassword,
-			realm: 'Username-Password-Authentication',
-		}))
 		.then(() => management.updateUser({ id: userId }, userinfo))
 		.then(() => {
 			if ('newPassword' in event.body) {
@@ -102,23 +134,36 @@ const updateUser = async (event, context, callback) => {
 			if ('statusCode' in err) {
 				if (err.statusCode === 404) {
 					return callback(null, {
-						statusCode: 404,
+						statusCode: 404,	// not found
 						body: 'No user found with this ID.',
 					});
 				}
 				if (err.statusCode === 400) {
 					return callback(null, {
-						statusCode: 400,
+						statusCode: 400,	// bad request
 						body: 'Bad user ID.',
 					});
 				}
 				if (err.statusCode === 403) {
 					return callback(null, {
-						statusCode: 403,
+						statusCode: 403,	// unauthorized
 						body: 'Incorrect password.',
 					});
 				}
+				if (err.statusCode === 999) {
+					return callback(null, {
+						statusCode: 400,	// bad request
+						body: 'Missing old password.',
+					});
+				}
+				if (err.statusCode === 998) {
+					return callback(null, {
+						statusCode: 400,	// bad request
+						body: 'New password required after demo.',
+					});
+				}
 			}
+
 			// eslint-disable-next-line no-console
 			console.log(`ERROR updating course: ${err}`);
 			console.log(err);
