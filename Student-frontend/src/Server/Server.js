@@ -68,6 +68,178 @@ class Server {
     });
   }
 
+  async getEmonBalanceByCourse(callback, callbackError, courseId) {
+    let studentSub = localStorage.getItem('sub');
+    if (studentSub === null || !auth.isAuthenticated()) {
+      callbackError({
+        response: {
+          data: {
+            error: "Error in getEmonBalanceByCourse in Server.js"
+          }
+        }
+      });
+    }
+    studentSub = encodeURI(studentSub);
+    
+    axios.get(`${SERVER_CONFIG.domain}/student/${studentSub}/emonBalance/byCourse/${courseId}`,
+       this.config)
+       .then(callback)
+       .catch(callbackError);
+  }
+
+  async getCourse(callback, callbackError, courseId) {
+    axios.get(`${SERVER_CONFIG.domain}/course/${courseId}`,
+            this.config)
+            .then(callback, callbackError);
+  }
+
+  async getCondensedLog(callback, callbackError, courseId) {
+    let studentSub = localStorage.getItem('sub');
+    if (studentSub === null || !auth.isAuthenticated()) {
+      callbackError({
+        response: {
+          data: {
+            error: "Error in getCondensedLog in Server.js"
+          }
+        }
+      });
+    }
+    studentSub = encodeURI(studentSub);
+
+    axios.get(`${SERVER_CONFIG.domain}/log/condensed/${studentSub}/byCourse/${courseId}`,
+        this.config)
+        .then(callback, callbackError);
+  }
+
+  async getLog(callback, callbackError, courseId) {
+    let studentSub = localStorage.getItem('sub');
+    if (studentSub === null || !auth.isAuthenticated()) {
+      callbackError({
+        response: {
+          data: {
+            error: "Error in getLog in Server.js"
+          }
+        }
+      });
+    }
+    studentSub = encodeURI(studentSub);
+
+    axios.get(`${SERVER_CONFIG.domain}/log/ofStudent/${studentSub}/byCourse/${courseId}`,
+        this.config)
+        .then(callback, callbackError);
+  }
+
+  async getStudentCourses(callback, callbackError) {
+    let studentSub = localStorage.getItem('sub');
+    if (studentSub === null || !auth.isAuthenticated()) {
+      callbackError({
+        response: {
+          data: {
+            error: "Error in getLog in Server.js"
+          }
+        }
+      });
+    }
+    studentSub = encodeURI(studentSub);
+
+    axios.get(`${SERVER_CONFIG.domain}/course/byStudent/${studentSub}`,
+      this.config)
+      .then(callback, callbackError);
+  }
+
+  async getLessonStatus(callback, callbackError, courseId) {
+    axios.get(`${SERVER_CONFIG.domain}/lesson/${courseId}/status`,
+      this.config)
+      .then(callback, callbackError);
+  }
+
+  async getLessonPresentStudents(callback, callbackError, courseId) {
+    axios.get(`${SERVER_CONFIG.domain}/lesson/${courseId}/present`,
+      this.config)
+      .then(callback, callbackError);
+  }
+
+  async lessonRegisterPresentStudent(callback, callbackError, courseId, desk) {
+    let studentSub = localStorage.getItem('sub');
+    if (studentSub === null || !auth.isAuthenticated()) {
+      callbackError({
+        response: {
+          data: {
+            error: "Error in getLog in Server.js"
+          }
+        }
+      });
+    }
+
+    axios.post(`${SERVER_CONFIG.domain}/lesson/${courseId}/present`, {
+        id: studentSub,
+        desk,
+      }, this.config)
+      .then(callback, callbackError);
+  }
+
+  async getCourseInventory(callback, callbackError, courseId) {
+    let studentSub = localStorage.getItem('sub');
+    if (studentSub === null || !auth.isAuthenticated()) {
+      callbackError({
+        response: {
+          data: {
+            error: "Error in getLog in Server.js"
+          }
+        }
+      });
+    }
+    studentSub = encodeURI(studentSub);
+
+    axios.get(`${SERVER_CONFIG.domain}/student/${studentSub}/courseInventory/${courseId}`,
+      this.config)
+      .then(callback, callbackError);
+  }
+
+  async useItem(callback, callbackError, courseId, itemId) {
+    let studentSub = localStorage.getItem('sub');
+    if (studentSub === null || !auth.isAuthenticated()) {
+      callbackError({
+        response: {
+          data: {
+            error: "Error in getLog in Server.js"
+          }
+        }
+      });
+    }
+    studentSub = encodeURI(studentSub);
+
+    axios.post(`${SERVER_CONFIG.domain}/student/${studentSub}/courseInventory/${courseId}/useItem`, 
+      itemId,
+      this.config)
+      .then(callback, callbackError);
+  }
+
+  async getShopItems(callback, callbackError, courseId) {
+    axios.get(`${SERVER_CONFIG.domain}/shop/${courseId}/items`,
+      this.config)
+      .then(callback, callbackError);
+  }
+
+  async orderItem(callback, callbackError, courseId, itemId, amount) {
+    let studentSub = localStorage.getItem('sub');
+    if (studentSub === null || !auth.isAuthenticated()) {
+      callbackError({
+        response: {
+          data: {
+            error: "Error in getLog in Server.js"
+          }
+        }
+      });
+    }
+
+    axios.post(`${SERVER_CONFIG.domain}/shop/${courseId}/order`, {
+        studentId: studentSub,
+        itemId, 
+        amount
+      }, this.config)
+      .then(callback, callbackError);
+  }
 
   // async registerStudentTrial(callback, callbackError, studentDetails){
   //   axios.post(SERVER_CONFIG.domain + '/demo', courseDetails, this.config)
