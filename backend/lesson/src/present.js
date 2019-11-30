@@ -100,6 +100,13 @@ const updatePresentStudents = async (event, context, callback) => {
 		return callback(createError.BadRequest('ID should be an integer.'));
 	}
 
+	const management = new auth0.ManagementClient({
+		domain: 'e-mon.eu.auth0.com',
+		clientId: process.env.AUTH0_MANAGEMENT_CLIENT_ID,
+		clientSecret: process.env.AUTH0_MANAGEMENT_CLIENT_SECRET,
+		scope: 'read:users',
+	});
+
 	const objToInsert = {
 		studentId: event.body.id,
 		courseId: event.pathParameters.courseId,
@@ -125,6 +132,25 @@ const updatePresentStudents = async (event, context, callback) => {
 		})
 		.then(() => knexConnection('PresentStudents')
 			.insert(objToInsert))
+		.then(() => management.getUser({ id: event.body.id }))
+		.then(profile => ({
+			id: event.body.id,
+			email: profile.email,
+			name: `${profile.user_metadata.first_name} ${profile.user_metadata.last_name}`,
+			phoneNum: profile.user_metadata.phone_number,
+			desk: objToInsert.desk,
+		}))
+		.then((notificationToSend) => {
+			iot.connect().then(() => {
+				iot.client.publish(`lesson/${event.pathParameters.courseId}/present`, JSON.stringify(notificationToSend), {}, (uneededResult) => {
+					iot.client.end(false);
+					callback(null, {
+						statusCode: 200,
+						body: '',
+					});
+				});
+			});
+		})
 		.then(async (result) => {
 			knexConnection.client.destroy();
 			return axios.post(
@@ -134,17 +160,6 @@ const updatePresentStudents = async (event, context, callback) => {
 					headers: { Authorization: event.headers.Authorization },
 				},
 			);
-		})
-		.then(() => {
-			iot.connect().then(() => {
-				iot.client.publish(`lesson/${event.pathParameters.courseId}/present`, JSON.stringify(event.body), {}, (uneededResult) => {
-					iot.client.end(false);
-					callback(null, {
-						statusCode: 200,
-						body: '',
-					});
-				});
-			});
 		})
 		.catch((err) => {
 			// Disconnect
