@@ -20,6 +20,9 @@ exports.UserInfo = {
 		newPassword: {
 			type: 'string',
 		},
+		username: {
+			type: 'string',
+		},
 	},
 	additionalProperties: false,
 };
