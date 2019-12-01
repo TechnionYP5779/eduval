@@ -71,7 +71,7 @@ const registerDemoStudent = async (event, context, callback) => {
 			return knexConnection('PresentStudents')
 				.select()
 				.where({
-					courseId: courseId,
+					courseId,
 					desk: event.body.seatNumber,
 				});
 		})

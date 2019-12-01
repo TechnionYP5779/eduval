@@ -76,6 +76,9 @@ paths:
         '403':
           description: Incorrect password
           content: {}
+        '429':
+          description: Too many attempts. Account blocked.
+          content: {}
       security:
         - auth0_token: []
  

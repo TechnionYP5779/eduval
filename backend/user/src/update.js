@@ -154,6 +154,12 @@ const updateUser = async (event, context, callback) => {
 						body: 'Incorrect password.',
 					});
 				}
+				if (err.statusCode === 429) {
+					return callback(null, {
+						statusCode: 429,	// too many requests
+						body: 'Too many requests. Account has been blocked. We\'ve sent you an email with instructions on how to unblock it.',
+					});
+				}
 				if (err.statusCode === 999) {
 					return callback(null, {
 						statusCode: 400,	// bad request
