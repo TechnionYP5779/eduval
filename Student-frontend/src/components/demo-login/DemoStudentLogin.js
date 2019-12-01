@@ -1,5 +1,4 @@
 import React from "react";
-import axios from 'axios';
 import Auth from "../../Auth/Auth"
 import history from '../../history';
 
@@ -18,7 +17,7 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import FormatListNumberedIcon from '@material-ui/icons/FormatListNumbered';
 
 import Alert from 'react-bootstrap/Alert'
-
+import server from "../../Server/Server"
 
 const styles = theme => ({
   card: {
@@ -49,7 +48,6 @@ const styles = theme => ({
 class DemoStudentLogin extends React.Component {
   constructor(props){
     super(props);
-    console.log(props);
     this.state = {
       student_name:"",
       student_seat:-1,
@@ -65,29 +63,23 @@ class DemoStudentLogin extends React.Component {
       disabled: false,
     }
 
-    axios.get('https://api.emon-teach.com/demo/'+this.state.lessonHash)
-      .then((response) => {
-        console.log("Got for hash!");
-        console.log(response);
-        this.setState(
-          {
-            lesson_id : response.data.id});
-        this.setState(
-          {
-            lessonName : response.data.name});
-        console.log("STUDENTLOGINPROPS");
-        console.log(this.state.lesson_id);
-        console.log(this.state.lessonName);
-
-    })
-    .catch((error)=>{
-      console.log("ask with hash got error");
-      console.log(error);
-    });
-
     this.updateStudentName = this.updateStudentName.bind(this);
     this.updateStudentSeat = this.updateStudentSeat.bind(this);
     this.startDemoLesson = this.startDemoLesson.bind(this);
+
+
+    var self = this;
+    server.getTrialLessonByHash(function(response) {
+        self.setState(
+          {
+            lesson_id : response.data.id});
+        self.setState(
+          {
+            lessonName : response.data.name});
+    },
+    function(error){
+      console.log("Error in getTrialLessonByHash in constructor of DemoStudentLogin in DemoStudentLogin.js", error);
+    }, self.state.lessonHash);
 
   }
 
@@ -122,20 +114,20 @@ class DemoStudentLogin extends React.Component {
     this.setState({disabled: true});
     console.log(this.state.student_name);
     console.log(this.state.student_seat);
-    axios.post('https://api.emon-teach.com/demo/'+this.state.lessonHash+'/students',
-      {
-        nickname: this.state.student_name,
-        seatNumber: this.state.student_seat
-      }
-    )
-    .then((response) => {
+    var self = this;
+    var student_details =
+    {
+      nickname: self.state.student_name,
+      seatNumber: self.state.student_seat
+    };
+    server.postStudentToTrial(function(response){
       console.log("Posted Student!");
       console.log(response);
-    this.setState(
+    self.setState(
       {
         authIdToken : response.data.idToken
       });
-      console.log(this.state.authIdToken);
+      console.log(self.state.authIdToken);
 
 
       let expiresAt = (response.data.expiresIn * 1000) + new Date().getTime();
@@ -151,39 +143,37 @@ class DemoStudentLogin extends React.Component {
       Auth.sub = response.data.sub;
       Auth.registerstudent()
       console.log("PUSH?");
-      history.push("/lesson/" + this.state.lesson_id);
+      history.push("/lesson/" + self.state.lesson_id);
       console.log("PUSH!");
-  })
-  .catch((error)=>{
-    console.log("Posting Student didn't work");
-    console.log(error.response);
+  }, function(error){
+    console.log("Error in postStudentToTrial in startDemoLesson in DemoStudentLogin", error);
     if(error.response)
     {
       if(error.response.status==409)
       {      console.log(error.response.data.error);
             if(error.response.data.error=="COURSE_NOT_STARTED")
             {
-              this.setState({lessonNotStarted: true});
+              self.setState({lessonNotStarted: true});
             }
             else
             {
 
               if(error.response.data.error=="DESK_TAKEN"){
-                this.setState({studentSeatTaken: true})
+                self.setState({studentSeatTaken: true})
               }
               else {
-                this.setState({studentNameTaken: true})
+                self.setState({studentNameTaken: true})
               }
-              this.setState({lessonNotStarted: false});
+              self.setState({lessonNotStarted: false});
             }
       }
       else
       {
-        this.setState({errored: true});
+        self.setState({errored: true});
       }
     }
-    this.setState({disabled: false});
-  });
+    self.setState({disabled: false});
+  },self.state.lessonHash, student_details);
 }
 
 render(){

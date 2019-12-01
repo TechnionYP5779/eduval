@@ -8,6 +8,15 @@ class Server {
   config = {
     headers: {'Authorization': 'Bearer ' + localStorage.getItem('idToken')}
   };
+  getConfig(){
+    let authorization = "Bearer " + localStorage.getItem('idToken');
+    return {
+      headers: {
+        'X-Api-Key': SERVER_CONFIG.xApiKey,
+        'Authorization': authorization
+      }
+    };
+  }
 
   /*
   =================== Get student Profile ====================
@@ -45,7 +54,7 @@ class Server {
       callback(response);
     })
     .catch(function(error){
-
+      console.log("Error in getStudentProfile in Server.js");
       if (error.status !== 404){
         callbackError(error);
         return;
@@ -68,13 +77,168 @@ class Server {
     });
   }
 
+  /*
+  =================== Get Course Details====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+      + response is {data: {student object}}
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {error object}}
+    - studentDetails: an object containing a field "nickname" and a field "seatNumber"
+  @side effects:
+    - Logs out if student wa previously logged to some profile
+  */
+  async getCourse(callback, callbackError, course_id){
+    let student_id_sub = localStorage.getItem('sub');
+    if (student_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in getCourse in Server.js"}}};
+      callbackError(error);
+      return;
+    }
+    axios.get(SERVER_CONFIG.domain + "/course/" +course_id, this.getConfig())
+    .then(callback)
+    .catch(callbackError);
+  }
 
-  // async registerStudentTrial(callback, callbackError, studentDetails){
-  //   axios.post(SERVER_CONFIG.domain + '/demo', courseDetails, this.config)
-  //   .then(callback)
-  //   .catch(callbackError);
-  //
-  // }
+
+
+  /*
+  =================== Get Trial Details====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+      + response is {data: {student object}}
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {error object}}
+    - studentDetails: an object containing a field "nickname" and a field "seatNumber"
+  @side effects:
+    - Logs out if student wa previously logged to some profile
+  */
+  async getTrialLessonByHash(callback, callbackError, lessonHash){
+    axios.get(SERVER_CONFIG.domain + "/demo/" +lessonHash)
+    .then(callback)
+    .catch(callbackError);
+  }
+
+
+  /*
+  =================== Post Student to Trial ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+      + response is {data: {student object}}
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {error object}}
+    - studentDetails: an object containing a field "nickname" and a field "seatNumber"
+  @side effects:
+    - Logs out if student wa previously logged to some profile
+  */
+  async postStudentToTrial(callback, callbackError, lessonHash, studentDetails){
+    axios.post(SERVER_CONFIG.domain + "/demo/" +lessonHash + "/students", studentDetails)
+    .then(callback)
+    .catch(callbackError);
+  }
+
+  /*
+  =================== Get Lesson Messsages ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+      + response is {data: {student object}}
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {error object}}
+    - studentDetails: an object containing a field "nickname" and a field "seatNumber"
+  @side effects:
+    - Logs out if student wa previously logged to some profile
+  */
+  async getLessonMessages(callback, callbackError, lesson_id, student_id){
+    let student_id_sub = localStorage.getItem('sub');
+    if (student_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in getLessonStatus in Server.js"}}};
+      callbackError(error);
+      return;
+    }
+
+    axios.get(SERVER_CONFIG.domain + "/lesson/" +lesson_id+"/messages/" + encodeURI(student_id),
+          this.getConfig())
+    .then(callback)
+    .catch(callbackError);
+  }
+
+
+  /*
+  =================== Get Lesson Status ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+      + response is {data: {student object}}
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {error object}}
+    - studentDetails: an object containing a field "nickname" and a field "seatNumber"
+  @side effects:
+    - Logs out if student wa previously logged to some profile
+  */
+  async getLessonStatus(callback, callbackError, lesson_id){
+    let student_id_sub = localStorage.getItem('sub');
+    if (student_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in getLessonStatus in Server.js"}}};
+      callbackError(error);
+      return;
+    }
+
+    axios.get(SERVER_CONFIG.domain + "/lesson/" +lesson_id+"/status", this.getConfig()  )
+    .then(callback)
+    .catch(callbackError);
+  }
+
+  /*
+  =================== Send Message ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+      + response is {data: {student object}}
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {error object}}
+    - studentDetails: an object containing a field "nickname" and a field "seatNumber"
+  @side effects:
+    - Logs out if student wa previously logged to some profile
+  */
+  async sendMessage(callback, callbackError, lesson_id, message_details){
+    let student_id_sub = localStorage.getItem('sub');
+    if (student_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in sendMessage in Server.js"}}};
+      callbackError(error);
+      return;
+    }
+
+    axios.post(SERVER_CONFIG.domain + "/lesson/" +lesson_id+"/teacherMessages",
+          message_details, this.getConfig())
+    .then(callback)
+    .catch(callbackError);
+  }
+
+
+  /*
+  =================== Delete Lesson Messages ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+      + response is {data: {student object}}
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {error object}}
+    - studentDetails: an object containing a field "nickname" and a field "seatNumber"
+  @side effects:
+    - Logs out if student wa previously logged to some profile
+  */
+
+
+  async deleteLessonMessages( callbackError, lesson_id, student_id){
+    let student_id_sub = localStorage.getItem('sub');
+    if (student_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in deleteLessonMessages in Server.js"}}};
+      callbackError(error);
+      return;
+    }
+
+    axios.delete(SERVER_CONFIG.domain + "/lesson/" +lesson_id+'/messages/'+encodeURI(student_id),
+      this.getConfig())
+    .catch(callbackError);
+  }
+
 }
 
 let server = new Server();

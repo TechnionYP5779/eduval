@@ -19,7 +19,6 @@ import {
   FormCheckbox,
   Alert
 } from "shards-react";
-import axios from 'axios';
 import TimeoutAlert from "../components/common/TimeoutAlert";
 import Colors from "../components/components-overview/Colors";
 import Checkboxes from "../components/components-overview/Checkboxes";
@@ -50,6 +49,8 @@ import StudentMessageCard from "../components/lessonCards/StudentMessageCard";
 
 import awsIot  from 'aws-iot-device-sdk';
 import "./Lesson.css";
+import server from "../Server/Server"
+import iotclient from "../iotClient/iotClient"
 
 const headers = {
     'Authorization': 'Bearer ' + localStorage.getItem('idToken')
@@ -141,7 +142,7 @@ class Lesson extends React.Component {
 
       reward_money : 0,
       lesson_id : props.match.params.id,
-      student_id : localStorage.getItem('student_id'),
+      student_id : localStorage.getItem('sub'),
       chosen_smile : -1,
       chosen_message : -1,
       showing_messages: false,
@@ -159,28 +160,28 @@ class Lesson extends React.Component {
             id: 0
         },
         {
-            message: "I didn't understand",
-            enum: "MESSAGE_CONFUSED",
-            color:"Violet",
-            id: 2
-        },
-        {
             message: "May I go out?",
             enum: "MESSAGE_NEED_TO_LEAVE",
             color:"Orange",
-            id: 3
+            id: 1
         },
         {
             message: "I know the answer!",
             enum: "MESSAGE_ANSWER",
             color:"MediumSeaGreen",
-            id: 4
+            id: 2
+        },
+        {
+            message: "I didn't understand",
+            enum: "MESSAGE_CONFUSED",
+            color:"Violet",
+            id: 3
         },
         {
             message: "Speak louder please",
             enum: "MESSAGE_LOUDER",
             color:"SlateBlue",
-            id: 5
+            id: 4
         }
       ],
 
@@ -218,142 +219,101 @@ class Lesson extends React.Component {
 
    componentDidMount(){
      const getHistory=() =>{
-      var LessonsMessageURL='lesson/'+this.state.lesson_id+'/messages/'+localStorage.getItem('student_id');
-      var LessonsStatusURL = 'lesson/'+this.state.lesson_id+'/status';
       this.setState(prevState => ({
       reward_money : 0
         }));
         this.setState(prevState => ({
         currentEmojis : []
       }));
-      axios.get('https://api.emon-teach.com/'+LessonsMessageURL,
-       {headers: headers})
-       .then((response) =>
+      var self = this;
+      server.getLessonMessages(function(response)
        {
-
+         console.log("Got Lesson Status", response);
          //iterating over the recieved messages
         var data=response.data;
         for(var res of data){
           //if got an emoji
           if(res.messageType != "EMON"){
-              this.setState(prevState => ({
-              currentEmojis : [...this.state.currentEmojis, EmojiEnum[res.emojiType]]
+              self.setState(prevState => ({
+              currentEmojis : [...self.state.currentEmojis, EmojiEnum[res.emojiType]]
             }));
           }else
           {
             //if got an emoji
-            var updated_reward_money = this.state.reward_money ? this.state.reward_money : 0;
+            var updated_reward_money = self.state.reward_money ? self.state.reward_money : 0;
             updated_reward_money +=res.value
 
-            this.setState(prevState => ({
+            self.setState(prevState => ({
             reward_money : updated_reward_money
           }));
         }
-     }})
-     .catch((error)=>{
-       console.log(error);
-     });
+     }}, function(error){
+       console.log("Error in getLessonDetails in componentDidMount in Lesson.js ", error);
+     }, self.state.lesson_id, self.state.student_id);
    }
 
+    var LessonsMessageURL='lesson/'+this.state.lesson_id+'/messages/'+this.state.student_id;
 
+    let onConnect = () => {
+      getHistory();
+    }
 
-    const getContent = function(url) {
-      return new Promise((resolve, reject) => {
-    	    const lib = url.startsWith('https') ? require('https') : require('http');
-    	    const request = lib.get(url, (response) => {
-    	      if (response.statusCode < 200 || response.statusCode > 299) {
-    	         reject(new Error('Failed to load page, status code: ' + response.statusCode));
-    	       }
+    let onMessages =  (topic, message) => {
+      console.log("topic, message");
+      console.log(topic,message);
+      if(topic === LessonsMessageURL){
+          var res=JSON.parse(message);
+          if(res.messageType === "EMOJI"){
+              this.setState(prevState => ({
+              currentEmojis : [...this.state.currentEmojis, EmojiEnum[res.emojiType]]
+            }));
+            this.setState({message: "You got an Emoji from your teacher: "+ EmojiEnum[res.emojiType], success: true});
+            this.handleMessageModalOpen();
+            window.scrollTo(0, 0);
+          }else{
+            let updated_reward_money = +this.state.reward_money + +res.value
+            this.setState(prevState => ({
+            reward_money : updated_reward_money
+          }));
+          this.setState({message: "You got "+ res.value+" Emons from your teacher!", success: true});
+          this.handleMessageModalOpen();
+            window.scrollTo(0, 0);
+          }
 
-    	      const body = [];
-    	      response.on('data', (chunk) => body.push(chunk));
-    	      response.on('end', () => resolve(body.join('')));
-    	    });
-    	    request.on('error', (err) => reject(err))
-        })
-    };
+      }else{
+            var self = this;
+            server.deleteLessonMessages(function(error){
+              console.log("Error in deleteLessonMessages in onMessages in Lesson.js", error);
+            }, self.state.lesson_id, self.state.student_id);
 
+            this.setState({message: "The lesson ended", success: false, message_modal_open:false});
+            window.scrollTo(0, 0);
+            window.location.href = "/course-summery/" + JSON.stringify( {
+                id: this.state.lesson_id,
+                reward_money: this.state.reward_money,
+                emojis: this.state.currentEmojis
+              })
 
-    var connect = async () => {
-      console.log("Connecting!");
-    	return getContent('https://qh6vsuof2f.execute-api.eu-central-1.amazonaws.com/dev/iot/keys').then((res) => {
-    		res = JSON.parse(res)
-    		client = awsIot.device({
-                region: res.region,
-                protocol: 'wss',
-                accessKeyId: res.accessKey,
-                secretKey: res.secretKey,
-                sessionToken: res.sessionToken,
-                port: 443,
-                host: res.iotEndpoint
-            });
-    	})
+          }
+
 
     }
-    var LessonsMessageURL='lesson/'+this.state.lesson_id+'/messages/'+localStorage.getItem('student_id');
-    var LessonsStatusURL = 'lesson/'+this.state.lesson_id+'/status';
-    let counter=0;
-    connect().then(() => {
 
-      client.subscribe(LessonsMessageURL);
-      client.subscribe(LessonsStatusURL);
-      //checking if a message was sent
-      getHistory();
+    let onOffline = () => {} /* Basically we had it in the teacher part and
+                              I had no idea whether it's important but it might be*/
+    var self = this;
+    iotclient.getKeys(function(response){
+      iotclient.connect(self.state.lesson_id, self.state.student_id, onConnect, onMessages, onOffline);
+    }, function(error){
+      console.log("Error in getKeys in componentDidMount in Lesson.js", error);
+    })
 
-      const onReconnect = () => {
-        getHistory();
-      };
-      client.on('reconnect', onReconnect);
-
-
-
-      client.on('message', (topic, message) => {
-        if(topic === LessonsMessageURL){
-            var res=JSON.parse(message);
-            if(res.messageType === "EMOJI"){
-                this.setState(prevState => ({
-                currentEmojis : [...this.state.currentEmojis, EmojiEnum[res.emojiType]]
-              }));
-              this.setState({message: "You got an Emoji from your teacher: "+ EmojiEnum[res.emojiType], success: true});
-              this.handleMessageModalOpen();
-              window.scrollTo(0, 0);
-            }else{
-              let updated_reward_money = +this.state.reward_money + +res.value
-              this.setState(prevState => ({
-              reward_money : updated_reward_money
-            }));
-            this.setState({message: "You got "+ res.value+" Emons from your teacher!", success: true});
-            this.handleMessageModalOpen();
-              window.scrollTo(0, 0);
-            }
-
-        }else{
-
-              axios.delete('https://api.emon-teach.com/'+LessonsMessageURL,
-               {headers: headers});
-
-              this.setState({message: "The lesson ended", success: false, message_modal_open:false});
-              window.scrollTo(0, 0);
-              window.location.href = "/course-summery/" + JSON.stringify( {
-                  id: this.state.lesson_id,
-                  reward_money: this.state.reward_money,
-                  emojis: this.state.currentEmojis
-                })
-
-            }
-
-
-      })
-    });
-   axios.get('https://api.emon-teach.com/course/'+this.state.lesson_id,
-    {headers: headers})
-    .then((response) => {
-    this.setState(
+   server.getCourse(function(response) {
+    self.setState(
       {name: response.data.name ,description : response.data.description,location: response.data.location});
-  })
-  .catch((error)=>{
+  },function(error){
     console.log(error);
-  });
+  }, self.state.lesson_id);
 
 
 }
@@ -361,15 +321,16 @@ class Lesson extends React.Component {
   handleMessageClick(message)
   {
     this.setState({chosen_message : message.id});
-    axios.post(
-    'https://api.emon-teach.com' + "/lesson/" + this.state.lesson_id + "/teacherMessages" ,
-    {messageType: "MESSAGE", studentId:  this.state.student_id, content: message.enum},
-    {headers: headers})
-  .then( (response) =>{
-      this.setState({buttons_disabled: true});
-      this.setState({message: "Your message sent to your teacher!", success: true});
-      this.handleMessageModalOpen();
-      window.scrollTo(0, 0)});
+    var self = this;
+    server.sendMessage(function(response) {
+      self.setState({buttons_disabled: true});
+      self.setState({message: "Your message sent to your teacher!", success: true});
+      self.handleMessageModalOpen();
+      window.scrollTo(0, 0)
+    }, function(error) {
+      console.log("Error in sendMessage in handleMessageClick in Lesson.js", error);
+    },self.state.lesson_id,
+    {messageType: "MESSAGE", studentId:  self.state.student_id, content: message.enum});
   }
 
 

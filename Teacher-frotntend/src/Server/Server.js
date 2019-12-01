@@ -54,12 +54,13 @@ class Server {
     - User should be logged in when called.
   */
   addStudentsToCourse(callback, callbackError, students, courseId){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "not logged in"}}};
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in addStudentsToCourse in Server.js"}}};
       callbackError(error);
       return;
     }
+    var teacher_id = encodeURI(teacher_id_sub);
     axios.post(SERVER_CONFIG.domain + '/course/' + courseId + "/registered", students ,this.getConfig())
     .then(callback)
     .catch(callbackError);
@@ -80,15 +81,15 @@ class Server {
     - Lesson should be in session
   */
   async sendEMoney(callback, callbackError, amount, reason, students_id, course_id){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "not logged in"}}};
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in sendEMoney in Server.js"}}};
       callbackError(error);
       return;
     }
     for (var student_id in students_id){
       axios.post(
-        SERVER_CONFIG.domain + "/lesson/" + course_id + "/messages/" + students_id[student_id],
+        SERVER_CONFIG.domain + "/lesson/" + course_id + "/messages/" + encodeURI(students_id[student_id]),
         {messageType: "EMON", messageReason: reason, value: amount},
         this.getConfig())
       .then(callback)
@@ -108,12 +109,14 @@ class Server {
     - User should be logged in when called.
   */
   async changeLessonStatus(callback, callbackError, course_id, status){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "not logged in"}}};
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in changeLessonStatus in Server.js"}}};
       callbackError(error);
       return;
     }
+
+    var teacher_id = encodeURI(teacher_id_sub);
     axios.post(SERVER_CONFIG.domain + "/lesson/" + course_id + "/status", status, this.getConfig())
     .then(callback)
     .catch(callbackError);
@@ -133,15 +136,15 @@ class Server {
     - Lesson should be in session
   */
   async sendEmoji(callback, callbackError, emoji_type, students_id, course_id){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "not logged in"}}};
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in sendEmoji in Server.js"}}};
       callbackError(error);
       return;
     }
     for (var student_id in students_id){
       axios.post(
-        SERVER_CONFIG.domain + "/lesson/" + course_id + "/messages/" + students_id[student_id],
+        SERVER_CONFIG.domain + "/lesson/" + course_id + "/messages/" + encodeURI(students_id[student_id]),
         {messageType: "EMOJI", emojiType: emoji_type},
         this.getConfig())
       .then(callback)
@@ -161,12 +164,13 @@ class Server {
     - User should be logged in when called.
   */
   async updateCourse(callback, callbackError, courseDetails){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "not logged in"}}};
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in updateCourse in Server.js"}}};
       callbackError(error);
       return;
     }
+    console.log(courseDetails);
     axios.put(SERVER_CONFIG.domain + "/course", courseDetails, this.getConfig())
     .then(callback)
     .catch(callbackError);
@@ -185,9 +189,9 @@ class Server {
     - Lesson in session.
   */
   async getAttendingStudents(callback, callbackError, courseId){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "not logged in"}}};
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in getAttendingStudents in Server.js"}}};
       callbackError(error);
       return;
     }
@@ -208,12 +212,13 @@ class Server {
     - Lesson in session.
   */
   async getRegisteredStudents(callback, callbackError, courseId){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "not logged in"}}};
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in getRegisteredStudents in Server.js"}}};
       callbackError(error);
       return;
     }
+
     axios.get(SERVER_CONFIG.domain + "/course/" + courseId + "/registered/emons", this.getConfig())
     .then(callback)
     .catch(callbackError);
@@ -231,9 +236,9 @@ class Server {
     - Lesson in session.
   */
   async getAttendingStudentsEmons(callback, callbackError, courseId){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "not logged in"}}};
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in getAttendingStudentsEmons in Server.js"}}};
       callbackError(error);
       return;
     }
@@ -255,9 +260,9 @@ class Server {
     - Lesson in session.
   */
   getMessagesFromStudents(callback, callbackError, courseId){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "not logged in"}}};
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in getMessagesFromStudents in Server.js"}}};
       callbackError(error);
       return;
     }
@@ -280,13 +285,14 @@ class Server {
     - Student registered
   */
   deleteStudent(callback, callbackError, courseId, studentId){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "not logged in"}}};
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in deleteStudent in Server.js"}}};
       callbackError(error);
       return;
     }
-    axios.delete(SERVER_CONFIG.domain + "/course/" + courseId + "/registered/" + studentId, this.getConfig())
+    axios.delete(SERVER_CONFIG.domain + "/course/" + courseId + "/registered/"
+            + encodeURI(studentId), this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -303,8 +309,8 @@ class Server {
     - Course exists.
   */
   deleteCourse(callback, callbackError, courseId){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
       let error = {response: {data: {error: "not logged in"}}};
       callbackError(error);
       return;
@@ -332,8 +338,8 @@ class Server {
     {
       type=""
     }
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
       let error = {response: {data: {error: "not logged in"}}};
       callbackError(error);
       return;
@@ -354,12 +360,13 @@ class Server {
     - User should be logged in when called.
   */
   getActiveLesson(callback, callbackError){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "not logged in"}}};
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "GetActiveLesson error in Server.js"}}};
       callbackError(error);
       return;
     }
+    var teacher_id = encodeURI(teacher_id_sub);
     axios.get(SERVER_CONFIG.domain + "/teacher/" + teacher_id + "/activeLesson", this.getConfig())
     .then(callback)
     .catch(callbackError);
@@ -377,9 +384,9 @@ class Server {
     - User should be logged in when called.
   */
   getProducts(callback, callbackError, courseId){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "not logged in"}}};
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "getProducts error in Server.js"}}};
       callbackError(error);
       return;
     }
@@ -399,9 +406,9 @@ class Server {
     - User should be logged in when called.
   */
   getProductUse(callback, callbackError, courseId){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "not logged in"}}};
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "getProductUse error in Server.js"}}};
       callbackError(error);
       return;
     }
@@ -421,13 +428,13 @@ class Server {
     - User should be logged in when called.
   */
   getStudentById(callback, callbackError, studentId){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "not logged in"}}};
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in getStudentById in Server.js"}}};
       callbackError(error);
       return;
     }
-    axios.get(SERVER_CONFIG.domain + "/student/" + studentId , this.getConfig())
+    axios.get(SERVER_CONFIG.domain + "/student/" + encodeURI(studentId) , this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -444,12 +451,13 @@ class Server {
     - User should be logged in when called.
   */
   getStudents(callback, callbackError, courseId){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "not logged in"}}};
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in getStudents in Server.js"}}};
       callbackError(error);
       return;
     }
+    var teacher_id = encodeURI(teacher_id_sub);
     axios.get(SERVER_CONFIG.domain + "/course/" + courseId + "/registered", this.getConfig())
     .then(callback)
     .catch(callbackError);
@@ -467,9 +475,9 @@ class Server {
     - User should be logged in when called.
   */
   async getCourse(callback, callbackError, courseId){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "not logged in"}}};
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in getCourse in Server.js"}}};
       callbackError(error);
       return;
     }
@@ -493,12 +501,13 @@ class Server {
     - User should be logged in when called.
   */
   async getAllCourses(callback, callbackError){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "not logged in"}}};
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "getAllCourses error in Server.js"}}};
       callbackError(error);
       return;
     }
+    var teacher_id = encodeURI(teacher_id_sub);
     axios.get(SERVER_CONFIG.domain + "/course/byTeacher/" + teacher_id, this.getConfig())
     .then(callback)
     .catch(callbackError);
@@ -518,8 +527,8 @@ class Server {
     - Will delete the desired item from the DB or return an appropriate error
   */
   deleteItem(callback, callbackError, itemId, courseId){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
       let error = {response: {data: {error: "not logged in"}}};
       callbackError(error);
       return;
@@ -543,8 +552,8 @@ class Server {
     - Will add the desired item to the DB or return an appropriate error
   */
   createNewItem(callback, callbackError, item, courseId){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
       let error = {response: {data: {error: "not logged in"}}};
       callbackError(error);
       return;
@@ -568,8 +577,8 @@ class Server {
     - Will update the desired item in the DB or return an appropriate error
   */
   updateItem(callback, callbackError, item, courseId){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
       let error = {response: {data: {error: "not logged in"}}};
       callbackError(error);
       return;
@@ -593,18 +602,20 @@ class Server {
     - Will add the desired course to the DB or return an appropriate error
   */
   async createNewCourse(callback, callbackError, courseDetails){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "not logged in"}}};
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in createNewCourse in Server.js"}}};
       callbackError(error);
       return;
     }
+
+    var teacher_id = encodeURI(teacher_id_sub);
     courseDetails['id'] = 0;
-    courseDetails['teacherId'] = parseInt(teacher_id);
+    courseDetails['teacherId'] = teacher_id_sub;
     axios.post(SERVER_CONFIG.domain + '/course', courseDetails, this.getConfig())
     .then(callback)
     .catch(callbackError);
-  }
+  }א
 
   /*
   =================== Create New Demo ====================
@@ -620,15 +631,17 @@ class Server {
     - Will add the desired course to the DB or return an appropriate error
   */
   async createNewDemo(callback, callbackError, courseDetails){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "not logged in"}}};
+    let teacher_id_sub = localStorage.getItem('sub');
+
+    if ( teacher_id_sub==null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "error in createNewDemo in Server.js"}}};
       callbackError(error);
       return;
     }
+    var teacher_id = encodeURI(teacher_id_sub);
     console.log(courseDetails);
     courseDetails['id'] = 0;
-    courseDetails['teacherId'] = parseInt(teacher_id);
+    courseDetails['teacherId'] = teacher_id_sub;
     console.log(courseDetails['teacherId']);
     axios.post(SERVER_CONFIG.domain + '/demo', courseDetails, this.getConfig())
     .then(callback)
@@ -647,14 +660,11 @@ class Server {
   @side effects:
     - if auth0 account is not in the EMON DB, it will register the teacher
   */
-  async getTeacherProfile(callback, callbackError){
+  getTeacherProfile(callbackError){
     let config = this.getConfig();
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id != null){
-      axios.get(SERVER_CONFIG.domain + '/teacher/' + teacher_id, config)
-      .then(callback)
-      .catch(callbackError);
-      return;
+    let profile_payload = localStorage.getItem('payload');
+    if (profile_payload){
+      return JSON.parse(profile_payload)
     }
     let error = {response: {data: {error: "not logged in"}}};
     callbackError(error);

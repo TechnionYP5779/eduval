@@ -34,9 +34,9 @@ class iotClient {
     });
   }
 
-  connect(courseId, connectCallback, messageCallback, offlineCallback){
-    this.messageTopic = this.iotTopicMessage(courseId);
-    this.presentTopic = this.iotTopicPresent(courseId);
+  connect(course_id, student_id, connectCallback, messageCallback, offlineCallback){
+    this.messageTopic = this.iotTopicMessage(course_id, student_id);
+    this.presentTopic = this.iotTopicPresent(course_id);
     this.client = awsIot.device({
       region: this.iotKeys.region,
       protocol: 'wss',

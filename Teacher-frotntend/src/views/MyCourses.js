@@ -86,7 +86,7 @@ class MyCourses extends React.Component {
           self.setState({courses: response.data});
         }, function(error){
       });
-        }, (err)=>{console.log("err", err);});
+    }, (err)=>{console.log("getActiveLesson error in componentDidMount in MyCourses.js", err);});
   }
 
 
@@ -148,7 +148,7 @@ class MyCourses extends React.Component {
                 server.changeLessonStatus(function(response){
                   history.push("/lesson/" + course.id);
                 }, function(error){
-                  console.log("error" ,error);
+                  console.log("Error in changeLessonStatus in playClicked passed to CourseCard in MyCourses.js" ,error);
                   self.setState({disabled: false, error: "An error has occured while starting a lesson"});
                 }, course.id, "LESSON_START");
               }}
@@ -165,7 +165,7 @@ class MyCourses extends React.Component {
                 server.deleteCourse(function(response){
                   history.push("/my-courses");
                 }, function(error){
-                  console.log("error" ,error);
+                  console.log("Error in deleteCourse in MyCourses.js" ,error);
                   self.setState({disabled: false, error: "An error has occured while deleing a course "});
                 }, course.id);
               }

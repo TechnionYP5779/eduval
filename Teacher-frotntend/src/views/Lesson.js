@@ -242,19 +242,21 @@ class Lesson extends React.Component {
 
     server.getRegisteredStudents(function(responseReg){
       self.setState({registered_students: responseReg.data});
-    }, (error)=>{}, courseId);
+    }, (error)=>{console.log("Error in getRegisteredStudents in componentDidMount in Lessons.js", error)}, courseId);
 
     let onConnect = ()=>{
 
       server.getAttendingStudents(function(responseAtt){
         responseAtt.data.sort(function(a,b){
-          return parseInt(a.id)-parseInt(b.id);
+          return a.id.localeCompare(b.id);
         });
+        console.log("getAttendingStudents", responseAtt);
 
         server.getAttendingStudentsEmons(function(responseEmon){
           responseEmon.data.sort(function(a,b){
-            return parseInt(a.studentId)-parseInt(b.studentId);
+            return a.studentId.localeCompare(b.studentId);
           });
+          console.log("getAttendingStudentsEmons", responseEmon);
           var tmp = [];
           var index = 0;
 
@@ -264,7 +266,6 @@ class Lesson extends React.Component {
               var newstud =
               {
                 id: (responseAtt.data[index]).id,
-                authIdToken: (responseAtt.data[index]).authIdToken,
                 name: (responseAtt.data[index]).name,
                 email: (responseAtt.data[index]).email,
                 phoneNum: (responseAtt.data[index]).phoneNum,
@@ -282,11 +283,12 @@ class Lesson extends React.Component {
           });
           self.setState({students: tmp});
 
-          }, function(error) { console.log("Error at Emons of Present Students");
-        console.log(error);}, courseId)
+          }, function(error) {
+            console.log("Error in getAttendingStudentsEmons in componentDidMount in Lessons.js", error)
+          }, courseId)
 
 
-      }, (error)=>{}, courseId);
+      }, (error)=>{console.log("Error in getAttendingStudents in componentDidMount in Lessons.js", error)}, courseId);
 
       server.getMessagesFromStudents(function(response){
         self.setState({messages: response.data});
@@ -302,13 +304,12 @@ class Lesson extends React.Component {
         self.setState({student_message_counter: count})
 
       }, (error)=>{
-        console.log(error);
+        console.log("Error in getMessagesFromStudents in componentDidMount in Lessons.js", error);
       }, courseId);
 
       if (!self.state.connected)
         self.setState({connected: true});
     }
-    console.log(this.state.students);
 
     let onMessages = (topic,message)=>
     {
@@ -335,20 +336,19 @@ class Lesson extends React.Component {
       }
       else if (topic=="lesson/"+courseId+"/present")
       {
-        server.getStudentById(function(response)
-      {
         var tmpstudents = self.state.students;
-        var newstud = response.data;
+        var newstud =
+        {
+          id: JSON.parse(message).id,
+          name:JSON.parse(message).name,
+          email: JSON.parse(message).email,
+          phoneNum: JSON.parse(message).phoneNum,
+          desk: JSON.parse(message).desk,
+        };
         newstud.emons=5;
         newstud.desk=JSON.parse(message).desk;
         tmpstudents.push(newstud);
         self.setState({students:tmpstudents});
-
-      }, function(error)
-      {
-        console.log("error getting new logged student");
-        console.log(error);
-      },JSON.parse(message).id)
       }
 
       else {
@@ -366,11 +366,16 @@ class Lesson extends React.Component {
 
     iotclient.getKeys(function(response){
       iotclient.connect(courseId, onConnect, onMessages, onOffline);
-    }, (error)=>{console.log("Didn't get keys for socket")});
+    }, (error)=>{
+        console.log("Error in getKeys in componentDidMount in Lessons.js", error);
+      });
 
     server.getCourse(function(response){
       self.setState({course_name: response.data.name});
-    }, (error)=>{}, courseId);
+    }, (error)=>
+        {
+          console.log("Error in getCourse in componentDidMount in Lessons.js", error);
+        }, courseId);
 
   }
 
@@ -455,6 +460,7 @@ class Lesson extends React.Component {
                 server.deleteLessonMessages(
                   function(response){console.log("Deleted Messages "+ num)}, function(error)
                   {
+                    console.log("Error in deleteLessonMessages in clearMessages passed to StudentMessageCard in Lessons.js", error);
                     console.log("Error clearing messages of type " + num);
                   }, this.state.course_id, this.state.message_types[num].content
                 );
@@ -481,7 +487,8 @@ class Lesson extends React.Component {
                 <Row style={{margin:"2px"}}>
                 {smileys.map((smile, idx) => (
                   <Col xs="3" key={idx}>
-                    <Button outline disabled={this.state.disabled} style={{fontSize:"1.3em"}} theme={smile.type} className="mb-2 mr-1" onClick={()=>{
+                    <Button outline disabled={this.state.disabled} style={{fontSize:"1.3em"}} theme={smile.type} className="mb-2 mr-1"
+                    onClick={()=>{
                       if (this.state.chosen_students.length === 0)
                         return;
                       this.setState({disabled: true});
@@ -504,7 +511,7 @@ class Lesson extends React.Component {
                           self.setState({chosen_students: [], success: success, error: error_state, disabled: false});
                           window.scrollTo(0, 0);
                         }
-                        console.log("error", error);
+                        console.log("Error in sendEmoji in onClick passed to Rewards & Emojis in Lessons.js", error);
                       }, smile.name, this.state.chosen_students, this.props.match.params.id);
                     }}>
                       {smile.smile}
@@ -563,7 +570,7 @@ class Lesson extends React.Component {
                             self.setState({chosen_students: [], success: success, error: error_state, disabled: false});
                             window.scrollTo(0, 0);
                           }
-                          console.log("error", error);
+                          console.log("Error in sendEMoney in onClick passed to Rewards & Emojis in Lessons.js", error);
                         }, coin.value, "participation", this.state.chosen_students, this.props.match.params.id);
                       }}>
                       <img
@@ -603,10 +610,11 @@ class Lesson extends React.Component {
                     server.changeLessonStatus(function(response){
                       server.deleteLessonMessages(()=>{
                         history.push("/my-courses");
-                      }, ()=>{
+                      }, (err)=>{
+                        console.log("Error in deleteLessonMessages in onClick in End Class in Lessons.js", err);
                       }, self.props.match.params.id);
                     }, function(error){
-                      console.log(error);
+                      console.log("Error in changeLessonStatus in onClick in End Class in Lessons.js", error);
                       self.setState({disabled: false, error: true});
                     }, this.props.match.params.id, "LESSON_END");
                   }}>

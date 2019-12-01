@@ -132,8 +132,7 @@ class DemoLessonProperties extends React.Component {
       self.setState({invite_link: response.data});
     }, function(error){
       console.log(error);
-      console.log("Demo error");
-      console.log("An error has occured");
+      console.log("Error in createNewDemo in startDemoLesson in DemoLessonProperties.js");
       self.setState({disabled: false});
     }, {name: this.state.course.name=="" ? "Trial Lesson" : this.state.course.name,
         location: this.state.course.location == "" ? "" : this.state.course.location,

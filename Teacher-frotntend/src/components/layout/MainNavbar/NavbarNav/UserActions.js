@@ -36,15 +36,18 @@ export default class UserActions extends React.Component {
   componentDidMount() {
     var self = this;
     this._isMounted = true;
-    server.getTeacherProfile(function(response){
-        if (self._isMounted){
-          self.setState({username: response.data.name});
-        }
-      }, function(error){
+    var teacher_payload = server.getTeacherProfile( function(error){
         console.log("Error in getting Teacher Profile for Nav Bar");
         console.log(error);
     });
-
+    if (teacher_payload)
+    {
+      self.setState({username: teacher_payload.nickname});
+    }
+    else
+    {
+      console.log("Problem at componentDidMount at UserActions.js!");
+    }
 
   }
 

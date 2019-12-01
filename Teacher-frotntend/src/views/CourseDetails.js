@@ -49,6 +49,8 @@ class CourseDetails extends React.Component {
 
       course: {id: "", name: "", location: "", description: "", startDate: "", endDate: ""},
 
+      original_course_name: "",
+
       // Third list of posts.
       PostsListThree: [
         {
@@ -99,7 +101,7 @@ class CourseDetails extends React.Component {
     server.addStudentsToCourse(function(response){
       window.location.reload();
     }, function(error){
-      console.log("failed", error);
+      console.log("Error in updateStudents in CourseDetails.js", error);
       self.setState({error: "An error has occured", success: false, disabled: false});
       window.scrollTo(0, 0);
     }, students, this.props.match.params.id);
@@ -124,12 +126,18 @@ class CourseDetails extends React.Component {
 
     server.updateCourse(function(response){
       self.setState({error: false, success: true, disabled: false});
+      server.getCourse(function(response){
+        self.setState({course: response.data});
+        self.setState({original_course_name: response.data.name});
+      }, function(error){
+        console.log("Error in getCourse in updateCourse in CourseDetails.js");
+      }, self.props.match.params.id);
       window.scrollTo(0, 0);
     }, function(error){
       console.log("failed", error);
       self.setState({error: "An error has occured", success: false, disabled: false});
       window.scrollTo(0, 0);
-    }, this.state.course);
+    }, self.state.course);
   }
 
   handleStudentsChange(new_students) {
@@ -172,12 +180,14 @@ class CourseDetails extends React.Component {
     var self = this;
     server.getCourse(function(response){
       self.setState({course: response.data});
+      self.setState({original_course_name: response.data.name});
     }, function(error){
+      console.log("Error in getCourse in componentDidMount in CourseDetails.js");
     }, this.props.match.params.id);
 
     server.getStudents(function(response){
       self.setState({students: response.data});
-    }, function(error){
+    }, function(error){ console.log("Error in componentDidMount in CourseDetails.js", error)
     }, this.props.match.params.id);
 
     server.getActiveLesson(function(response){
@@ -239,7 +249,9 @@ class CourseDetails extends React.Component {
       <Button disabled={this.state.disabled} theme="success" onClick={()=>{
         self.setState({disabled: true});
         server.deleteStudent((response)=>{window.location.reload();},
-        (err)=>{self.setState({disabled: false, error: "An error has occured"}); window.scrollTo(0, 0);},
+        (err)=>{self.setState({disabled: false, error:
+          "Error in deleteStudent in Yes Button in deleteStudent Modal in CourseDetails.js"});
+            window.scrollTo(0, 0);},
         self.props.match.params.id,
         self.state.student.id);
       }}>Yes</Button>
@@ -256,7 +268,7 @@ class CourseDetails extends React.Component {
 
       {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title={this.state.course.name} subtitle="Course Details" className="text-sm-left" />
+          <PageTitle sm="4" title={this.state.original_course_name} subtitle="Course Details" className="text-sm-left" />
           </Row>
 
           <Row>

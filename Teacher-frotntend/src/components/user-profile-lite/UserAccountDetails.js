@@ -23,7 +23,6 @@ class UserAccountDetails extends React.Component {
     this.state = {
       details:
       {
-        id: "",
         name: "",
         password: "",
         email: "",
@@ -78,11 +77,25 @@ class UserAccountDetails extends React.Component {
 
   componentDidMount() {
     var self = this;
-    server.getTeacherProfile(function(response){
-      self.setState({details: response.data});
-    }, function(error){
-    });
 
+    var teacher_profile = server.getTeacherProfile( function(error){
+        console.log("Error in getting Teacher Profile for Nav Bar");
+        console.log(error);
+    });
+    if (teacher_profile)
+    {
+      var new_dets = {
+          name: teacher_profile.nickname,
+          password: "",
+          email: teacher_profile.email,
+          phoneNum: teacher_profile["https://emon-teach.com/phone_number"]
+    }
+      self.setState({details: new_dets});
+    }
+    else
+    {
+      console.log("Problem at componentDidMount at UserAccountDetails.js!");
+    }
   }
 
 

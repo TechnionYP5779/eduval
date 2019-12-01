@@ -10,6 +10,8 @@ class Auth {
   idToken;
   expiresAt;
   sub;
+  payload;
+  profile;
 
   auth0 = new auth0.WebAuth({
     domain: AUTH_CONFIG.domain,
@@ -17,7 +19,7 @@ class Auth {
     redirectUri: AUTH_CONFIG.callbackUrl,
     responseType: 'token id_token',
     sso: false,
-    scope: 'openid  profile email user_metadata app_metadata'
+    scope: 'openid profile email user_metadata app_metadata'
   });
 
   constructor() {
@@ -82,6 +84,20 @@ class Auth {
     this.idToken = authResult.idToken;
     this.expiresAt = expiresAt;
     this.sub = authResult.idTokenPayload.sub;
+    this.payload = authResult.idTokenPayload;
+    let self = this;
+
+    auth.getUserInfo(function(error, profile){
+      if(error)
+      {
+        console.log("Error in getUserInfo in setSession in Auth.js");
+      }
+      else
+      {
+        self.profile = profile;
+        localStorage.setItem('authProfile', JSON.stringify(profile));
+      }
+    });
 
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('expiresAt', expiresAt);
@@ -108,11 +124,11 @@ class Auth {
         'Authorization': "Bearer " + localStorage.getItem('idToken')
       }
     };
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id != null){
-      history.replace('/');
-      return;
-    }
+    // let teacher_id = localStorage.getItem('teacher_id');
+    // if (teacher_id != null){
+    //   history.replace('/');
+    //   return;
+    // }
 
     let sub = this.sub;
     if(sub == null){
@@ -182,6 +198,7 @@ class Auth {
 
     localStorage.removeItem('payload');
     localStorage.removeItem('teacher_id');
+    localStorage.removeItem('profile');
 
     this.auth0.logout({
       returnTo: window.location.origin
