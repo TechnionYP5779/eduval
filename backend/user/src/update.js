@@ -169,7 +169,9 @@ const updateUser = async (event, context, callback) => {
 				if (err.statusCode === 998) {
 					return callback(null, {
 						statusCode: 400,	// bad request
-						body: 'New password required after demo.',
+						body: {
+							error: 'DEMO_USER_MISSING_PASSWORD',
+						},
 					});
 				}
 			}
