@@ -10,6 +10,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
+import { withTranslation } from "react-i18next";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
 
@@ -135,6 +136,8 @@ class RegisterStudentTable extends React.Component {
   render()
   {
     const classes = this.props.classes;
+    const { t } = this.props;
+
     return (
       <Paper className={classes.root}>
         <div className={classes.tableWrapper}>
@@ -149,7 +152,7 @@ class RegisterStudentTable extends React.Component {
                     align={column.align}
                     style={{ minWidth: column.minWidth }}
                   >
-                    {column.label}
+                    {t(column.label)}
                   </TableCell>
                 )})}
               </TableRow>
@@ -213,4 +216,4 @@ RegisterStudentTable.propTypes = {
 };
 
 
-export default withStyles(styles)(RegisterStudentTable);
+export default withTranslation()(withStyles(styles)(RegisterStudentTable));

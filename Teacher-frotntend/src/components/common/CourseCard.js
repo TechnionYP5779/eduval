@@ -25,6 +25,7 @@ import Backdrop from '@material-ui/core/Backdrop';
 import Fade from '@material-ui/core/Fade';
 import Button from '@material-ui/core/Button';
 import ClearIcon from '@material-ui/icons/Clear';
+import { withTranslation } from 'react-i18next';
 
 var QRCode = require('qrcode.react');
 
@@ -153,6 +154,8 @@ class CourseCard extends React.Component
 
   render(){
     const classes = this.props.classes;
+    const { t } = this.props;
+
     return(
       <div>
         <Modal
@@ -169,7 +172,7 @@ class CourseCard extends React.Component
         >
           <Fade in={this.state.delete_modal_open}>
             <div className={classes.paper}>
-              <h3 id="transition-modal-title">Are you sure you want to delete {this.state.name}?</h3>
+              <h3 id="transition-modal-title">{t('deleteConfirm', {name: this.state.name})}</h3>
               <Button
                 variant="contained"
                 color="primary"
@@ -177,7 +180,7 @@ class CourseCard extends React.Component
                 endIcon={<ClearIcon />}
                 onClick={this.handleDeleteModalClose}
               >
-                Cancel
+                {t('Cancel')}
               </Button>
               <Button
                 variant="contained"
@@ -186,7 +189,7 @@ class CourseCard extends React.Component
                 endIcon={<Delete />}
                 onClick={this.handleDeleteCourse}
               >
-                Delete
+                {t('Delete')}
               </Button>
             </div>
           </Fade>
@@ -196,9 +199,9 @@ class CourseCard extends React.Component
           classes={{
             title: classes.title,
           }}
-          title={this.state.name + (this.state.play_pushed? " [In Progress!]" : "")}
+          title={this.state.name + (this.state.play_pushed? " " + t("[In Progress!]") : "")}
           action={
-            <LightTooltip title="Delete Course" placement="top-start" className={classes.tooltip}>
+            <LightTooltip title={t("Delete Course")} placement="top-start" className={classes.tooltip}>
               <IconButton aria-label="delete"
               className={classes.delete}
               disabled={this.state.play_pushed}
@@ -209,15 +212,15 @@ class CourseCard extends React.Component
             </LightTooltip>
           }
           />
-          { this.state.description!="" &&
+          { this.state.description!=="" &&
             <CardContent>
-              <Typography paragraph>Course Description: {this.state.description}</Typography>
+              <Typography paragraph>{t('Course Description')}: {this.state.description}</Typography>
             </CardContent>
           }
 
           { this.state.demoLink!=null &&
             <CardContent>
-              <Typography paragraph>Trial Lesson Invite Link: <br/> {this.state.demoLink}</Typography>
+              <Typography paragraph>{t('Trial Lesson Invite Link')}: <br/> {this.state.demoLink}</Typography>
               <QRCode size="200" value={this.state.demoLink} className={classes.qr}/>
 
             </CardContent>
@@ -225,14 +228,14 @@ class CourseCard extends React.Component
 
 
           <CardActions disableSpacing>
-            <LightTooltip title="Course Details" placement="bottom-end">
+            <LightTooltip title={t("Course Details")} placement="bottom-end">
               <IconButton>
                 <a href={"/course-details/" + this.state.id}>
                 <MenuBookIcon />
                 </a>
               </IconButton>
             </LightTooltip>
-            <LightTooltip title="Manage Store" placement="bottom-end">
+            <LightTooltip title={t("Manage Store")} placement="bottom-end">
               <IconButton>
                 <a href={"/manage-store/" + this.state.id}>
                 <ShoppingCartIcon />
@@ -240,7 +243,7 @@ class CourseCard extends React.Component
               </IconButton>
             </LightTooltip>
 
-            <LightTooltip title={this.state.play_pushed? "Resume Lesson" : "Start Lesson"}
+            <LightTooltip title={this.state.play_pushed? t("Resume Lesson") : t("Start Lesson")}
               placement="bottom-end">
               <IconButton
               disabled={ this.state.disabled_play}
@@ -269,4 +272,4 @@ CourseCard.propTypes = {
 };
 
 
-export default withStyles(styles)(CourseCard);
+export default withTranslation()(withStyles(styles)(CourseCard));

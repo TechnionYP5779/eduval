@@ -18,7 +18,7 @@ class NavbarToggle extends React.Component {
 
   render() {
     return (
-      <nav className="nav">
+      <nav className="nav" style={{flexGrow:10, flexShrink:1}}>
         {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
         {auth.isAuthenticated() && <a href="#" onClick={this.handleClick} className="nav-link nav-link-icon toggle-sidebar d-sm-inline d-md-inline d-lg-none text-center">
           <i className="material-icons">&#xE5D2;</i>

@@ -20,6 +20,8 @@ import PageTitle from "../components/common/PageTitle";
 import TimeoutAlert from "../components/common/TimeoutAlert";
 import server from "../Server/Server";
 import TagsInput from 'react-tagsinput';
+import { withTranslation } from "react-i18next";
+import { capitalize } from '../utils/strings';
 
 Modal.setAppElement('#root');
 
@@ -220,6 +222,9 @@ class CourseDetails extends React.Component {
     const{
       students
     } = this.state;
+
+    const { t } = this.props;
+
     return(
       <div>
 
@@ -228,15 +233,15 @@ class CourseDetails extends React.Component {
         onRequestClose={this.closeDeleteCourseModal}
         style={customStyles}
       >
-      <p>Are you sure you want to delete the course "{this.state.course.name}"?</p>
+      <p>{t("deleteConfirm", {name: this.state.course.name})}</p>
 
       <Button disabled={this.state.disabled} theme="success" onClick={()=>{
         self.setState({disabled: true});
         server.deleteCourse((response)=>{history.push("/my-courses");},
-        (err)=>{self.setState({disabled: false, error: "An error has occured"}); window.scrollTo(0, 0);},
+        (err)=>{self.setState({disabled: false, error: t("An error has occured")}); window.scrollTo(0, 0);},
         self.props.match.params.id);
-      }}>Yes</Button>
-      <Button theme="danger" disabled={this.state.disabled} style={{float: "right"}} onClick={closeDeleteCourseModal}>No</Button>
+      }}>{t("Yes")}</Button>
+      <Button theme="danger" disabled={this.state.disabled} style={{float: "right"}} onClick={closeDeleteCourseModal}>{t("No")}</Button>
       </Modal>
 
       <Modal
@@ -244,18 +249,22 @@ class CourseDetails extends React.Component {
         onRequestClose={this.closeDeleteModal}
         style={customStyles}
       >
-      <p>Are you sure you want to remove {this.state.student.name} from the course?</p>
+      <p>{t("unregisterStudentConfirm", {name: this.state.student.name})}</p>
 
       <Button disabled={this.state.disabled} theme="success" onClick={()=>{
         self.setState({disabled: true});
         server.deleteStudent((response)=>{window.location.reload();},
-        (err)=>{self.setState({disabled: false, error:
-          "Error in deleteStudent in Yes Button in deleteStudent Modal in CourseDetails.js"});
-            window.scrollTo(0, 0);},
+        (err) => {
+          self.setState({
+            disabled: false,
+            error: "Error in deleteStudent in Yes Button in deleteStudent Modal in CourseDetails.js"
+          });
+          window.scrollTo(0, 0);
+        },
         self.props.match.params.id,
         self.state.student.id);
-      }}>Yes</Button>
-      <Button theme="danger" disabled={this.state.disabled} style={{float: "right"}} onClick={closeDeleteModal}>No</Button>
+      }}>{t("Yes")}</Button>
+      <Button theme="danger" disabled={this.state.disabled} style={{float: "right"}} onClick={closeDeleteModal}>{t("No")}</Button>
       </Modal>
 
       {this.state.error &&
@@ -268,7 +277,7 @@ class CourseDetails extends React.Component {
 
       {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title={this.state.original_course_name} subtitle="Course Details" className="text-sm-left" />
+          <PageTitle sm="4" title={this.state.original_course_name} subtitle={t("Course Details")} className="text-sm-left" />
           </Row>
 
           <Row>
@@ -276,7 +285,7 @@ class CourseDetails extends React.Component {
           {/* Editor */}
           <Card style = {{height:"auto",width:"100%",marginLeft:"16px"}} className="mb-4">
             <CardHeader className="border-bottom">
-            <Row><Col><h6 className="m-0">Details</h6></Col>
+            <Row><Col><h6 className="m-0">{t("Details")}</h6></Col>
             {// <Col><Button outline style={{padding:"0px", float: "right"}} theme="danger" onClick={this.deleteCourseModal}>
             //   <i className="material-icons" style={{fontSize:"2em"}}>delete</i>
             // </Button></Col>
@@ -291,7 +300,7 @@ class CourseDetails extends React.Component {
                     <Row form>
                     {/* Course Name */}
                       <Col md="6" className="form-group">
-                        <label htmlFor="feFirstName">Course Name</label>
+                        <label htmlFor="feFirstName">{t("Course Name")}</label>
                         <FormInput
                         id="feFirstName"
                         placeholder="Course Name"
@@ -303,7 +312,7 @@ class CourseDetails extends React.Component {
                     <Row form>
                       {/* Start */}
                       <Col md="6" className="form-group">
-                        <label htmlFor="feLastName">Start Date</label>
+                        <label htmlFor="feLastName">{t("Start Date")}</label>
                         <FormInput
                         type="date"
                         id="feLastName"
@@ -314,7 +323,7 @@ class CourseDetails extends React.Component {
 
                       {/* End */}
                       <Col md="6" className="form-group">
-                        <label htmlFor="feEmail">End Date</label>
+                        <label htmlFor="feEmail">{t("End Date")}</label>
                         <FormInput
                         type="date"
                         id="feEmail"
@@ -324,7 +333,7 @@ class CourseDetails extends React.Component {
                       </Col>
                       {/* Course Location */}
                       <Col md="6" className="form-group">
-                        <label htmlFor="feZipCode">Class Room</label>
+                        <label htmlFor="feZipCode">{t("Class Room")}</label>
                         <FormInput
                         id="feZipCode"
                         value={this.state.course.location}
@@ -335,11 +344,11 @@ class CourseDetails extends React.Component {
                     <Row form>
                     {/* Description */}
                       <Col md="12" className="form-group">
-                        <label htmlFor="feDescription">Course Description</label>
+                        <label htmlFor="feDescription">{t("Course Description")}</label>
                         <FormTextarea id="feDescription" rows="5" value={this.state.course.description} onChange={this.updateDescription}/>
                       </Col>
                     </Row>
-                    <Button outline disabled={this.state.disabled} onClick={this.update} theme="accent">Update Course</Button>
+                    <Button outline disabled={this.state.disabled} onClick={this.update} theme="accent">{t("Update Course")}</Button>
                     <Button theme="success" disabled={this.state.disabled || (this.state.activeLesson && this.state.activeLesson != this.props.match.params.id)} onClick={()=>{
                       this.setState({disabled: true});
                       if(this.state.activeLesson == this.props.match.params.id){
@@ -350,9 +359,9 @@ class CourseDetails extends React.Component {
                       server.changeLessonStatus(function(response){
                         history.push("/lesson/" + self.props.match.params.id);
                       }, function(error){
-                        self.setState({disabled: false, error: "An error has occured"}); window.scrollTo(0, 0);
+                        self.setState({disabled: false, error: t("An error has occured")}); window.scrollTo(0, 0);
                       }, this.props.match.params.id, "LESSON_START");
-                    }} style={{float:"right"}}>{(this.state.activeLesson != this.props.match.params.id && "Start lesson") || (this.state.activeLesson == this.props.match.params.id && "Resume lesson")}</Button>
+                    }} style={{float:"right"}}>{(this.state.activeLesson != this.props.match.params.id && t("Start Lesson")) || (this.state.activeLesson == this.props.match.params.id && t("Resume Lesson"))}</Button>
                   </Form>
                 </Col>
               </Row>
@@ -363,7 +372,7 @@ class CourseDetails extends React.Component {
           <Col lg="6">
             <Card small className="mb-4">
               <CardHeader className="border-bottom">
-                <h6 className="m-0">Registered Students</h6>
+                <h6 className="m-0">{t("Registered Students")}</h6>
               </CardHeader>
               <CardBody className="p-0 pb-3">
                 <table className="table mb-0">
@@ -373,13 +382,13 @@ class CourseDetails extends React.Component {
                       #
                       </th>
                       <th scope="col" className="border-0">
-                      Name
+                      {t("Name")}
                       </th>
                       <th scope="col" className="border-0">
-                      Email
+                      {t("Email")}
                       </th>
                       <th scope="col" className="border-0">
-                      Phone
+                      {t("Phone")}
                       </th>
                       <th scope="col" className="border-0">
                       </th>
@@ -401,14 +410,14 @@ class CourseDetails extends React.Component {
                 <hr style={{backgroundColor: "#a4a4a4", width: "95%"}} />
                 <Row>
                 <Col>
-                <label style={{marginLeft: "20px", fontSize: "16px"}}>Add students to course</label>
+                <label style={{marginLeft: "20px", fontSize: "16px"}}>{t("Add students to course")}</label>
                 </Col>
                 <Col>
-                <Button theme="primary" disabled={this.state.disabled} style={{marginRight: "20px", float: "right"}} onClick={this.updateStudents}>Add</Button>
+                <Button theme="primary" disabled={this.state.disabled} style={{marginRight: "20px", float: "right"}} onClick={this.updateStudents}>{t("Add")}</Button>
                 </Col>
                 </Row>
                 <TagsInput onlyUnique
-                inputProps={{placeholder: "Add students by Email"}}
+                inputProps={{placeholder: t("Add students by Email")}}
                 addKeys={[9, 13, 32, 186, 188]}
                 value={this.state.new_students}
                 inputValue={this.state.tag}
@@ -426,4 +435,4 @@ class CourseDetails extends React.Component {
 
 
 
-export default CourseDetails;
+export default withTranslation()(CourseDetails);
