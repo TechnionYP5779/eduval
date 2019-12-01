@@ -24,6 +24,9 @@ exports.Course = {
 			type: 'string',
 			format: 'date',
 		},
+		demoLink: {
+			type: 'string',
+		},
 	},
 	additionalProperties: false,
 	// if ID is required, it should be excplicitly stated when included.
