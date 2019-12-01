@@ -52,8 +52,6 @@ const registerDemoStudent = async (event, context, callback) => {
 		.then((result) => {
 			// eslint-disable-next-line prefer-destructuring
 			courseId = result[0].courseId;
-			emailSuffix = `fake${crypto.createHash('md5').update(courseId.toString()).digest('hex')}.email`;
-			email = `${username}@${emailSuffix}`;
 
 			if (result.length === 0) {
 				callback(createError.NotFound('Demo lesson not found.'));
@@ -64,10 +62,16 @@ const registerDemoStudent = async (event, context, callback) => {
 				return Promise.reject(createError.InternalServerError('More than one demo lesson with this hash.'));
 			}
 
+			return knexConnection('Courses').select('lessonNum').where({ courseId });
+		})
+		.then((result) => {
+			emailSuffix = `fake${crypto.createHash('md5').update(courseId.toString()).digest('hex')}${result[0].lessonNum}.email`;
+			email = `${username}@${emailSuffix}`;
+
 			return knexConnection('PresentStudents')
 				.select()
 				.where({
-					courseId: result[0].courseId,
+					courseId: courseId,
 					desk: event.body.seatNumber,
 				});
 		})

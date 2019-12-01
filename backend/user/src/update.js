@@ -41,6 +41,10 @@ function objectToUserInfo(obj) {
 		retObj.email = obj.email;
 	}
 
+	if ('username' in obj) {
+		retObj.username = obj.username;
+	}
+
 	return retObj;
 }
 
