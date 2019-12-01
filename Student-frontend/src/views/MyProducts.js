@@ -19,6 +19,7 @@ import awsIot  from 'aws-iot-device-sdk';
 import CoinImage from "../images/midEcoin.png"
 import Dropdown from 'react-dropdown'
 import Select from 'react-select';
+import server from '../Server/Server';
 
 
 const customStyles = {
@@ -43,101 +44,36 @@ class MyProducts extends React.Component {
             message: ""
         };
 
-        var headers = {
-            'Authorization': 'Bearer ' + localStorage.getItem('idToken')
-        };
-
-        let sub=new Buffer( localStorage.getItem('sub')).toString('base64');
-    axios.get('https://api.emon-teach.com/student/byToken/'+sub,
-     {headers: headers})
-      .then(response =>localStorage.setItem('student_id', response.data.id) );
-      let res=[];
-
         //getting data all the courses the student taking
-        axios.get('https://api.emon-teach.com/course/byStudent/'+localStorage.getItem('student_id'),
-        {headers: headers})
-        .then(response =>{
-            this.setState({courses: response.data});
-
-
-    const getContent = function(url) {
-      return new Promise((resolve, reject) => {
-    	    const lib = url.startsWith('https') ? require('https') : require('http');
-    	    const request = lib.get(url, (response) => {
-    	      if (response.statusCode < 200 || response.statusCode > 299) {
-    	         reject(new Error('Failed to load page, status code: ' + response.statusCode));
-    	       }
-
-    	      const body = [];
-    	      response.on('data', (chunk) => body.push(chunk));
-    	      response.on('end', () => resolve(body.join('')));
-    	    });
-    	    request.on('error', (err) => reject(err))
-        })
-    };
-    let client;
-
-      let connect = async () => {
-    	return getContent('https://qh6vsuof2f.execute-api.eu-central-1.amazonaws.com/dev/iot/keys').then((res) => {
-    		res = JSON.parse(res)
-    		client = awsIot.device({
-                region: res.region,
-                protocol: 'wss',
-                accessKeyId: res.accessKey,
-                secretKey: res.secretKey,
-                sessionToken: res.sessionToken,
-                port: 443,
-                host: res.iotEndpoint
-            });
-    	})
-
+        server.getStudentCourses((response) => {
+          this.setState({courses: response.data});
+        }, (error)=>{
+          console.log(error);
+        });
     }
 
-
-}).catch((error)=>{
-     console.log(error);
-  });
-
-
-
-           const getContent = function(url) {
-      return new Promise((resolve, reject) => {
-    	    const lib = url.startsWith('https') ? require('https') : require('http');
-    	    const request = lib.get(url, (response) => {
-    	      if (response.statusCode < 200 || response.statusCode > 299) {
-    	         reject(new Error('Failed to load page, status code: ' + response.statusCode));
-    	       }
-
-    	      const body = [];
-    	      response.on('data', (chunk) => body.push(chunk));
-    	      response.on('end', () => resolve(body.join('')));
-    	    });
-    	    request.on('error', (err) => reject(err))
-        })
-    };
-    }
-
-    onSelect = e => {
+    onSelect = (e) => {
         this.setState({products: [],selectedCourse: e, ischoosen: true});
 
-        var headers = {
-        'Authorization': 'Bearer ' + localStorage.getItem('idToken')
-         };
         this.setState({haveAnswer: false});
-        axios.get('https://api.emon-teach.com/student/'+localStorage.getItem('student_id')+'/courseInventory/'+e.value.id,
-         {headers: headers})
-         .then(response =>{var data = Array.from(response.data); this.setState({products: data.filter(elem => (elem.amount - elem.amountUsed)>0 ), haveAnswer: true }); } );
 
-  }
+        server.getCourseInventory((response) => {
+          var data = Array.from(response.data);
+          this.setState({
+            products: data.filter(elem => (elem.amount - elem.amountUsed)>0 ),
+            haveAnswer: true
+          });
+        }, null , e.value.id);
+    }
 
   sleep(milliseconds) {
-  var start = new Date().getTime();
-  for (var i = 0; i < 1e7; i++) {
-    if ((new Date().getTime() - start) > milliseconds){
-      break;
+    var start = new Date().getTime();
+    for (var i = 0; i < 1e7; i++) {
+      if ((new Date().getTime() - start) > milliseconds){
+        break;
+      }
     }
   }
-}
 
   stringToColour(str) {
     var hash = 0;
@@ -186,23 +122,19 @@ class MyProducts extends React.Component {
 
    }
 
-    productuse(product){
-        var headers = {
-        'Authorization': 'Bearer ' + localStorage.getItem('idToken')
-      };
+  productuse(product){
+      server.useItem((response) => {
+        this.setState({
+          message: "The items is successfully used",
+          success: true,
+          error: false
+        });
 
-      
-      axios.post('https://api.emon-teach.com/student/'+localStorage.getItem('student_id')+ '/courseInventory/' + this.state.selectedCourse.value.id + '/useItem', 
-    product.itemId,
-     {headers: headers})
-      .then(response =>{this.setState({message: "The items is successfully used", success: true, error:false}); this.onSelect(this.state.selectedCourse); } );
-
-
+        this.onSelect(this.state.selectedCourse);
+      }, null, this.state.selectedCourse.value.id, product.itemId);
+     
       this.sleep(500);
       //getting emon balance of student in the course
-      
-
-
     }
 
 

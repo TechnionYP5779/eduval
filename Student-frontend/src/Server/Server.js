@@ -8,6 +8,7 @@ class Server {
   config = {
     headers: {'Authorization': 'Bearer ' + localStorage.getItem('idToken')}
   };
+  
   getConfig(){
     let authorization = "Bearer " + localStorage.getItem('idToken');
     return {
@@ -100,8 +101,6 @@ class Server {
     .catch(callbackError);
   }
 
-
-
   /*
   =================== Get Trial Details====================
   @params:
@@ -118,7 +117,6 @@ class Server {
     .then(callback)
     .catch(callbackError);
   }
-
 
   /*
   =================== Post Student to Trial ====================
@@ -161,7 +159,6 @@ class Server {
     .then(callback)
     .catch(callbackError);
   }
-
 
   /*
   =================== Get Lesson Status ====================
@@ -212,7 +209,6 @@ class Server {
     .catch(callbackError);
   }
 
-
   /*
   =================== Delete Lesson Messages ====================
   @params:
@@ -224,9 +220,7 @@ class Server {
   @side effects:
     - Logs out if student wa previously logged to some profile
   */
-
-
-  async deleteLessonMessages( callbackError, lesson_id, student_id){
+  async deleteLessonMessages(callbackError, lesson_id, student_id){
     let student_id_sub = localStorage.getItem('sub');
     if (student_id_sub == null || !auth.isAuthenticated()){
       let error = {response: {data: {error: "Error in deleteLessonMessages in Server.js"}}};
@@ -237,6 +231,167 @@ class Server {
     axios.delete(SERVER_CONFIG.domain + "/lesson/" +lesson_id+'/messages/'+encodeURI(student_id),
       this.getConfig())
     .catch(callbackError);
+  }
+  
+  async getEmonBalanceByCourse(callback, callbackError, courseId) {
+    let studentSub = localStorage.getItem('sub');
+    if (studentSub === null || !auth.isAuthenticated()) {
+      callbackError({
+        response: {
+          data: {
+            error: "Error in getEmonBalanceByCourse in Server.js"
+          }
+        }
+      });
+    }
+    studentSub = encodeURI(studentSub);
+    
+    axios.get(`${SERVER_CONFIG.domain}/student/${studentSub}/emonBalance/byCourse/${courseId}`,
+       this.config)
+       .then(callback)
+       .catch(callbackError);
+  }
+
+  async getCondensedLog(callback, callbackError, courseId) {
+    let studentSub = localStorage.getItem('sub');
+    if (studentSub === null || !auth.isAuthenticated()) {
+      callbackError({
+        response: {
+          data: {
+            error: "Error in getCondensedLog in Server.js"
+          }
+        }
+      });
+    }
+    studentSub = encodeURI(studentSub);
+
+    axios.get(`${SERVER_CONFIG.domain}/log/condensed/${studentSub}/byCourse/${courseId}`,
+        this.config)
+        .then(callback, callbackError);
+  }
+
+  async getLog(callback, callbackError, courseId) {
+    let studentSub = localStorage.getItem('sub');
+    if (studentSub === null || !auth.isAuthenticated()) {
+      callbackError({
+        response: {
+          data: {
+            error: "Error in getLog in Server.js"
+          }
+        }
+      });
+    }
+    studentSub = encodeURI(studentSub);
+
+    axios.get(`${SERVER_CONFIG.domain}/log/ofStudent/${studentSub}/byCourse/${courseId}`,
+        this.config)
+        .then(callback, callbackError);
+  }
+
+  async getStudentCourses(callback, callbackError) {
+    let studentSub = localStorage.getItem('sub');
+    if (studentSub === null || !auth.isAuthenticated()) {
+      callbackError({
+        response: {
+          data: {
+            error: "Error in getLog in Server.js"
+          }
+        }
+      });
+    }
+    studentSub = encodeURI(studentSub);
+
+    axios.get(`${SERVER_CONFIG.domain}/course/byStudent/${studentSub}`,
+      this.config)
+      .then(callback, callbackError);
+  }
+
+  async getLessonPresentStudents(callback, callbackError, courseId) {
+    axios.get(`${SERVER_CONFIG.domain}/lesson/${courseId}/present`,
+      this.config)
+      .then(callback, callbackError);
+  }
+
+  async lessonRegisterPresentStudent(callback, callbackError, courseId, desk) {
+    let studentSub = localStorage.getItem('sub');
+    if (studentSub === null || !auth.isAuthenticated()) {
+      callbackError({
+        response: {
+          data: {
+            error: "Error in getLog in Server.js"
+          }
+        }
+      });
+    }
+
+    axios.post(`${SERVER_CONFIG.domain}/lesson/${courseId}/present`, {
+        id: studentSub,
+        desk,
+      }, this.config)
+      .then(callback, callbackError);
+  }
+
+  async getCourseInventory(callback, callbackError, courseId) {
+    let studentSub = localStorage.getItem('sub');
+    if (studentSub === null || !auth.isAuthenticated()) {
+      callbackError({
+        response: {
+          data: {
+            error: "Error in getLog in Server.js"
+          }
+        }
+      });
+    }
+    studentSub = encodeURI(studentSub);
+
+    axios.get(`${SERVER_CONFIG.domain}/student/${studentSub}/courseInventory/${courseId}`,
+      this.config)
+      .then(callback, callbackError);
+  }
+
+  async useItem(callback, callbackError, courseId, itemId) {
+    let studentSub = localStorage.getItem('sub');
+    if (studentSub === null || !auth.isAuthenticated()) {
+      callbackError({
+        response: {
+          data: {
+            error: "Error in getLog in Server.js"
+          }
+        }
+      });
+    }
+    studentSub = encodeURI(studentSub);
+
+    axios.post(`${SERVER_CONFIG.domain}/student/${studentSub}/courseInventory/${courseId}/useItem`, 
+      itemId,
+      this.config)
+      .then(callback, callbackError);
+  }
+
+  async getShopItems(callback, callbackError, courseId) {
+    axios.get(`${SERVER_CONFIG.domain}/shop/${courseId}/items`,
+      this.config)
+      .then(callback, callbackError);
+  }
+
+  async orderItem(callback, callbackError, courseId, itemId, amount) {
+    let studentSub = localStorage.getItem('sub');
+    if (studentSub === null || !auth.isAuthenticated()) {
+      callbackError({
+        response: {
+          data: {
+            error: "Error in getLog in Server.js"
+          }
+        }
+      });
+    }
+
+    axios.post(`${SERVER_CONFIG.domain}/shop/${courseId}/order`, {
+        studentId: studentSub,
+        itemId, 
+        amount
+      }, this.config)
+      .then(callback, callbackError);
   }
 
 }
