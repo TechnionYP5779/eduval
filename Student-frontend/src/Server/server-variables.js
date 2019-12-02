@@ -1,5 +1,5 @@
 export const SERVER_CONFIG = {
-  domain: "https://dev-api.emon-teach.com",
+  domain: "https://api.emon-teach.com",
   xApiKey: "ZrcWSl3ESR4T3cATxz7qN1NONPWx5SSea4s6bnR6",
   first_name: "https://e-mon:eu:auth0:com/firstname",
   last_name: "https://e-mon:eu:auth0:com/lastname",
