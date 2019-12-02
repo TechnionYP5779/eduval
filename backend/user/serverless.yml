@@ -6,7 +6,7 @@ service:        user
 provider:
     name:       aws
     runtime:    nodejs8.10
-    stage:      dev
+    stage:      prod
     region:     eu-central-1
 
     # defines environment variables for connecting to DB
