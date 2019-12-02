@@ -18,6 +18,7 @@ import {
 } from "shards-react";
 
 import server from "../../Server/Server";
+import { withTranslation } from 'react-i18next';
 
 import axios from 'axios';
 
@@ -174,4 +175,4 @@ render()
 };
 
 
-export default UserAccountDetails;
+export default withTranslation()(UserAccountDetails);

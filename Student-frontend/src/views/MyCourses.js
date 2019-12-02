@@ -40,6 +40,7 @@ import TextField from '@material-ui/core/TextField';
 import FormatListNumberedIcon from '@material-ui/icons/FormatListNumbered';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import SendIcon from '@material-ui/icons/Send';
+import { withTranslation } from 'react-i18next';
 
 
 const customStyles = {
@@ -148,35 +149,31 @@ class MyCourses extends React.Component {
         'Authorization': 'Bearer ' + localStorage.getItem('idToken')
     }
     let sub=new Buffer( localStorage.getItem('sub')).toString('base64');
-    axios.get('https://api.emon-teach.com/student/byToken/'+sub,
-     {headers: headers})
-      .then(response =>localStorage.setItem('student_id', response.data.id) );
+   
       let res=[];
 
-      axios.get('https://api.emon-teach.com/course/byStudent/'+localStorage.getItem('student_id'),
-     {headers: headers})
-     .then((response) => {
-     this.setState({PostsListThree: response.data});
+      server.getStudentCourses((response) => {
+        this.setState({PostsListThree: response.data});
 
+        const getContent = function(url) {
+          return new Promise((resolve, reject) => {
+            const lib = url.startsWith('https') ? require('https') : require('http');
+            const request = lib.get(url, (response) => {
+              if (response.statusCode < 200 || response.statusCode > 299) {
+                  reject(new Error('Failed to load page, status code: ' + response.statusCode));
+                }
 
-           const getContent = function(url) {
-      return new Promise((resolve, reject) => {
-    	    const lib = url.startsWith('https') ? require('https') : require('http');
-    	    const request = lib.get(url, (response) => {
-    	      if (response.statusCode < 200 || response.statusCode > 299) {
-    	         reject(new Error('Failed to load page, status code: ' + response.statusCode));
-    	       }
+              const body = [];
+              response.on('data', (chunk) => body.push(chunk));
+              response.on('end', () => resolve(body.join('')));
+            });
+            request.on('error', (err) => reject(err))
+          })
+        };        
+        
+        let client;
 
-    	      const body = [];
-    	      response.on('data', (chunk) => body.push(chunk));
-    	      response.on('end', () => resolve(body.join('')));
-    	    });
-    	    request.on('error', (err) => reject(err))
-        })
-    };
-    let client;
-
-      let connect = async () => {
+        let connect = async () => {
     	return getContent('https://qh6vsuof2f.execute-api.eu-central-1.amazonaws.com/dev/iot/keys').then((res) => {
     		res = JSON.parse(res)
     		client = awsIot.device({
@@ -190,89 +187,80 @@ class MyCourses extends React.Component {
             });
     	})
 
-    }
+        }
 
-    var j;
-    for (j = 0; j < this.state.PostsListThree.length; j++) {
-      axios.get('https://api.emon-teach.com/lesson/'+ this.state.PostsListThree[j].id +'/status',
-          {headers: headers})
-          .then((response) => {
-
+        var j;
+        for (j = 0; j < this.state.PostsListThree.length; j++) {
+          server.getLessonStatus((response) => {
             var current_id = ((response.request.responseURL).split('lesson')[1]).split('/')[1];
-          if(response.data === "LESSON_START"){
-            var insert = this.state.lessons_status;
-            var insert_student_status = this.state.lessons_student_status
-            insert[current_id] = false;
-            this.setState({lessons_status: insert});
-            axios.get('https://api.emon-teach.com/lesson/'+ current_id +'/present',
-                {headers: headers})
-                .then((response) => {
-                   var Student_id = parseInt(localStorage.getItem('student_id'));
-                    for (var student of response.data){
-                      if(student.id == Student_id){
+            
+            if(response.data === "LESSON_START") {
+              var insert = this.state.lessons_status;
+              var insert_student_status = this.state.lessons_student_status
+              insert[current_id] = false;
+              this.setState({lessons_status: insert});
 
-                        insert_student_status[current_id] = true;
-                        this.setState({lessons_student_status: insert_student_status});
-                        break;
-                      }
-                    }
-                });
+              server.getLessonPresentStudents((response) => {
+                var Student_id = parseInt(localStorage.getItem('student_id'));
+                for (var student of response.data){
+                  if(student.id == Student_id){
 
-          }else{
-
+                    insert_student_status[current_id] = true;
+                    this.setState({lessons_student_status: insert_student_status});
+                    break;
+                  }
+                }
+              }, null, current_id);
+            } else {
               this.state.lessons_status[current_id] = true;
-             this.setState({lessons_status: this.state.lessons_status});
-          }
+              this.setState({lessons_status: this.state.lessons_status});
+            }
 
-        }).catch((error)=>{
-          console.log(error);
-        });
-    }
+          }, (error)=>{
+            console.log(error);
+          }, this.state.PostsListThree[j].id);
+        }
 
-     var i;
-    for (i = 0; i < this.state.PostsListThree.length; i++) {
+        var i;
+        for (i = 0; i < this.state.PostsListThree.length; i++) {
+          let LessonsStatusURL = 'lesson/'+ this.state.PostsListThree[i].id +'/status';
+          connect().then(() => {
+            client.subscribe(LessonsStatusURL);
+            client.on('message', (topic, message) => {
 
-      let LessonsStatusURL = 'lesson/'+ this.state.PostsListThree[i].id +'/status';
-      connect().then(() => {
-        client.subscribe(LessonsStatusURL);
-        client.on('message', (topic, message) => {
-
-        var current_id = ((topic).split('lesson')[1]).split('/')[1];
-         if(message == "LESSON_START"){
-            var insert = this.state.lessons_status;
-            insert[current_id] = false;
-            this.setState({lessons_status: insert});
-          }else{
-            var insert = this.state.lessons_status;
-              insert[current_id] = true;
-             this.setState({lessons_status: insert});
-          }
-        })
-      });
-
-  }
-
-   })
-  .catch((error)=>{
-     console.log(error);
-  });
+            var current_id = ((topic).split('lesson')[1]).split('/')[1];
+            if(message == "LESSON_START"){
+                var insert = this.state.lessons_status;
+                insert[current_id] = false;
+                this.setState({lessons_status: insert});
+              }else{
+                var insert = this.state.lessons_status;
+                  insert[current_id] = true;
+                this.setState({lessons_status: insert});
+              }
+            })
+          });
+        }
+      }, (error)=>{
+        console.log(error);
+     });
 
   }
 
   setDeskModalChange(value)
-   {
-     this.setState({desk_modal_open: value})
-   }
+  {
+    this.setState({desk_modal_open: value})
+  }
 
-   handleDeskModalOpen = (id) =>
-   {
-     this.setState({post_id: id});
-     this.setDeskModalChange(true);
-   };
+  handleDeskModalOpen = (id) =>
+  {
+    this.setState({post_id: id});
+    this.setDeskModalChange(true);
+  };
 
-   handleDeskModalClose = () => {
-     this.setDeskModalChange(false);
-   };
+  handleDeskModalClose = () => {
+    this.setDeskModalChange(false);
+  };
 
 
   insertDeskNumber(seatNumber, errorCallback) {
@@ -300,37 +288,30 @@ class MyCourses extends React.Component {
     })
 
     var self = this;
-    axios.post('https://api.emon-teach.com/lesson/'+ lesson_id +'/present',
+    server.lessonRegisterPresentStudent(() =>
     {
-      id:  Student_id,
-      desk: seatNumber
-    }, config)
-    .then(function(response)
-      {
-        history.push("/lesson/" + lesson_id);
-      })
-    .catch(function(error)
-  {
-      console.log(error);
-           console.log("Failed presenting maself");
-           if(error.response)
-           {
-             if(error.response.status==409)
-             {
-               self.setState({studentSeatTaken: true})
-             }
-             else
-             {
-               self.setState({errored: true});
-             }
-           }
-           else
-           {
-             self.setState({errored: true});
-           }
-           self.setState({desk_button_disabled: false});
-         }
-);
+      history.push("/lesson/" + lesson_id);
+    }, (error) =>
+    {
+        console.log(error);
+        console.log("Failed presenting maself");
+        if(error.response)
+        {
+          if(error.response.status === 409)
+          {
+            self.setState({studentSeatTaken: true})
+          }
+          else
+          {
+            self.setState({errored: true});
+          }
+        }
+        else
+        {
+          self.setState({errored: true});
+        }
+        self.setState({desk_button_disabled: false});
+    }, lesson_id, seatNumber);
   }
 
   showModal(id) {
@@ -343,7 +324,7 @@ class MyCourses extends React.Component {
   }
 
   updateStudentSeat(evnt){
-    if(evnt.target.value==""  )
+    if(evnt.target.value === "")
     {
       this.setState({emptySeat: true});
     }
@@ -363,7 +344,7 @@ class MyCourses extends React.Component {
     } = this.state;
     let showModal = this.showModal;
     let closeModal = this.closeModal;
-
+    const { t } = this.props;
 
     return (
     <div>
@@ -372,7 +353,7 @@ class MyCourses extends React.Component {
       <Container fluid className="main-content-container px-4">
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title="My Courses" subtitle="Manage eveyrthing in one place"
+          <PageTitle sm="4" title={t("My Courses")} subtitle={t("Manage eveyrthing in one place")}
                      className="text-sm-left" />
         </Row>
 
@@ -390,7 +371,7 @@ class MyCourses extends React.Component {
               name={post.name}
               description={post.description}
               disabled_play={this.state.lessons_status[post.id]}
-              play_text={this.state.lessons_student_status[post.id] ? "Resume" : "Join" }
+              play_text={this.state.lessons_student_status[post.id] ? t("Resume") : t("Join") }
               play_pushed={this.state.lessons_student_status[post.id]}
               id={post.id}
               play_errored={this.state.errored}
@@ -428,7 +409,7 @@ MyCourses.propTypes = {
 };
 
 
-export default withStyles(styles)(MyCourses);
+export default withTranslation()(withStyles(styles)(MyCourses));
 
 // <CourseCard
 //   name={post.name}

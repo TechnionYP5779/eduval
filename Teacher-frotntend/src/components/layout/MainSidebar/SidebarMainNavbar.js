@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Navbar, NavbarBrand } from "shards-react";
+import { withTranslation } from 'react-i18next';
 
 import { Dispatcher, Constants } from "../../../flux";
 
@@ -18,7 +19,7 @@ class SidebarMainNavbar extends React.Component {
   }
 
   render() {
-    const { hideLogoText } = this.props;
+    const { t, hideLogoText } = this.props;
     return (
       <div className="main-navbar">
         <Navbar
@@ -36,11 +37,11 @@ class SidebarMainNavbar extends React.Component {
                 className="d-inline-block align-top mr-1"
                 style={{ maxWidth: "25px" }}
                 src={require("../../../images/shards-dashboards-logo.svg")}
-                alt="EMon - Teacher"
+                alt={t("EMon - Teacher")}
               />
               {!hideLogoText && (
                 <span className="d-none d-md-inline ml-1">
-                  EMon - Teacher
+                  {t("EMon - Teacher")}
                 </span>
               )}
             </div>
@@ -69,4 +70,4 @@ SidebarMainNavbar.defaultProps = {
   hideLogoText: false
 };
 
-export default SidebarMainNavbar;
+export default withTranslation()(SidebarMainNavbar);

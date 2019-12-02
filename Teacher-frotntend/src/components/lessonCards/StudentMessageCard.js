@@ -31,6 +31,7 @@ import MeetingRoomIcon from '@material-ui/icons/MeetingRoom';
 import RecordVoiceOverIcon from '@material-ui/icons/RecordVoiceOver';
 import SentimentDissatisfiedIcon from '@material-ui/icons/SentimentDissatisfied';
 import VolumeUpIcon from '@material-ui/icons/VolumeUp';
+import { withTranslation } from 'react-i18next';
 
 import {
   Row,
@@ -308,11 +309,13 @@ class StudentMessageCard extends React.Component
   render()
   {
     const classes = this.props.classes;
+    const { t } = this.props;
+
     return(
       <Card className={classes.card}>
         <CardHeader
-        title={this.state.title}
-        subheader={this.state.subtitle}
+        title={this.props.title}
+        subheader={this.props.subtitle}
         classes={{
           title: classes.title,
         }}
@@ -353,10 +356,10 @@ class StudentMessageCard extends React.Component
                 >
                   <HelpIcon />
                   <br/>
-                  Questions
+                  {t("Questions")}
                 </Button>
                 <Typography className={clsx([classes.text,classes.tomatoUnChosen])}>
-                <b>{this.state.student_message_counter[0]}</b> Students
+                <b>{this.state.student_message_counter[0]}</b> {t("Students")}
                 </Typography>
                 <IconButton aria-label="delete"
                 className={clsx([classes.delete_icon,classes.tomatoUnChosen])}
@@ -387,10 +390,10 @@ class StudentMessageCard extends React.Component
                 >
                   <MeetingRoomIcon  />
                   <br/>
-                  Go Out
+                  {t("Go Out")}
                 </Button>
                 <Typography className={clsx([classes.text,classes.orangeUnChosen])}>
-                <b>{this.state.student_message_counter[1]}</b> Students
+                <b>{this.state.student_message_counter[1]}</b> {t("Students")}
                 </Typography>
                 <IconButton aria-label="delete"
                 className={clsx([classes.delete_icon,classes.orangeUnChosen])}
@@ -419,10 +422,10 @@ class StudentMessageCard extends React.Component
                 >
                   <RecordVoiceOverIcon  />
                   <br/>
-                  Answer!
+                  {t("Answer")+"!"}
                 </Button>
                 <Typography className={clsx([classes.text,classes.greenUnChosen])}>
-                <b>{this.state.student_message_counter[2]}</b> Students
+                <b>{this.state.student_message_counter[2]}</b> {t("Students")}
                 </Typography>
                 <IconButton aria-label="delete"
                 className={clsx([classes.delete_icon,classes.greenUnChosen])}
@@ -453,10 +456,10 @@ class StudentMessageCard extends React.Component
                 >
                   <SentimentDissatisfiedIcon  />
                   <br/>
-                  Confused
+                  {t("Confused")}
                 </Button>
                 <Typography className={clsx([classes.text,classes.violetUnChosen])}>
-                <b>{this.state.student_message_counter[3]}</b> Students
+                <b>{this.state.student_message_counter[3]}</b> {t("Students")}
                 </Typography>
                 <IconButton aria-label="delete"
                 className={clsx([classes.delete_icon,classes.violetUnChosen])}
@@ -485,10 +488,10 @@ class StudentMessageCard extends React.Component
                 >
                   <VolumeUpIcon  />
                   <br/>
-                  Louder
+                  {t("Louder")}
                 </Button>
                 <Typography className={clsx([classes.text,classes.blueslateUnChosen])}>
-                  <b>{this.state.student_message_counter[4]}</b> Students
+                  <b>{this.state.student_message_counter[4]}</b> {t("Students")}
                 </Typography>
                 <IconButton aria-label="delete"
                 className={clsx([classes.delete_icon,classes.blueslateUnChosen])}
@@ -512,4 +515,4 @@ StudentMessageCard.propTypes = {
 };
 
 
-export default withStyles(styles)(StudentMessageCard);
+export default withTranslation()(withStyles(styles)(StudentMessageCard));
