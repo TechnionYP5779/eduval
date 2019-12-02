@@ -3,7 +3,7 @@ export default function() {
     {
       title: "Home",
       to: "/overview",
-      htmlBefore: 'DONEEE<i class="material-icons">edit</i>',
+      htmlBefore: '<i class="material-icons">edit</i>',
       htmlAfter: ""
     },
     {
@@ -13,7 +13,7 @@ export default function() {
     },
     {
       title: "Add New Course",
-      htmlBefore: 'DONEEE<i class="material-icons">note_add</i>',
+      htmlBefore: '<i class="material-icons">note_add</i>',
       to: "/add-new-course",
     },
     {
@@ -23,7 +23,7 @@ export default function() {
     },
     {
       title: "Trial Lesson",
-      htmlBefore: 'DONEEE<i class="material-icons">flash_on</i>',
+      htmlBefore: '<i class="material-icons">flash_on</i>',
       to: "/demo-lesson",
     }
   ];

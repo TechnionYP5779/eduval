@@ -42,7 +42,7 @@ export default class UserActions extends React.Component {
     });
     if (teacher_payload)
     {
-      self.setState({username: teacher_payload.nickname});
+      self.setState({username: teacher_payload["https://emon-teach.com/username"]});
     }
     else
     {

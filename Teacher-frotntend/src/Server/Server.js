@@ -31,13 +31,14 @@ class Server {
     - User should be logged in when called.
   */
   updateTeacher(callback, callbackError, teacherDetails){
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "not logged in"}}};
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in updateTeacher in Server.js"}}};
       callbackError(error);
       return;
     }
-    axios.put(SERVER_CONFIG.domain + '/teacher', teacherDetails ,this.getConfig())
+    axios.put(SERVER_CONFIG.domain + '/user/'+encodeURI(teacher_id_sub),
+      teacherDetails ,this.getConfig())
     .then(callback)
     .catch(callbackError);
   }
@@ -666,7 +667,7 @@ class Server {
     if (profile_payload){
       return JSON.parse(profile_payload)
     }
-    let error = {response: {data: {error: "not logged in"}}};
+    let error = {response: {data: {error: "Error in getTeacherProfile in Sever.js"}}};
     callbackError(error);
   }
 }
