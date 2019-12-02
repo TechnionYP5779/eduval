@@ -634,6 +634,7 @@ class Lesson extends React.Component {
           <RegisteredStudentsCard
           registered_students={this.state.registered_students}
           students={this.state.students}
+          courseDetails={false}
           />
         </Row>
       </Container>

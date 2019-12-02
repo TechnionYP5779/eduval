@@ -451,10 +451,10 @@ class Server {
   @use conditions:
     - User should be logged in when called.
   */
-  getStudents(callback, callbackError, courseId){
+  getRegisteredStudents(callback, callbackError, courseId){
     let teacher_id_sub = localStorage.getItem('sub');
     if (teacher_id_sub == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "Error in getStudents in Server.js"}}};
+      let error = {response: {data: {error: "Error in getRegisteredStudents in Server.js"}}};
       callbackError(error);
       return;
     }
@@ -670,6 +670,61 @@ class Server {
     let error = {response: {data: {error: "Error in getTeacherProfile in Sever.js"}}};
     callbackError(error);
   }
+
+
+  /*
+  =================== Get Teacher Emon Pie ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+      + response is {data: {teacher object}}
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+  @use conditions:
+    - User should be logged in when called.
+  @side effects:
+    - if auth0 account is not in the EMON DB, it will register the teacher
+  */
+  async getTeacherEmonPie(callback, callbackError){
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "getTeacherEmonPie error in Server.js"}}};
+      callbackError(error);
+      return;
+    }
+    var teacher_id = encodeURI(teacher_id_sub);
+    axios.get(SERVER_CONFIG.domain + "/log/teacher/"
+                + teacher_id + "/awardedEmons", this.getConfig())
+    .then(callback)
+    .catch(callbackError);
+  }
+
+  /*
+  =================== Get Course Emon Pie ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+      + response is {data: {teacher object}}
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+  @use conditions:
+    - User should be logged in when called.
+  @side effects:
+    - if auth0 account is not in the EMON DB, it will register the teacher
+  */
+  async getCourseEmonPie(callback, callbackError, course_id){
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "getCourseEmonPie error in Server.js"}}};
+      callbackError(error);
+      return;
+    }
+    var teacher_id = encodeURI(teacher_id_sub);
+    axios.get(SERVER_CONFIG.domain + "/log/course/"
+                + course_id + "/awardedEmons", this.getConfig())
+    .then(callback)
+    .catch(callbackError);
+  }
+
+
 }
 
 let server = new Server();

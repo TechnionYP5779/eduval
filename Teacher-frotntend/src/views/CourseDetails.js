@@ -16,8 +16,10 @@ import {
 } from "shards-react";
 
 import Modal from 'react-modal';
+import RegisteredStudentsCard from "../components/lessonCards/RegisteredStudentsCard";
 import PageTitle from "../components/common/PageTitle";
 import TimeoutAlert from "../components/common/TimeoutAlert";
+import CourseGraphCard from "../components/common/CourseGraphCard";
 import server from "../Server/Server";
 import TagsInput from 'react-tagsinput';
 import { withTranslation } from "react-i18next";
@@ -43,7 +45,7 @@ class CourseDetails extends React.Component {
 
     this.state = {
 
-      students: [],
+      reg_students: [],
 
       new_students: [],
 
@@ -66,7 +68,8 @@ class CourseDetails extends React.Component {
       modalDeleteIsOpen: false,
 
       student: {},
-      showDeleteCourseModal: false
+      showDeleteCourseModal: false,
+      just_deleted: false,
     };
 
     this.updateName = this.updateName.bind(this);
@@ -187,8 +190,8 @@ class CourseDetails extends React.Component {
       console.log("Error in getCourse in componentDidMount in CourseDetails.js");
     }, this.props.match.params.id);
 
-    server.getStudents(function(response){
-      self.setState({students: response.data});
+    server.getRegisteredStudents(function(response){
+      self.setState({reg_students: response.data});
     }, function(error){ console.log("Error in componentDidMount in CourseDetails.js", error)
     }, this.props.match.params.id);
 
@@ -220,7 +223,7 @@ class CourseDetails extends React.Component {
     let closeDeleteModal = this.closeDeleteModal;
     let closeDeleteCourseModal = this.closeDeleteCourseModal;
     const{
-      students
+      reg_students
     } = this.state;
 
     const { t } = this.props;
@@ -244,28 +247,6 @@ class CourseDetails extends React.Component {
       <Button theme="danger" disabled={this.state.disabled} style={{float: "right"}} onClick={closeDeleteCourseModal}>{t("No")}</Button>
       </Modal>
 
-      <Modal
-        isOpen={this.state.modalDeleteIsOpen}
-        onRequestClose={this.closeDeleteModal}
-        style={customStyles}
-      >
-      <p>{t("unregisterStudentConfirm", {name: this.state.student.name})}</p>
-
-      <Button disabled={this.state.disabled} theme="success" onClick={()=>{
-        self.setState({disabled: true});
-        server.deleteStudent((response)=>{window.location.reload();},
-        (err) => {
-          self.setState({
-            disabled: false,
-            error: "Error in deleteStudent in Yes Button in deleteStudent Modal in CourseDetails.js"
-          });
-          window.scrollTo(0, 0);
-        },
-        self.props.match.params.id,
-        self.state.student.id);
-      }}>{t("Yes")}</Button>
-      <Button theme="danger" disabled={this.state.disabled} style={{float: "right"}} onClick={closeDeleteModal}>{t("No")}</Button>
-      </Modal>
 
       {this.state.error &&
       <TimeoutAlert className="mb-0" theme="danger" msg={this.state.error} time={10000}/>
@@ -281,151 +262,152 @@ class CourseDetails extends React.Component {
           </Row>
 
           <Row>
-          <Col lg="6">
-          {/* Editor */}
-          <Card style = {{height:"auto",width:"100%",marginLeft:"16px"}} className="mb-4">
-            <CardHeader className="border-bottom">
-            <Row><Col><h6 className="m-0">{t("Details")}</h6></Col>
-            {// <Col><Button outline style={{padding:"0px", float: "right"}} theme="danger" onClick={this.deleteCourseModal}>
-            //   <i className="material-icons" style={{fontSize:"2em"}}>delete</i>
-            // </Button></Col>
-          }
-            </Row>
-            </CardHeader>
-            <ListGroup flush>
-            <ListGroupItem className="p-3">
-              <Row>
-                <Col>
-                  <Form>
-                    <Row form>
-                    {/* Course Name */}
-                      <Col md="6" className="form-group">
-                        <label htmlFor="feFirstName">{t("Course Name")}</label>
-                        <FormInput
-                        id="feFirstName"
-                        placeholder="Course Name"
-                        value={this.state.course.name}
-                        onChange={this.updateName}
-                        />
-                      </Col>
-                    </Row>
-                    <Row form>
-                      {/* Start */}
-                      <Col md="6" className="form-group">
-                        <label htmlFor="feLastName">{t("Start Date")}</label>
-                        <FormInput
-                        type="date"
-                        id="feLastName"
-                        value={this.state.course.startDate}
-                        onChange={this.updateStartDate}
-                        />
-                      </Col>
+            <Col lg="6">
+              {/* Editor */}
+              <Card style = {{height:"auto",width:"100%",marginLeft:"16px"}} className="mb-4">
+                <ListGroup flush>
+                <ListGroupItem className="p-3">
+                  <Row>
+                    <Col>
+                      <Form>
+                        <Row form>
+                        {/* Course Name */}
+                          <Col md="6" className="form-group">
+                            <label htmlFor="feFirstName">{t("Course Name")}</label>
+                            <FormInput
+                            id="feFirstName"
+                            placeholder="Course Name"
+                            value={this.state.course.name}
+                            onChange={this.updateName}
+                            />
+                          </Col>
+                          {/* Course Location */}
+                          <Col md="6" className="form-group">
+                            <label htmlFor="feZipCode">{t("Class Room")}</label>
+                            <FormInput
+                            id="feZipCode"
+                            value={this.state.course.location}
+                            onChange={this.updateLocation}
+                            />
+                          </Col>
+                        </Row>
+                        <Row form>
+                          {/* Start */}
+                          <Col md="6" className="form-group">
+                            <label htmlFor="feLastName">{t("Start Date")}</label>
+                            <FormInput
+                            type="date"
+                            id="feLastName"
+                            value={this.state.course.startDate}
+                            onChange={this.updateStartDate}
+                            />
+                          </Col>
 
-                      {/* End */}
-                      <Col md="6" className="form-group">
-                        <label htmlFor="feEmail">{t("End Date")}</label>
-                        <FormInput
-                        type="date"
-                        id="feEmail"
-                        value={this.state.course.endDate}
-                        onChange={this.updateEndDate}
-                        />
-                      </Col>
-                      {/* Course Location */}
-                      <Col md="6" className="form-group">
-                        <label htmlFor="feZipCode">{t("Class Room")}</label>
-                        <FormInput
-                        id="feZipCode"
-                        value={this.state.course.location}
-                        onChange={this.updateLocation}
-                        />
-                      </Col>
-                    </Row>
-                    <Row form>
-                    {/* Description */}
-                      <Col md="12" className="form-group">
-                        <label htmlFor="feDescription">{t("Course Description")}</label>
-                        <FormTextarea id="feDescription" rows="5" value={this.state.course.description} onChange={this.updateDescription}/>
-                      </Col>
-                    </Row>
-                    <Button outline disabled={this.state.disabled} onClick={this.update} theme="accent">{t("Update Course")}</Button>
-                    <Button theme="success" disabled={this.state.disabled || (this.state.activeLesson && this.state.activeLesson != this.props.match.params.id)} onClick={()=>{
-                      this.setState({disabled: true});
-                      if(this.state.activeLesson == this.props.match.params.id){
-                        history.push("/lesson/" + this.props.match.params.id);
-                        return;
-                      }
-                      let self = this;
-                      server.changeLessonStatus(function(response){
-                        history.push("/lesson/" + self.props.match.params.id);
-                      }, function(error){
-                        self.setState({disabled: false, error: t("An error has occured")}); window.scrollTo(0, 0);
-                      }, this.props.match.params.id, "LESSON_START");
-                    }} style={{float:"right"}}>{(this.state.activeLesson != this.props.match.params.id && t("Start Lesson")) || (this.state.activeLesson == this.props.match.params.id && t("Resume Lesson"))}</Button>
-                  </Form>
-                </Col>
-              </Row>
-            </ListGroupItem>
-            </ListGroup>
-          </Card>
-          </Col>
-          <Col lg="6">
-            <Card small className="mb-4">
-              <CardHeader className="border-bottom">
-                <h6 className="m-0">{t("Registered Students")}</h6>
-              </CardHeader>
-              <CardBody className="p-0 pb-3">
-                <table className="table mb-0">
-                  <thead className="bg-light">
-                    <tr>
-                      <th scope="col" className="border-0">
-                      #
-                      </th>
-                      <th scope="col" className="border-0">
-                      {t("Name")}
-                      </th>
-                      <th scope="col" className="border-0">
-                      {t("Email")}
-                      </th>
-                      <th scope="col" className="border-0">
-                      {t("Phone")}
-                      </th>
-                      <th scope="col" className="border-0">
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {students.map((student, idx) => (
-                    <tr key={idx}>
-                      <td>{idx + 1}</td>
-                      <td>{student.name}</td>
-                      <td>{student.email}</td>
-                      <td>{student.phoneNum}</td>
-                      <td><Button pill outline style={{padding:"0px"}} theme="danger" onClick={()=>{showDeleteItemModal(student);}}>
-                        <i className="material-icons" style={{fontSize:"26px"}}>clear</i>
-                      </Button></td>
-                    </tr>))}
-                  </tbody>
-                </table>
-                <hr style={{backgroundColor: "#a4a4a4", width: "95%"}} />
-                <Row>
-                <Col>
-                <label style={{marginLeft: "20px", fontSize: "16px"}}>{t("Add students to course")}</label>
-                </Col>
-                <Col>
-                <Button theme="primary" disabled={this.state.disabled} style={{marginRight: "20px", float: "right"}} onClick={this.updateStudents}>{t("Add")}</Button>
-                </Col>
-                </Row>
-                <TagsInput onlyUnique
-                inputProps={{placeholder: t("Add students by Email")}}
-                addKeys={[9, 13, 32, 186, 188]}
-                value={this.state.new_students}
-                inputValue={this.state.tag}
-                onChangeInput={this.handleChangeTagInput}
-                onChange={this.handleStudentsChange} />
+                          {/* End */}
+                          <Col md="6" className="form-group">
+                            <label htmlFor="feEmail">{t("End Date")}</label>
+                            <FormInput
+                            type="date"
+                            id="feEmail"
+                            value={this.state.course.endDate}
+                            onChange={this.updateEndDate}
+                            />
+                          </Col>
+                        </Row>
+                        <Row form>
+                        {/* Description */}
+                          <Col md="12" className="form-group">
+                            <label htmlFor="feDescription">{t("Course Description")}</label>
+                            <FormTextarea id="feDescription" rows="3" value={this.state.course.description} onChange={this.updateDescription}/>
+                          </Col>
+                        </Row>
+                        <Button outline disabled={this.state.disabled} onClick={this.update} theme="accent">{t("Update Course")}</Button>
+                        <Button theme="success" disabled={this.state.disabled || (this.state.activeLesson && this.state.activeLesson != this.props.match.params.id)} onClick={()=>{
+                          this.setState({disabled: true});
+                          if(this.state.activeLesson == this.props.match.params.id){
+                            history.push("/lesson/" + this.props.match.params.id);
+                            return;
+                          }
+                          let self = this;
+                          server.changeLessonStatus(function(response){
+                            history.push("/lesson/" + self.props.match.params.id);
+                          }, function(error){
+                            self.setState({disabled: false, error: t("An error has occured")}); window.scrollTo(0, 0);
+                          }, this.props.match.params.id, "LESSON_START");
+                        }} style={{float:"right"}}>{(this.state.activeLesson != this.props.match.params.id && t("Start Lesson")) || (this.state.activeLesson == this.props.match.params.id && t("Resume Lesson"))}</Button>
+                      </Form>
+                    </Col>
+                  </Row>
+                </ListGroupItem>
+                </ListGroup>
+                <CardBody>
+                  <Row>
+                    <Col>
+                      <label style={{marginLeft: "20px", fontSize: "16px"}}>{t("Add students to course")}</label>
+                    </Col>
+                    <Col>
+                      <Button theme="primary" disabled={this.state.disabled} style={{marginRight: "20px", float: "right"}} onClick={this.updateStudents}>{t("Add")}</Button>
+                    </Col>
+                  </Row>
+                  <TagsInput onlyUnique
+                  inputProps={{placeholder: t("Add students by Email")}}
+                  addKeys={[9, 13, 32, 186, 188]}
+                  value={this.state.new_students}
+                  inputValue={this.state.tag}
+                  onChangeInput={this.handleChangeTagInput}
+                  onChange={this.handleStudentsChange} />
                 </CardBody>
               </Card>
             </Col>
+            <Col lg="6">
+              {this.state.course.id!="" &&
+                <CourseGraphCard
+                courseId={this.state.course.id}
+                justDeleted={this.state.just_deleted}
+                revertJustDeleted={()=>this.setState({just_deleted:false})}
+
+                />
+              }
+
+              {this.state.course.id=="" &&
+                <div>
+                  Loading..
+                </div>
+              }
+            </Col>
+          </Row>
+          <Row>
+            <RegisteredStudentsCard
+              registered_students={this.state.reg_students}
+              students={this.state.reg_students}
+              courseDetails={true}
+              deleteStudent={
+                (id)=>{
+                  var teacher_profile = server.getTeacherProfile(
+                    function(error){
+                      console.log("error in getTeacherProfile in deleteStudent Button in CourseDetails.js",error)
+                    }
+                  )
+                  self.setState({disabled: true});
+                  server.deleteStudent(function(response){
+                    self.setState({just_deleted:true});
+                  },
+                  function(error){
+                    self.setState({
+                      disabled: false,
+                    });
+                    console.log("error in deleteStudent in deleteStudent in Button in CourseDetails.js", error)
+                    window.scrollTo(0, 0);
+                  },
+                  self.state.course.id,
+                  id);
+
+                }
+              }
+            />
+          </Row>
+          <Row>
+
           </Row>
         </Container>
         </div>

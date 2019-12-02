@@ -133,7 +133,7 @@ class RegisteredStudentsCard extends React.Component
     }
     this.setExpanded = this.setExpanded.bind(this)
     this.handleExpandClick = this.handleExpandClick.bind(this)
-
+    console.log("Is CourseDetails?", this.props.courseDetails);
   }
   setExpanded(value)
   {
@@ -185,7 +185,11 @@ class RegisteredStudentsCard extends React.Component
             <CardContent>
                <RegisterStudentTable
                registered_students={this.state.registered_students}
-               students={this.state.students} />
+               students={this.state.students}
+               courseDetails={this.props.courseDetails}
+               deleteStudent={this.props.deleteStudent}
+               />
+
             </CardContent>
           </Collapse>
 
