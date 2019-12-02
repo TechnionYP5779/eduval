@@ -681,6 +681,93 @@ paths:
       security:
         - auth0_token: []
   
+  '/log/course/{courseId}/awardedEmons':
+    get:
+      tags:
+        - log
+      summary: See who's getting da money
+      description: Returns how much Emons students got in this course in total. 
+      parameters:
+        - name: courseId
+          in: path
+          description: ID of the requested course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalEmons:
+                    type: integer
+                  students:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        emons:
+                          type: integer
+        '400':
+          description: Validation exception. Invalid ID(s).
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+      security:
+        - auth0_token: []
+        
+  '/log/teacher/{teacherId}/awardedEmons':
+    get:
+      tags:
+        - log
+      summary: See who's getting da money
+      description: Returns how much Emons students got from this teacher in total. 
+      parameters:
+        - name: teacherId
+          in: path
+          description: ID of the relevant teacher
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalEmons:
+                    type: integer
+                  students:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        emons:
+                          type: integer
+        '400':
+          description: Validation exception. Invalid ID(s).
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+      security:
+        - auth0_token: []
+  
   
   
   '/lesson/{courseId}/status':

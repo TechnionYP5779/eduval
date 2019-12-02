@@ -19,6 +19,8 @@ provider:
         DB_PORT:        ${self:custom.secrets.DB_PORT}
         LAMBDA_ENDPOINT:        ${self:custom.secrets.LAMBDA_ENDPOINT}
         LAMBDA_APIKEY:        ${self:custom.secrets.LAMBDA_APIKEY}
+        AUTH0_MANAGEMENT_CLIENT_ID: ${self:custom.secrets.AUTH0_MANAGEMENT_CLIENT_ID}
+        AUTH0_MANAGEMENT_CLIENT_SECRET: ${self:custom.secrets.AUTH0_MANAGEMENT_CLIENT_SECRET}
 
 #package:
 #    individually: true
@@ -76,6 +78,36 @@ functions:
                         paths:
                             courseId: true
                             studentId: true
+                                
+    getCourseAwardedEmons:
+        handler: src/awardedEmons.course
+        description: Get condensed log
+        events:
+            - http:
+                path: course/{courseId}/awardedEmons
+                method: get
+                cors: true
+                authorizer:
+                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
+                request:
+                    parameters:
+                        paths:
+                            courseId: true
+                                
+    getTeacherAwardedEmons:
+        handler: src/awardedEmons.teacher
+        description: Get condensed log
+        events:
+            - http:
+                path: teacher/{teacherId}/awardedEmons
+                method: get
+                cors: true
+                authorizer:
+                    arn: ${self:custom.secrets.AUTHORIZER_ARN}
+                request:
+                    parameters:
+                        paths:
+                            teacherId: true
 
 resources:
     Resources:

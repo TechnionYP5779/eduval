@@ -41,10 +41,6 @@ function objectToUserInfo(obj) {
 		retObj.email = obj.email;
 	}
 
-	if ('username' in obj) {
-		retObj.username = obj.username;
-	}
-
 	return retObj;
 }
 
@@ -121,6 +117,14 @@ const updateUser = async (event, context, callback) => {
 				realm: 'Username-Password-Authentication',
 			});
 		})
+		.then(() => {
+			if ('username' in event.body) {
+				return management.updateUser({ id: userId }, {
+					username: event.body.username,
+				});
+			}
+			return Promise.resolve();
+		})
 		.then(() => management.updateUser({ id: userId }, userinfo))
 		.then(() => {
 			if ('newPassword' in event.body) {
@@ -143,9 +147,29 @@ const updateUser = async (event, context, callback) => {
 					});
 				}
 				if (err.statusCode === 400) {
+					if (err.message === 'The specified new username already exists') {
+						return callback(null, {
+							statusCode: 400,	// bad request
+							body: JSON.stringify({
+								error: 'USERNAME_TAKEN',
+							}),
+						});
+					}
+					if (err.message === 'The specified new email already exists') {
+						return callback(null, {
+							statusCode: 400,	// bad request
+							body: JSON.stringify({
+								error: 'EMAIL_TAKEN',
+							}),
+						});
+					}
+					console.log(err);
+					console.log(JSON.stringify(err));
 					return callback(null, {
 						statusCode: 400,	// bad request
-						body: 'Bad user ID.',
+						body: JSON.stringify({
+							error: 'UNKNOWN_BAD_REQUEST',
+						}),
 					});
 				}
 				if (err.statusCode === 403) {
