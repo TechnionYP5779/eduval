@@ -36,6 +36,7 @@ class Auth {
     let idToken = localStorage.getItem('idToken');
     let expiresAt = localStorage.getItem('expiresAt');
     let sub = localStorage.getItem('sub');
+    let payload = localStorage.getItem('payload');
 
     if (accessToken != null)
       this.accessToken = accessToken;
@@ -84,6 +85,7 @@ class Auth {
     localStorage.setItem('accessToken', authResult.accessToken);
     localStorage.setItem('idToken', authResult.idToken);
     localStorage.setItem('sub', authResult.idTokenPayload.sub);
+    localStorage.setItem('payload', JSON.stringify(authResult.idTokenPayload));
 
     // navigate to the home route
     this.registerstudent();

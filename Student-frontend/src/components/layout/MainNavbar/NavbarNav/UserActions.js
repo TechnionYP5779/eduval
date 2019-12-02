@@ -35,11 +35,18 @@ export default class UserActions extends React.Component {
 
   componentDidMount() {
     var self = this;
-    server.getStudentProfile(function(response){
-        self.setState({username: response.data.name});
-      }, function(error){
+    var student_payload = server.getStudentProfile( function(error){
+        console.log("Error in getting Teacher Profile for Nav Bar");
+        console.log(error);
     });
-    this.toggleUserActions = this.toggleUserActions.bind(this);
+    if (student_payload)
+    {
+      self.setState({username: student_payload["https://emon-teach.com/username"]});
+    }
+    else
+    {
+      console.log("Problem at componentDidMount at UserActions.js!");
+    }
   }
 
   toggleUserActions() {

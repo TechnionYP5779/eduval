@@ -8,7 +8,7 @@ class Server {
   config = {
     headers: {'Authorization': 'Bearer ' + localStorage.getItem('idToken')}
   };
-  
+
   getConfig(){
     let authorization = "Bearer " + localStorage.getItem('idToken');
     return {
@@ -31,52 +31,41 @@ class Server {
   @side effects:
     - if auth0 account is not in the EMON DB, it will register the student
   */
-  async getStudentProfile(callback, callbackError){
+  getStudentProfile(callbackError){
+    let config = this.getConfig();
+    let profile_payload = localStorage.getItem('payload');
+    if (profile_payload){
+      return JSON.parse(profile_payload)
+    }
+    let error = {response: {data: {error: "Error in getTeacherProfile in Sever.js"}}};
+    callbackError(error);
+  }
 
-    let config = this.config;
-    let student_id = localStorage.getItem('student_id');
-    let sub = localStorage.getItem('sub');
-    if (sub == null){
-
-      let error = {response: {error: "not logged in"}};
+  /*
+  =================== Update Student ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - courseDetails: the course object
+  @use conditions:
+    - User should be logged in when called.
+  */
+  updateStudent(callback, callbackError, studentDetails){
+    let student_id_sub = localStorage.getItem('sub');
+    if (student_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in updateStudent in Server.js"}}};
       callbackError(error);
       return;
     }
-    if (student_id != null){
-      axios.get(SERVER_CONFIG.domain + '/student/' + student_id, config)
-      .then(callback)
-      .catch(callbackError);
-      return;
-    }
-    // first time called might not have student id
-    axios.get(SERVER_CONFIG.domain + '/student/byToken/'+new Buffer(sub).toString('base64'), config)
-    .then(function(response){
-      localStorage.setItem('student_id', response.data.id);
-      callback(response);
-    })
-    .catch(function(error){
-      console.log("Error in getStudentProfile in Server.js");
-      if (error.status !== 404){
-        callbackError(error);
-        return;
-      }
-      // lazy registration to EMON DB
-      auth.getUserInfo(function(error, profile){
-        if (error) {
-          callbackError(error);
-          return;
-        }
-
-        axios.post(SERVER_CONFIG.domain + '/student',
-        {authIdToken: new Buffer(sub).toString('base64'),
-          name: profile.nickname,
-          email: profile.email,
-          phoneNum: profile[SERVER_CONFIG.phone_number]}, config)
-        .then(callback)
-        .catch(callbackError);
-      });
-    });
+    axios.put(SERVER_CONFIG.domain + '/user/'+encodeURI(student_id_sub),
+      studentDetails ,this.getConfig())
+    .then(callback)
+    .catch(callbackError);
   }
+
+
+
 
   /*
   =================== Get Course Details====================
@@ -89,6 +78,9 @@ class Server {
   @side effects:
     - Logs out if student wa previously logged to some profile
   */
+
+
+
   async getCourse(callback, callbackError, course_id){
     let student_id_sub = localStorage.getItem('sub');
     if (student_id_sub == null || !auth.isAuthenticated()){
@@ -232,7 +224,7 @@ class Server {
       this.getConfig())
     .catch(callbackError);
   }
-  
+
   async getEmonBalanceByCourse(callback, callbackError, courseId) {
     let studentSub = localStorage.getItem('sub');
     if (studentSub === null || !auth.isAuthenticated()) {
@@ -245,7 +237,7 @@ class Server {
       });
     }
     studentSub = encodeURI(studentSub);
-    
+
     axios.get(`${SERVER_CONFIG.domain}/student/${studentSub}/emonBalance/byCourse/${courseId}`,
        this.config)
        .then(callback)
@@ -362,7 +354,7 @@ class Server {
     }
     studentSub = encodeURI(studentSub);
 
-    axios.post(`${SERVER_CONFIG.domain}/student/${studentSub}/courseInventory/${courseId}/useItem`, 
+    axios.post(`${SERVER_CONFIG.domain}/student/${studentSub}/courseInventory/${courseId}/useItem`,
       itemId,
       this.config)
       .then(callback, callbackError);
@@ -388,7 +380,7 @@ class Server {
 
     axios.post(`${SERVER_CONFIG.domain}/shop/${courseId}/order`, {
         studentId: studentSub,
-        itemId, 
+        itemId,
         amount
       }, this.config)
       .then(callback, callbackError);
