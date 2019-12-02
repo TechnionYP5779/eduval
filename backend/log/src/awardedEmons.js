@@ -165,8 +165,8 @@ const getTeacherAwardedEmons = async (event, context, callback) => {
 		.then((result) => {
 			studentsArr = result;
 			return knexConnection('Logs')
-				.where({
-					courseId: event.pathParameters.courseId,
+				.whereIn('courseId', knexConnection('Courses').select('courseId').where('teacherId', teacherId))
+				.andWhere({
 					msgType: 0,
 				})
 				.andWhere('val', '>', 0)
