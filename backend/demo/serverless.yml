@@ -15,9 +15,9 @@ provider:
         DB_NAME:        ${self:custom.secrets.DB_NAME}
         DB_USER:        ${self:custom.secrets.DB_USER}
         DB_PASSWORD:    ${self:custom.secrets.DB_PASSWORD}
-        DB_HOST:        ${self:custom.secrets.DB_HOST}
+        DB_HOST:        ${self:custom.secrets.DB_HOST.${self:provider.stage}}
         DB_PORT:        ${self:custom.secrets.DB_PORT}
-        LAMBDA_ENDPOINT:        ${self:custom.secrets.LAMBDA_ENDPOINT}
+        LAMBDA_ENDPOINT:            ${self:custom.secrets.LAMBDA_ENDPOINT.${self:provider.stage}}
         LAMBDA_APIKEY:        ${self:custom.secrets.LAMBDA_APIKEY}
         BITLY_APIKEY:        ${self:custom.secrets.BITLY_APIKEY}
         BITLY_GROUP_GUID:        ${self:custom.secrets.BITLY_GROUP_GUID}
@@ -25,7 +25,7 @@ provider:
         AUTH0_CLIENT_SECRET:        ${self:custom.secrets.AUTH0_CLIENT_SECRET}
         AUTH0_MANAGEMENT_CLIENT_ID:        ${self:custom.secrets.AUTH0_MANAGEMENT_CLIENT_ID}
         AUTH0_MANAGEMENT_CLIENT_SECRET:        ${self:custom.secrets.AUTH0_MANAGEMENT_CLIENT_SECRET}
-        NEW_DEMO_REDIRECT_DOMAIN:               ${self:custom.newDemoRedirectDomain.${self:provider.stage}}
+        NEW_DEMO_REDIRECT_DOMAIN:               ${self:custom.newDemoRedirectDomain.prod}
 
 #package:
 #    individually: true

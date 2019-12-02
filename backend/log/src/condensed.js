@@ -45,23 +45,25 @@ function isAnInteger(obj) {
 }
 
 // GET log/condensed/{studentId}/byCourse/{courseId}
-const getStudentLog = async (event, context, callback) => {
+const getCondensedLog = async (event, context, callback) => {
 	if (!event.pathParameters.courseId || !event.pathParameters.studentId) {
 		return callback(createError.BadRequest("Student's and course's IDs required."));
 	}
-	if (!isAnInteger(event.pathParameters.courseId) || !isAnInteger(event.pathParameters.studentId)) {
-		return callback(createError.BadRequest('IDs should be integers.'));
+	if (!isAnInteger(event.pathParameters.courseId)) {
+		return callback(createError.BadRequest('Course ID should be an integers.'));
 	}
+
+	const studentId = decodeURI(event.pathParameters.studentId);
 
 	// Connect
 	const knexConnection = knex(dbConfig);
-	let toRet = [];
+	const toRet = [];
 
 	return knexConnection('Logs')
 		.max('lessonNumber')
 		.where({
 			courseId: event.pathParameters.courseId,
-			studentId: event.pathParameters.studentId,
+			studentId,
 		})
 		.then((result) => {
 			for (let i = 0; i <= result[0]['max(`lessonNumber`)']; i += 1) {
@@ -70,12 +72,11 @@ const getStudentLog = async (event, context, callback) => {
 					emojis: [],
 				});
 			}
-			console.log(JSON.stringify(toRet));
 		})
 		.then(() => knexConnection('Logs')
 			.where({
 				courseId: event.pathParameters.courseId,
-				studentId: event.pathParameters.studentId,
+				studentId,
 				msgType: 0,	// emon messages
 			})
 			.select('lessonNumber')
@@ -84,21 +85,16 @@ const getStudentLog = async (event, context, callback) => {
 		.then((result) => {
 			result.forEach((x) => {
 				toRet[x.lessonNumber].emons += x['sum(`val`)'];
-			});// result.map(x => ({ emons: x['sum(`val`)'] }));
+			});
 		})
 		.then(() => knexConnection('Logs')
 			.where({
 				courseId: event.pathParameters.courseId,
-				studentId: event.pathParameters.studentId,
+				studentId,
 				msgType: 1,	// emojis
 			})
 			.select('lessonNumber', 'val'))
 		.then((result) => {
-			/*toRet = toRet.map((x) => {
-				// eslint-disable-next-line no-param-reassign
-				x.emojis = [];
-				return x;
-			});*/
 			if (result.length !== 0) {
 				result.forEach((x) => {
 					toRet[x.lessonNumber].emojis.push(numToEmoji(x.val));
@@ -124,7 +120,7 @@ const getStudentLog = async (event, context, callback) => {
 		});
 };
 
-const handler = middy(getStudentLog)
+const handler = middy(getCondensedLog)
 	.use(httpEventNormalizer())
 	.use(httpErrorHandler())
 	.use(cors(corsConfig));

@@ -1,5 +1,5 @@
 {
-    "name": "course",
+    "name": "lambda",
     "version": "1.0.0",
     "description": "",
     "private": true,
@@ -15,9 +15,8 @@
     "dependencies": {
         "auth0": "^2.20.0",
         "http-errors": "^1.7.2",
-        "knex": "^0.16.5",
-        "middy": "^0.27.0",
-        "mysql": "^2.16.0"
+        "jsonwebtoken": "^8.5.1",
+        "middy": "^0.27.0"
     },
     "devDependencies": {
         "eslint": "^5.16.0",

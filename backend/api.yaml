@@ -5,6 +5,8 @@ info:
 servers:
   - url: 'https://api.emon-teach.com'
 tags:
+  - name: user
+    description: deals with generic users
   - name: teacher
     description: stuff related to the teachers
   - name: student
@@ -35,59 +37,51 @@ tags:
     description: stuff related to demo lessons
 
 paths:
-  /teacher:
+  '/user/{userId}':
     put:
       tags:
-        - teacher
-      summary: Update an existing teacher
+        - user
+      summary: Update a users's profile
+      description: Updates a user's profile, including password.
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user
+          required: true
+          schema:
+            type: string
       requestBody:
         description: >-
-          Teacher object that needs to be updated. ID is required, rest is
-          optional.
+          The fields to update. `oldPassword` required, the rest are optional.
+
+
+          In case of demo user, no old password is required, but a new one *must* be set. This status is lost after the first update.
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Teacher'
-        required: true
+              $ref: '#/components/schemas/UserDetails'
       responses:
         '200':
-          description: All OK
+          description: successful operation
+          content: {}
+        '401':
+          description: Trying to edit a different user
+          content: {}
+        '400':
+          description: JSON validation error / Invalid ID / missing new password for demo user.
           content: {}
         '404':
-          description: Teacher not found
+          description: User not found
           content: {}
-        '400':
-          description: Validation exception. Invalid JSON.
+        '403':
+          description: Incorrect password
           content: {}
-      security:
-        - auth0_token: []
-    post:
-      tags:
-        - teacher
-      summary: Add a new teacher
-      requestBody:
-        description: Teacher object that needs to be added. ID field is optional and is ignored.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Teacher'
-        required: true
-      responses:
-        '200':
-          description: All OK
-          content: 
-            text/plain:
-              schema:
-                type: integer
-                format: int64
-                example: 15
-                description: 'ID of inserted teacher'
-        '400':
-          description: Validation exception. Invalid JSON.
+        '429':
+          description: Too many attempts. Account blocked.
           content: {}
       security:
         - auth0_token: []
-  
+ 
   '/teacher/{teacherId}/activeLesson':
     get:
       tags:
@@ -100,8 +94,7 @@ paths:
           description: ID of teacher to return
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
       responses:
         '200':
           description: successful operation
@@ -120,199 +113,8 @@ paths:
           description: Teacher not found
           content: {}
       security:
-        - auth0_token: []
-  
-  '/teacher/{teacherId}':
-    get:
-      tags:
-        - teacher
-      summary: Find teacher by ID
-      description: Returns a single teacher
-      parameters:
-        - name: teacherId
-          in: path
-          description: ID of teacher to return
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Teacher'
-        '400':
-          description: Validation exception. Invalid ID.
-          content: {}
-        '404':
-          description: Teacher not found
-          content: {}
-      security:
-        - auth0_token: []
-    delete:
-      tags:
-        - teacher
-      summary: Deletes a teacher
-      parameters:
-        - name: teacherId
-          in: path
-          description: ID of teacher to delete
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: All OK
-          content: {}
-        '400':
-          description: Validation exception. Invalid ID.
-          content: {}
-        '404':
-          description: Teacher not found
-          content: {}
-      security:
-        - auth0_token: []
-  
-  '/teacher/byToken/{authToken}':
-    get:
-      tags:
-        - teacher
-      summary: Find teacher by Auth0 token
-      description: Returns a single teacher
-      parameters:
-        - name: authToken
-          in: path
-          description: Auth0 token of teacher to return
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Teacher'
-        '400':
-          description: Validation exception. Missing token.
-          content: {}
-        '404':
-          description: Teacher not found
-          content: {}
-      security:
-        - auth0_token: []
+        - auth0_token: [] 
 
-  
-  /student:
-    put:
-      tags:
-        - student
-      summary: Update an existing student
-      requestBody:
-        description: >-
-          Student object that needs to be updated. ID is required, rest is
-          optional.
-        content:
-          application/json:
-            schema:
-                $ref: '#/components/schemas/Student'
-        required: true
-      responses:
-        '200':
-          description: All OK
-          content: {}
-        '404':
-          description: Student not found
-          content: {}
-        '400':
-          description: Validation exception. Invalid JSON.
-          content: {}
-      security:
-        - auth0_token: []
-    post:
-      tags:
-        - student
-      summary: Add a new student
-      requestBody:
-        description: Student object that needs to be added. ID field is optional and is ignored.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Student'
-        required: true
-      responses:
-        '200':
-          description: All OK
-          content: 
-            text/plain:
-              schema:
-                type: integer
-                format: int64
-                example: 15
-                description: 'ID of inserted student'
-        '400':
-          description: Validation exception. Invalid JSON.
-          content: {}
-      security:
-        - auth0_token: []
-  
-  '/student/{studentId}':
-    get:
-      tags:
-        - student
-      summary: Find student by ID
-      description: Returns a single student
-      parameters:
-        - name: studentId
-          in: path
-          description: ID of student to return
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Student'
-        '400':
-          description: Validation exception. Invalid ID.
-          content: {}
-        '404':
-          description: Teacher not found
-          content: {}
-      security:
-        - auth0_token: []
-    delete:
-      tags:
-        - student
-      summary: Deletes a student
-      parameters:
-        - name: studentId
-          in: path
-          description: ID of student to delete
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: All OK
-          content: {}
-        '400':
-          description: Validation exception. Invalid ID.
-          content: {}
-        '404':
-          description: Student not found
-          content: {}
-      security:
-        - auth0_token: []
-  
   '/student/{studentId}/courseInventory/{courseId}':
     get:
       tags:
@@ -325,8 +127,7 @@ paths:
           description: ID of student
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
         - name: courseId
           in: path
           description: ID of course
@@ -363,8 +164,7 @@ paths:
           description: ID of student
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
         - name: courseId
           in: path
           description: ID of course
@@ -390,50 +190,20 @@ paths:
           content: {}
       security:
         - auth0_token: []
-  
-  '/student/byToken/{authToken}':
+ 
+  '/student/{studentId}/activeLesson':
     get:
       tags:
         - student
-      summary: Find student by Auth0 token
-      description: Returns a single student
+      summary: Return the learned course
+      description: Returns the lesson the student is studiying right now.
       parameters:
-        - name: authToken
+        - name: studentId
           in: path
-          description: Auth0 token of student to return
+          description: ID of student to return
           required: true
           schema:
             type: string
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Student'
-        '400':
-          description: Validation exception. Missing token.
-          content: {}
-        '404':
-          description: Student not found
-          content: {}
-      security:
-        - auth0_token: []
-  
-  '/student/{teacherId}/activeLesson':
-    get:
-      tags:
-        - student
-      summary: Return the taught course
-      description: Returns the lesson the teacher is teaching right now.
-      parameters:
-        - name: teacherId
-          in: path
-          description: ID of teacher to return
-          required: true
-          schema:
-            type: integer
-            format: int64
       responses:
         '200':
           description: successful operation
@@ -643,9 +413,6 @@ paths:
       
       description: >-
         Adds students to the registered students list.
-        
-        Note! does not check validity of course id or supplied students cause i'm lazy. if you pass bad values, you'll get 502.
-      
       parameters:
         - name: courseId
           in: path
@@ -655,18 +422,14 @@ paths:
             type: integer
             format: int64
       requestBody:
-        description: Array of student IDs that should be registered.
+        description: Array of student emails that should be registered.
         content:
           application/json:
             schema:
-              oneOf:
-              - type: array
-                items:
-                  type: integer
-              - type: array
-                items:
-                  type: string
-                  format: email
+              type: array
+              items:
+                type: string
+                format: email
         required: true
       responses:
         '200':
@@ -732,8 +495,7 @@ paths:
           description: ID of the student
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
       responses:
         '200':
           description: All OK
@@ -792,8 +554,7 @@ paths:
           description: ID of the teacher
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
       responses:
         '200':
           description: successful operation
@@ -824,8 +585,7 @@ paths:
           description: ID of the student
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
       responses:
         '200':
           description: successful operation
@@ -857,8 +617,7 @@ paths:
           description: ID of the relevant student
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
         - name: courseId
           in: path
           description: ID of the requested course
@@ -896,8 +655,7 @@ paths:
           description: ID of the relevant student
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
         - name: courseId
           in: path
           description: ID of the requested course
@@ -914,6 +672,93 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/LessonLog'
+        '400':
+          description: Validation exception. Invalid ID(s).
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+      security:
+        - auth0_token: []
+  
+  '/log/course/{courseId}/awardedEmons':
+    get:
+      tags:
+        - log
+      summary: See who's getting da money
+      description: Returns how much Emons students got in this course in total. 
+      parameters:
+        - name: courseId
+          in: path
+          description: ID of the requested course
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalEmons:
+                    type: integer
+                  students:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        emons:
+                          type: integer
+        '400':
+          description: Validation exception. Invalid ID(s).
+          content: {}
+        '404':
+          description: Course not found
+          content: {}
+      security:
+        - auth0_token: []
+        
+  '/log/teacher/{teacherId}/awardedEmons':
+    get:
+      tags:
+        - log
+      summary: See who's getting da money
+      description: Returns how much Emons students got from this teacher in total. 
+      parameters:
+        - name: teacherId
+          in: path
+          description: ID of the relevant teacher
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalEmons:
+                    type: integer
+                  students:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        emons:
+                          type: integer
         '400':
           description: Validation exception. Invalid ID(s).
           content: {}
@@ -1022,8 +867,7 @@ paths:
           description: ID of the requested student
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
       responses:
         '200':
           description: successful operation
@@ -1058,8 +902,7 @@ paths:
           description: ID of the student
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
       requestBody:
         description: The message to send.
         content:
@@ -1097,8 +940,7 @@ paths:
           description: ID of the student
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
       responses:
         '200':
           description: All OK
@@ -1163,8 +1005,7 @@ paths:
               type: object
               properties:
                 id:
-                  type: integer
-                  format: int64
+                  type: string
                   description: The ID of the student
                 desk:
                   type: string
@@ -1489,8 +1330,7 @@ paths:
               type: object
               properties:
                 studentId:
-                  type: integer
-                  format: int64
+                  type: string
                 itemId:
                   type: integer
                   format: int64
@@ -1615,9 +1455,6 @@ components:
       type: object
       properties:
         id:
-          type: integer
-          format: int64
-        authIdToken:
           type: string
         name:
           type: string
@@ -1634,9 +1471,6 @@ components:
       type: object
       properties:
         id:
-          type: integer
-          format: int64
-        authIdToken:
           type: string
         name:
           type: string
@@ -1650,8 +1484,7 @@ components:
       type: object
       properties:
         id:
-          type: integer
-          format: int64
+          type: string
         authIdToken:
           type: string
         name:
@@ -1668,9 +1501,6 @@ components:
       type: object
       properties:
         id:
-          type: integer
-          format: int64
-        authIdToken:
           type: string
         name:
           type: string
@@ -1691,8 +1521,7 @@ components:
         name:
           type: string
         teacherId:
-          type: integer
-          format: int64
+          type: string
         location:
           type: string
         description:
@@ -1753,8 +1582,7 @@ components:
               type: integer
               format: int64
             studentId:
-              type: integer
-              format: int64
+              type: string
             courseId:
               type: integer
               format: int64
@@ -1778,8 +1606,7 @@ components:
               type: integer
               format: int64
             studentId:
-              type: integer
-              format: int64
+              type: string
             item:
               type: integer
               format: int64
@@ -1799,8 +1626,7 @@ components:
               type: integer
               format: int64
             studentId:
-              type: integer
-              format: int64
+              type: string
             courseId:
               type: integer
               format: int64
@@ -1879,8 +1705,7 @@ components:
             type: object
             properties:
               id:
-                type: integer
-                format: int64
+                type: string
               name:
                 type: string
               email:
@@ -1897,12 +1722,32 @@ components:
       type: object
       properties:
         studentId:
-          type: integer
-          format: int64
+          type: string
         emons:
           type: integer
       additionalProperties: false
     
+    UserDetails:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phoneNum:
+          type: string
+        oldPassword:
+          type: string
+          format: password
+        newPassword:
+          type: string
+          format: password
+      required:
+        - oldPassword
+
  
   securitySchemes:
     auth0_token:

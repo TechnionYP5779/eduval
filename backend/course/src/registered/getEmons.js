@@ -4,18 +4,17 @@ const {
 	cors, httpErrorHandler, httpEventNormalizer,
 } = require('middy/middlewares');
 const createError = require('http-errors');
+const auth0 = require('auth0');
 const dbConfig = require('../../db');
 const corsConfig = require('../../cors');
 
 function dbRowToProperObject(obj) {
-	const retObj = { ...obj };		// shallow copy
-	retObj.id = obj.studentId;
-	delete retObj.studentId;
-	retObj.authIdToken = obj.idToken;
-	delete retObj.idToken;
-	delete retObj.courseId;
-	retObj.emons = obj['sum(`val`)'];
-	delete retObj['sum(`val`)'];
+	const retObj = {};
+	retObj.id = obj.user_id;
+	retObj.name = `${obj.user_metadata.first_name} ${obj.user_metadata.last_name}`;
+	retObj.email = obj.email;
+	retObj.phoneNum = obj.user_metadata.phone_number;
+	retObj.emons = obj.emons;
 	return retObj;
 }
 
@@ -32,6 +31,13 @@ const getRegisteredWithEmons = async (event, context, callback) => {
 		return callback(createError.BadRequest('ID should be an integer.'));
 	}
 
+	const management = new auth0.ManagementClient({
+		domain: 'e-mon.eu.auth0.com',
+		clientId: process.env.AUTH0_MANAGEMENT_CLIENT_ID,
+		clientSecret: process.env.AUTH0_MANAGEMENT_CLIENT_SECRET,
+		scope: 'read:users',
+	});
+
 	// Connect
 	const knexConnection = knex(dbConfig);
 
@@ -39,17 +45,43 @@ const getRegisteredWithEmons = async (event, context, callback) => {
 		.where({
 			courseId: event.pathParameters.courseId,
 		})
-		.select()
-		.join('Students', 'Registered.studentId', 'Students.studentId')
-		.join(knexConnection('Logs')
+		// .select('Registered.studentId')
+		.leftJoin(knexConnection('Logs')
 			.sum('val')
-			.select('studentId')
+			.select(knexConnection.ref('studentId').as('studentLogId'))
 			.where('msgType', 0)	// EMon messages
 			.andWhere('live', false)
 			.groupBy('studentId')
 			.as('Table1'),
 		'Registered.studentId',
-		'Table1.studentId')
+		'Table1.studentLogId')
+		.then((result) => {
+			// if no registered students
+			if (result.length === 0) {
+				return result;
+			}
+
+			let queryString = '';
+
+			result.forEach((x) => {
+				if (queryString !== '') { queryString += ' OR '; }
+
+				queryString += `user_id:${x.studentId}`;
+			});
+
+			return management.getUsers({
+				search_engine: 'v3',
+				fields: 'user_id,email,user_metadata',
+				include_fields: true,
+				q: queryString,
+			}).then(authResult => authResult.map((student) => {
+				const studentWithEmons = student;
+				const emons = result.find(element => element.studentId === student.user_id)['sum(`val`)'];
+				studentWithEmons.emons = emons == null ? 0 : emons;
+
+				return studentWithEmons;
+			}));
+		})
 		.then((result) => {
 			knexConnection.client.destroy();
 

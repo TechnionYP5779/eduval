@@ -77,11 +77,6 @@ const addDemoCourse = async (event, context, callback) => {
 				.update('demoLink', demoLink)
 				.where('courseId', courseId);
 		})
-		.then(() => axios.get(`https://api.emon-teach.com/teacher/${courseObj.teacherId}/activeLesson`, {
-			headers: {
-				Authorization: event.headers.Authorization,
-			},
-		}))
 		.then(() => {
 			knexConnection.client.destroy();
 			callback(null, {

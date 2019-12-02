@@ -134,9 +134,11 @@ const getStudentMessages = async (event, context, callback) => {
 	if (!event.pathParameters.courseId || !event.pathParameters.studentId) {
 		return callback(createError.BadRequest("Course's and student's ID required."));
 	}
-	if (!isAnInteger(event.pathParameters.courseId) || !isAnInteger(event.pathParameters.studentId)) {
-		return callback(createError.BadRequest('IDs should be integers.'));
+	if (!isAnInteger(event.pathParameters.courseId)) {
+		return callback(createError.BadRequest('Course ID should be an integer.'));
 	}
+
+	const studentId = decodeURI(event.pathParameters.studentId);
 
 	// Connect
 	const knexConnection = knex(dbConfig);
@@ -144,7 +146,7 @@ const getStudentMessages = async (event, context, callback) => {
 	return knexConnection('Logs')
 		.where({
 			courseId: event.pathParameters.courseId,
-			studentId: event.pathParameters.studentId,
+			studentId,
 			live: true,
 		}).select()
 		.then((result) => {
@@ -170,12 +172,13 @@ const postStudentMessages = async (event, context, callback) => {
 	if (!event.pathParameters.courseId || !event.pathParameters.studentId) {
 		return callback(createError.BadRequest("Course's and student's ID required."));
 	}
-	if (!isAnInteger(event.pathParameters.courseId) || !isAnInteger(event.pathParameters.studentId)) {
-		return callback(createError.BadRequest('IDs should be integers.'));
+	if (!isAnInteger(event.pathParameters.courseId)) {
+		return callback(createError.BadRequest('Course ID should be an integer.'));
 	}
 
-	const objToInsert = objToDBRow(event.body, event.pathParameters.courseId,
-		event.pathParameters.studentId);
+	const studentId = decodeURI(event.pathParameters.studentId);
+
+	const objToInsert = objToDBRow(event.body, event.pathParameters.courseId, studentId);
 
 	// Connect
 	const knexConnection = knex(dbConfig);
@@ -191,7 +194,7 @@ const postStudentMessages = async (event, context, callback) => {
 		.then(async () => {
 			knexConnection.client.destroy();
 			iot.connect().then(() => {
-				iot.client.publish(`lesson/${event.pathParameters.courseId}/messages/${event.pathParameters.studentId}`, JSON.stringify(event.body), {}, () => {
+				iot.client.publish(`lesson/${event.pathParameters.courseId}/messages/${studentId}`, JSON.stringify(event.body), {}, () => {
 					iot.client.end(false);
 					return callback(null, {
 						statusCode: 200,
@@ -215,9 +218,11 @@ const clearStudentMessages = async (event, context, callback) => {
 	if (!event.pathParameters.courseId || !event.pathParameters.studentId) {
 		return callback(createError.BadRequest("Course's and student's ID required."));
 	}
-	if (!isAnInteger(event.pathParameters.courseId) || !isAnInteger(event.pathParameters.studentId)) {
-		return callback(createError.BadRequest('IDs should be integers.'));
+	if (!isAnInteger(event.pathParameters.courseId)) {
+		return callback(createError.BadRequest('Course ID should be an integer.'));
 	}
+
+	const studentId = decodeURI(event.pathParameters.studentId);
 
 	// Connect
 	const knexConnection = knex(dbConfig);
@@ -225,7 +230,7 @@ const clearStudentMessages = async (event, context, callback) => {
 	return knexConnection('Logs')
 		.where({
 			courseId: event.pathParameters.courseId,
-			studentId: event.pathParameters.studentId,
+			studentId,
 			live: true,
 		})
 		.update({ live: false })

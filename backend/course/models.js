@@ -8,7 +8,7 @@ exports.Course = {
 			type: 'string',
 		},
 		teacherId: {
-			type: 'integer',
+			type: 'string',
 		},
 		location: {
 			type: 'string',
@@ -23,6 +23,9 @@ exports.Course = {
 		endDate: {
 			type: 'string',
 			format: 'date',
+		},
+		demoLink: {
+			type: 'string',
 		},
 	},
 	additionalProperties: false,

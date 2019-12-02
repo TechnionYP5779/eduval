@@ -98,9 +98,11 @@ const getStudentLog = async (event, context, callback) => {
 	if (!event.pathParameters.courseId || !event.pathParameters.studentId) {
 		return callback(createError.BadRequest("Student's and course's IDs required."));
 	}
-	if (!isAnInteger(event.pathParameters.courseId) || !isAnInteger(event.pathParameters.studentId)) {
-		return callback(createError.BadRequest('IDs should be integers.'));
+	if (!isAnInteger(event.pathParameters.courseId)) {
+		return callback(createError.BadRequest('Course ID should be an integer.'));
 	}
+
+	const studentId = decodeURI(event.pathParameters.studentId);
 
 	// Connect
 	const knexConnection = knex(dbConfig);
@@ -108,7 +110,7 @@ const getStudentLog = async (event, context, callback) => {
 	return knexConnection('Logs')
 		.where({
 			courseId: event.pathParameters.courseId,
-			studentId: event.pathParameters.studentId,
+			studentId,
 		})
 		.select()
 		.then(async (result) => {

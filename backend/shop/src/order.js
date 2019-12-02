@@ -37,7 +37,7 @@ const orderItem = async (event, context, callback) => {
 		return callback(createError.BadRequest('Not enough of this item is available.'));
 	}
 
-	const studentMoney = Number.parseInt(axios.get(`${process.env.LAMBDA_ENDPOINT}/student/${event.body.studentId}/emonBalance/byCourse/${event.pathParameters.courseId}`, { headers: { Authorization: event.headers.Authorization } }), 10);
+	const studentMoney = Number.parseInt(axios.get(`${process.env.LAMBDA_ENDPOINT}/student/${encodeURI(event.body.studentId)}/emonBalance/byCourse/${event.pathParameters.courseId}`, { headers: { Authorization: event.headers.Authorization } }), 10);
 
 	if (item.cost * event.body.amount > studentMoney) {
 		// Disconnect
@@ -96,7 +96,7 @@ const schema = {
 	type: 'object',
 	properties: {
 		studentId: {
-			type: 'integer',
+			type: 'string',
 		},
 		itemId: {
 			type: 'integer',

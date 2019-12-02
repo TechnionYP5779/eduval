@@ -8,7 +8,7 @@ exports.Course = {
 			type: 'string',
 		},
 		teacherId: {
-			type: 'integer',
+			type: 'string',
 		},
 		location: {
 			type: 'string',

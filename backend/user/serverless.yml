@@ -1,14 +1,14 @@
 # For full config options, check the docs:
 #    docs.serverless.com
 
-service:        teacher
+service:        user
 
 provider:
     name:       aws
     runtime:    nodejs8.10
     stage:      prod
     region:     eu-central-1
-    
+
     # defines environment variables for connecting to DB
     environment:
         AUTHORIZER_ARN:             ${self:custom.secrets.AUTHORIZER_ARN}
@@ -17,8 +17,14 @@ provider:
         DB_PASSWORD:    ${self:custom.secrets.DB_PASSWORD}
         DB_HOST:        ${self:custom.secrets.DB_HOST.${self:provider.stage}}
         DB_PORT:        ${self:custom.secrets.DB_PORT}
-        LAMBDA_ENDPOINT:        ${self:custom.secrets.LAMBDA_ENDPOINT}
+        LAMBDA_ENDPOINT:            ${self:custom.secrets.LAMBDA_ENDPOINT.${self:provider.stage}}
         LAMBDA_APIKEY:        ${self:custom.secrets.LAMBDA_APIKEY}
+        BITLY_APIKEY:        ${self:custom.secrets.BITLY_APIKEY}
+        BITLY_GROUP_GUID:        ${self:custom.secrets.BITLY_GROUP_GUID}
+        AUTH0_CLIENT_ID:        ${self:custom.secrets.AUTH0_CLIENT_ID}
+        AUTH0_CLIENT_SECRET:        ${self:custom.secrets.AUTH0_CLIENT_SECRET}
+        AUTH0_MANAGEMENT_CLIENT_ID:        ${self:custom.secrets.AUTH0_MANAGEMENT_CLIENT_ID}
+        AUTH0_MANAGEMENT_CLIENT_SECRET:        ${self:custom.secrets.AUTH0_MANAGEMENT_CLIENT_SECRET}
 
 #package:
 #    individually: true
@@ -38,27 +44,27 @@ custom:
         prod: true
     customDomain:
         domainName: ${self:custom.domains.${self:provider.stage}}
-        basePath: 'teacher' # This will be prefixed to all routes
+        basePath: 'user' # This will be prefixed to all routes
         stage: ${self:provider.stage}
         createRoute53Record: true
         enabled: ${self:custom.customDomainEnabled.${self:provider.stage}}
 
 #TODO: Implement a more strict CORS policy
 functions:
-    getActiveLesson:
-        handler: src/get.activeLesson
-        description: Get information about a teacher by their Auth Token.
+    updateUser:
+        handler: src/update.handler
+        description: Update userinfo.
         events:
             - http:
-                path: /{teacherId}/activeLesson
-                method: get
+                path: /{userId}/
+                method: put
                 cors: true
                 authorizer:
                     arn: ${self:custom.secrets.AUTHORIZER_ARN}
                 request:
                     parameters:
                         paths:
-                            teacherId: true
+                            userId: true
 
 resources:
     Resources:

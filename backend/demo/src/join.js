@@ -35,9 +35,12 @@ const registerDemoStudent = async (event, context, callback) => {
 		uppercase: true,
 		symbols: true,
 	});
+	// eslint-disable-next-line camelcase
+	const [given_name, ...restOfName] = event.body.nickname.split(' ');
+	// eslint-disable-next-line camelcase
+	const family_name = restOfName.join(' ');
 	let auth0Token = null;
-	let idToken = null;
-	let studentId = null;
+	// let idToken = null;
 	let courseId = null;
 	let decodedToken = null;
 	let accessToken = null;
@@ -49,8 +52,6 @@ const registerDemoStudent = async (event, context, callback) => {
 		.then((result) => {
 			// eslint-disable-next-line prefer-destructuring
 			courseId = result[0].courseId;
-			emailSuffix = `fake${crypto.createHash('md5').update(courseId.toString()).digest('hex')}.email`;
-			email = `${username}@${emailSuffix}`;
 
 			if (result.length === 0) {
 				callback(createError.NotFound('Demo lesson not found.'));
@@ -61,10 +62,16 @@ const registerDemoStudent = async (event, context, callback) => {
 				return Promise.reject(createError.InternalServerError('More than one demo lesson with this hash.'));
 			}
 
+			return knexConnection('Courses').select('lessonNum').where({ courseId });
+		})
+		.then((result) => {
+			emailSuffix = `fake${crypto.createHash('md5').update(courseId.toString()).digest('hex')}${result[0].lessonNum}.email`;
+			email = `${username}@${emailSuffix}`;
+
 			return knexConnection('PresentStudents')
 				.select()
 				.where({
-					courseId: result[0].courseId,
+					courseId,
 					desk: event.body.seatNumber,
 				});
 		})
@@ -122,6 +129,15 @@ const registerDemoStudent = async (event, context, callback) => {
 			name: event.body.nickname,
 			username,
 			nickname: event.body.nickname,
+			given_name,
+			user_metadata: {
+				phone_number: '0000000000',
+				first_name: given_name,
+				last_name: family_name,
+			},
+			app_metadata: {
+				demo_student: true,
+			},
 			connection: 'Username-Password-Authentication',
 		}))
 		.then(() => {
@@ -141,38 +157,24 @@ const registerDemoStudent = async (event, context, callback) => {
 			decodedToken = jwt.decode(response.id_token);
 			accessToken = response.access_token;
 
-			idToken = Buffer.from(decodedToken.sub).toString('base64');
+			// idToken = Buffer.from(decodedToken.sub).toString('base64');
 			auth0Token = response.id_token;
 			return Promise.resolve();
-		})
-		.then(() => axios.post('https://api.emon-teach.com/student', {
-			authIdToken: idToken,
-			name: event.body.nickname,
-			email,
-			phoneNum: '000-0000000',
-		}, {
-			headers: {
-				Authorization: `Bearer ${auth0Token}`,
-			},
-		}))
-		.then((response) => {
-			// Not sure if already int or not. If yes, this does nothing.
-			studentId = parseInt(response.data, 10);
 		})
 		.then(() => {
 			knexConnection.client.destroy();
 
 			return axios({
-				url: `https://api.emon-teach.com/course/${courseId}/registered`,
+				url: `${process.env.LAMBDA_ENDPOINT}/course/${courseId}/registered`,
 				method: 'post',
-				data: [parseInt(studentId, 10)],
+				data: [email],
 				headers: {
 					Authorization: `Bearer ${auth0Token}`,
 				},
 			});
 		})
-		.then(() => axios.post(`https://api.emon-teach.com/lesson/${courseId}/present`, {
-			id: studentId,
+		.then(() => axios.post(`${process.env.LAMBDA_ENDPOINT}/lesson/${courseId}/present`, {
+			id: decodedToken.sub,
 			desk: event.body.seatNumber,
 		}, {
 			headers: {
@@ -187,7 +189,6 @@ const registerDemoStudent = async (event, context, callback) => {
 					accessToken,
 					expiresIn: decodedToken.exp,
 					sub: decodedToken.sub,
-					studentId,
 				}),
 			});
 		})
