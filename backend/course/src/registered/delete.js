@@ -24,12 +24,17 @@ const removeCourseRegistered = async (event, context, callback) => {
 	// Connect
 	const knexConnection = knex(dbConfig);
 
-	return knexConnection('Registered')
+	return knexConnection('Logs')
 		.where({
 			courseId: event.pathParameters.courseId,
 			studentId,
-		})
-		.del()
+		}).del()
+		.then(() => knexConnection('Registered')
+			.where({
+				courseId: event.pathParameters.courseId,
+				studentId,
+			})
+			.del())
 		.then((result) => {
 			knexConnection.client.destroy();
 

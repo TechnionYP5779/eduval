@@ -130,9 +130,109 @@ const getStudentLog = async (event, context, callback) => {
 		});
 };
 
+// GET log/ofCourse/{courseId}/csv
+const getStudentLogCsv = async (event, context, callback) => {
+	if (!event.pathParameters.courseId) {
+		return callback(createError.BadRequest("Course's ID required."));
+	}
+	if (!isAnInteger(event.pathParameters.courseId)) {
+		return callback(createError.BadRequest('Course ID should be an integer.'));
+	}
+
+	// Connect
+	const knexConnection = knex(dbConfig);
+
+	return knexConnection('Logs')
+		.where({
+			courseId: event.pathParameters.courseId,
+		})
+		.select()
+		.then(async (result) => {
+			knexConnection.client.destroy();
+
+			let resArray = await Promise.all(result.map(dbRowToProperObject));
+
+			const csvHeader = Object.keys(resArray[0]).sort().join(',');
+
+			resArray = resArray.map(x => Object.entries(x)
+				// eslint-disable-next-line no-nested-ternary
+				.sort((a, b) => ((a[0] < b[0]) ? -1 : (a[0] > b[0]) ? 1 : 0))
+				.map(y => y[1]).join(',')).join('\r\n');
+
+			callback(null, {
+				statusCode: 200,
+				headers: {
+					'Content-Disposition': ' attachment; filename="log.csv"',
+					'Content-Type': 'text/csv; charset=UTF-8',
+				},
+				body: `${csvHeader}\n${resArray}`,
+			});
+		})
+		.catch((err) => {
+			// Disconnect
+			knexConnection.client.destroy();
+			// eslint-disable-next-line no-console
+			console.log(`ERROR getting log: ${err}`);
+			return callback(createError.InternalServerError('Error getting log.'));
+		});
+};
+
+// GET log/ofTeacher/{teacherId}/csv
+const getAllLogCsv = async (event, context, callback) => {
+	if (!event.pathParameters.teacherId) {
+		return callback(createError.BadRequest("Course's ID required."));
+	}
+	const teacherId = decodeURI(event.pathParameters.teacherId);
+
+	// Connect
+	const knexConnection = knex(dbConfig);
+
+	return knexConnection('Logs')
+		.whereIn('courseId', knexConnection('Courses').select('courseId').where({ teacherId }))
+		.select()
+		.then(async (result) => {
+			knexConnection.client.destroy();
+
+			let resArray = await Promise.all(result.map(dbRowToProperObject));
+
+			const csvHeader = Object.keys(resArray[0]).sort().join(',');
+
+			resArray = resArray.map(x => Object.entries(x)
+				// eslint-disable-next-line no-nested-ternary
+				.sort((a, b) => ((a[0] < b[0]) ? -1 : (a[0] > b[0]) ? 1 : 0))
+				.map(y => y[1]).join(',')).join('\r\n');
+
+			callback(null, {
+				statusCode: 200,
+				headers: {
+					'Content-Disposition': ' attachment; filename="log.csv"',
+					'Content-Type': 'text/csv; charset=UTF-8',
+				},
+				body: `${csvHeader}\n${resArray}`,
+			});
+		})
+		.catch((err) => {
+			// Disconnect
+			knexConnection.client.destroy();
+			// eslint-disable-next-line no-console
+			console.log(`ERROR getting log: ${err}`);
+			return callback(createError.InternalServerError('Error getting log.'));
+		});
+};
+
 const handler = middy(getStudentLog)
 	.use(httpEventNormalizer())
 	.use(httpErrorHandler())
 	.use(cors(corsConfig));
 
-module.exports = { handler };
+const csv = middy(getStudentLogCsv)
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
+
+const csvAll = middy(getAllLogCsv)
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
+
+module.exports = { handler, csv, csvAll };

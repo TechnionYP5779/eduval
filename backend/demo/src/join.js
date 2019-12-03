@@ -62,10 +62,10 @@ const registerDemoStudent = async (event, context, callback) => {
 				return Promise.reject(createError.InternalServerError('More than one demo lesson with this hash.'));
 			}
 
-			return knexConnection('Courses').select('lessonNum').where({ courseId });
+			return knexConnection('Courses').select('lessonNumber').where({ courseId });
 		})
 		.then((result) => {
-			emailSuffix = `fake${crypto.createHash('md5').update(courseId.toString()).digest('hex')}${result[0].lessonNum}.email`;
+			emailSuffix = `fake${crypto.createHash('md5').update(courseId.toString()).digest('hex')}${result[0].lessonNumber}.email`;
 			email = `${username}@${emailSuffix}`;
 
 			return knexConnection('PresentStudents')
@@ -189,6 +189,7 @@ const registerDemoStudent = async (event, context, callback) => {
 					accessToken,
 					expiresIn: decodedToken.exp,
 					sub: decodedToken.sub,
+					payload: decodedToken,
 				}),
 			});
 		})

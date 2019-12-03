@@ -106,6 +106,62 @@ const getCourseAwardedEmons = async (event, context, callback) => {
 		});
 };
 
+
+// GET log/student/{studentId}/awardedEmons/
+const getStudentAwardedEmons = async (event, context, callback) => {
+	if (!event.pathParameters.studentId) {
+		return callback(createError.BadRequest("Student's ID required."));
+	}
+	const studentId = decodeURI(event.pathParameters.studentId);
+
+	// Connect
+	const knexConnection = knex(dbConfig);
+
+	let coursesArr;
+
+	return knexConnection('Logs')
+		.where({
+			studentId,
+			msgType: 0,
+		})
+		.andWhere('val', '>', 0)
+		.sum('val')
+		.select('Logs.courseId', 'courseName')
+		.groupBy('courseId')
+		.join(knexConnection('Courses').as('JoinTable').select('courseName', 'courseId').whereIn('courseId', knexConnection('Registered').select('courseId').where({ studentId })),
+			'JoinTable.courseId', 'Logs.courseId')
+		.then((result) => {
+			coursesArr = result;
+			return knexConnection('Logs')
+				.where({
+					studentId,
+					msgType: 0,
+				})
+				.andWhere('val', '>', 0)
+				.sum('val');
+		})
+		.then(async (result) => {
+			knexConnection.client.destroy();
+
+			callback(null, {
+				statusCode: 200,
+				body: JSON.stringify({
+					totalEmons: result[0]['sum(`val`)'],
+					courses: await Promise.all(coursesArr.map(x => ({ name: x.courseName, emons: x['sum(`val`)'] }))),
+				}),
+			});
+		})
+		.catch((err) => {
+			// Disconnect
+			knexConnection.client.destroy();
+			// eslint-disable-next-line no-console
+			console.log(`ERROR getting log: ${err}`);
+			console.log(err);
+			console.log(JSON.stringify(err));
+			return callback(createError.InternalServerError('Error getting log.'));
+		});
+};
+
 // GET log/teacher/{teacherId}/awardedEmons/
 const getTeacherAwardedEmons = async (event, context, callback) => {
 	if (!event.pathParameters.teacherId) {
@@ -188,6 +244,8 @@ const getTeacherAwardedEmons = async (event, context, callback) => {
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
 			console.log(`ERROR getting log: ${err}`);
+			console.log(err);
+			console.log(JSON.stringify(err));
 			return callback(createError.InternalServerError('Error getting log.'));
 		});
 };
@@ -202,4 +260,9 @@ const teacher = middy(getTeacherAwardedEmons)
 	.use(httpErrorHandler())
 	.use(cors(corsConfig));
 
-module.exports = { course, teacher };
+const student = middy(getStudentAwardedEmons)
+	.use(httpEventNormalizer())
+	.use(httpErrorHandler())
+	.use(cors(corsConfig));
+
+module.exports = { course, teacher, student };
