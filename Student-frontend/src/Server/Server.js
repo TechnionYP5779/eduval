@@ -386,6 +386,21 @@ class Server {
       .then(callback, callbackError);
   }
 
+  async getStudentEmonPie(callback, callbackError){
+    let studentSub = localStorage.getItem('sub');
+    if (studentSub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "getStudentEmonPie error in Server.js"}}};
+      callbackError(error);
+      return;
+    }
+    var student_id = encodeURI(studentSub);
+    axios.get(SERVER_CONFIG.domain + "/log/student/"
+                + student_id + "/awardedEmons", this.getConfig())
+    .then(callback)
+    .catch(callbackError);
+  }
+
+
 }
 
 let server = new Server();

@@ -41,7 +41,7 @@ export default class UserActions extends React.Component {
     });
     if (student_payload)
     {
-      self.setState({username: student_payload["https://emon-teach.com/username"]});
+      self.setState({username: student_payload["https://emon-teach.com/first_name"]+" "+student_payload["https://emon-teach.com/last_name"]});
     }
     else
     {

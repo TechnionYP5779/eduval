@@ -189,6 +189,7 @@ class Lesson extends React.Component {
       currentEmojis: [],
 
       buttons_disabled: false,
+      demoStudent: false,
      };
      this.setMessageModalChange = this.setMessageModalChange.bind(this)
      this.handleMessageModalOpen = this.handleMessageModalOpen.bind(this)
@@ -219,6 +220,16 @@ class Lesson extends React.Component {
 
 
    componentDidMount(){
+     var self = this;
+     var student_payload = server.getStudentProfile( function(error){
+         console.log("Error in getting Teacher Profile for Nav Bar");
+         console.log(error);
+     });
+     if (student_payload)
+     {
+       self.setState({demoStudent: student_payload["https://emon-teach.com/demo_student"]});
+     }
+
      const getHistory=() =>{
       this.setState(prevState => ({
       reward_money : 0
@@ -226,7 +237,6 @@ class Lesson extends React.Component {
         this.setState(prevState => ({
         currentEmojis : []
       }));
-      var self = this;
       server.getLessonMessages(function(response)
        {
          console.log("Got Lesson Status", response);
@@ -289,11 +299,17 @@ class Lesson extends React.Component {
 
             this.setState({message: "The lesson ended", success: false, message_modal_open:false});
             window.scrollTo(0, 0);
-            window.location.href = "/course-summery/" + JSON.stringify( {
-                id: this.state.lesson_id,
-                reward_money: this.state.reward_money,
-                emojis: this.state.currentEmojis
-              })
+            if(this.state.demoStudent)
+            {
+              history.push("/user-profile-lite/");
+            }
+            else {
+              window.location.href = "/course-summery/" + JSON.stringify( {
+                  id: this.state.lesson_id,
+                  reward_money: this.state.reward_money,
+                  emojis: this.state.currentEmojis
+                })
+            }
 
           }
 

@@ -269,6 +269,16 @@ class UserAccountCard extends React.Component
     const classes = this.props.classes;
     return(
       <Card className={classes.card}>
+      {(this.state.details.demoStudent) &&
+        <Alert variant = "warning">
+          <Alert.Heading style={{color:"white"} }>Welcome to the System!</Alert.Heading>
+          <p>
+            This is your first time in the system. <br/>
+            In order to keep all the Emons you've accumulated, you need to set a new password! <br/>
+            ADVICE: You might want to change the username and email as you're required to enter them when you log in.
+          </p>
+        </Alert>
+      }
       {(this.state.tooMany) &&
         <Alert variant = "warning">
           <Alert.Heading style={{color:"white"} }>Your Account is blocked!</Alert.Heading>
@@ -363,7 +373,7 @@ class UserAccountCard extends React.Component
               </Typography>
               <TextField
                 error={this.state.wrongPassword}
-                required
+                required={!this.state.details.demoStudent}
                 id="standard-required"
                 type="password"
                 label="Password"

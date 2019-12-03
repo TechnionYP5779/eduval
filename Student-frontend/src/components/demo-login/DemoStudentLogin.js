@@ -123,10 +123,10 @@ class DemoStudentLogin extends React.Component {
     server.postStudentToTrial(function(response){
       console.log("Posted Student!");
       console.log(response);
-    self.setState(
-      {
-        authIdToken : response.data.idToken
-      });
+      self.setState(
+        {
+          authIdToken : response.data.idToken
+        });
       console.log(self.state.authIdToken);
 
 
@@ -137,6 +137,8 @@ class DemoStudentLogin extends React.Component {
       localStorage.setItem('idToken', response.data.idToken);
       localStorage.setItem('sub', response.data.sub);
       localStorage.setItem('student_id', response.data.studentId);
+      localStorage.setItem('payload', JSON.stringify(response.data.payload));
+
       Auth.accessToken = response.data.accessToken;
       Auth.idToken = response.idToken;
       Auth.expiresAt = expiresAt;

@@ -97,6 +97,79 @@ class Server {
       .catch(callbackError);
     }
   }
+  /*
+  =================== Export Course Logs ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - course_id: the course in session
+    - status: "LESSON_START" or "LESSON_END"
+  @use conditions:
+    - User should be logged in when called.
+  */
+  async exportTeacherLogs(callback, callbackError){
+
+    let teacher_id_sub = localStorage.getItem('sub');
+    if (teacher_id_sub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in exportCourseLogs in Server.js"}}};
+      callbackError(error);
+      return;
+    }
+
+    var teacher_id = encodeURI(teacher_id_sub)
+    let anchor = document.createElement("a");
+    document.body.appendChild(anchor);
+    let file = `${SERVER_CONFIG.domain}/log/ofTeacher/${teacher_id}/csv`;
+
+    let headers = new Headers();
+    headers.append('Authorization', this.getConfig().headers.Authorization);
+
+    fetch(file, { headers })
+        .then(response => response.blob())
+        .then(blobby => {
+            let objectUrl = window.URL.createObjectURL(blobby);
+
+            anchor.href = objectUrl;
+            anchor.download = 'log.csv';
+            anchor.click();
+
+            window.URL.revokeObjectURL(objectUrl);
+        });
+  }
+
+  /*
+  =================== Export Teacher Logs ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - course_id: the course in session
+    - status: "LESSON_START" or "LESSON_END"
+  @use conditions:
+    - User should be logged in when called.
+  */
+  async exportCourseLogs(callback, callbackError, course_id){
+    let anchor = document.createElement("a");
+    document.body.appendChild(anchor);
+    let file = `${SERVER_CONFIG.domain}/log/ofCourse/${course_id}/csv`;
+
+    let headers = new Headers();
+    headers.append('Authorization', this.getConfig().headers.Authorization);
+
+    fetch(file, { headers })
+        .then(response => response.blob())
+        .then(blobby => {
+            let objectUrl = window.URL.createObjectURL(blobby);
+
+            anchor.href = objectUrl;
+            anchor.download = 'log.csv';
+            anchor.click();
+
+            window.URL.revokeObjectURL(objectUrl);
+        });
+  }
+
 
   /*
   =================== Change lesson status ====================

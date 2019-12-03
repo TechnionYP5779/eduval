@@ -46,10 +46,22 @@ class UserAccountDetails extends React.Component {
     this.setState({disabled: true});
 
     var tmp_dets=teacher_details;
-
+    delete tmp_dets.demoStudent;
     if(tmp_dets.newPassword=="")
     {
       delete tmp_dets.newPassword;
+    }
+    if(tmp_dets.lastName=="")
+    {
+      delete tmp_dets.lastName;
+    }
+    if(tmp_dets.firstName=="")
+    {
+      delete tmp_dets.firstName;
+    }
+    if(tmp_dets.phoneNum=="")
+    {
+      delete tmp_dets.phoneNum;
     }
     //Theoretically we might want to check whether anything was changed at all?
     server.updateStudent(function(response)
@@ -59,6 +71,7 @@ class UserAccountDetails extends React.Component {
       payload["https://emon-teach.com/first_name"]=tmp_dets.firstName;
       payload["https://emon-teach.com/last_name"]=tmp_dets.lastName;
       payload["https://emon-teach.com/username"]=tmp_dets.username;
+      payload["https://emon-teach.com/demo_student"]=false;
       payload["email"]=tmp_dets.email;
       console.log("New Payload", payload);
       localStorage.setItem('payload', JSON.stringify(payload));
@@ -100,20 +113,21 @@ class UserAccountDetails extends React.Component {
   componentDidMount() {
     var self = this;
 
-    var teacher_payload = server.getStudentProfile( function(error){
+    var student_payload = server.getStudentProfile( function(error){
         console.log("Error in getting Student Profile for Nav Bar");
         console.log(error);
     });
-    if (teacher_payload)
+    if (student_payload)
     {
       var new_dets = {
-        username: teacher_payload["https://emon-teach.com/username"],
-        firstName: teacher_payload["https://emon-teach.com/first_name"],
-        lastName: teacher_payload["https://emon-teach.com/last_name"],
+        username: student_payload["https://emon-teach.com/username"],
+        firstName: student_payload["https://emon-teach.com/first_name"],
+        lastName: student_payload["https://emon-teach.com/last_name"],
         newPassword: "",
         oldPassword: "",
-        email: teacher_payload["email"],
-        phoneNum: teacher_payload["https://emon-teach.com/phone_number"]
+        email: student_payload["email"],
+        phoneNum: student_payload["https://emon-teach.com/phone_number"],
+        demoStudent: student_payload["https://emon-teach.com/demo_student"]
     }
       self.setState({details: new_dets});
     }

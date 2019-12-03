@@ -16,16 +16,26 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import SendIcon from '@material-ui/icons/Send';
 import Alert from 'react-bootstrap/Alert'
-
+import GetAppIcon from '@material-ui/icons/GetApp';
+import Tooltip from '@material-ui/core/Tooltip';
 import {
   Row,
   Col,
 } from "shards-react";
-
-
 import server from "../../Server/Server";
 
 import CoursePie from "./CoursePie";
+
+const LightTooltip = withStyles(theme => ({
+  tooltip: {
+    boxShadow: theme.shadows[1],
+    fontSize: 20,
+  },
+}))(Tooltip);
+
+
+
+
 
 const styles = theme => ({
   card: {
@@ -55,7 +65,12 @@ const styles = theme => ({
     width:"45%",
     marginTop: '28px ',
 
-  }
+  },
+
+  export:{
+    color: "LimeGreen"
+  },
+
 });
 
 function getRandomColor() {
@@ -77,6 +92,7 @@ class CourseGraphCard extends React.Component
     }
 
     this.getPieStudentPieData = this.getPieStudentPieData.bind(this);
+    this.exportStuff = this.exportStuff.bind(this);
   }
 
   getPieStudentPieData(top)
@@ -137,13 +153,36 @@ class CourseGraphCard extends React.Component
   componentDidMount(){
     this.getPieStudentPieData(5);
   }
+
+  exportStuff(){
+    let anchor = document.createElement("a");
+    document.body.appendChild(anchor);
+    server.exportCourseLogs(function(response)
+    {
+      console.log("EXPORTED?");
+    }, function(error){
+      console.log("Error in exportLogs in exportStuff in CourseGraphCard.js",error);
+    }, this.props.courseId)
+
+  }
+
   render(){
     const classes = this.props.classes;
     return(
       <Card className={classes.card}>
         <CardHeader
           className={classes.title}
-          title="Teacher Graphs"
+          title="Course Graphs and Data"
+          action={
+            <LightTooltip title={"Export Course Log"} placement="top-start" className={classes.tooltip}>
+              <IconButton aria-label="export"
+              className={classes.export}
+              onClick={this.exportStuff}
+              >
+                <GetAppIcon  />
+              </IconButton>
+            </LightTooltip>
+          }
         />
         <CardContent>
           {!this.state.piedata &&
@@ -153,7 +192,7 @@ class CourseGraphCard extends React.Component
           }
           {this.state.piedata &&
             <div>
-              <Typography variant="h5" gutterBottom>
+              <Typography variant="h6" gutterBottom>
                 Emon Division between Students for this Teacher
               </Typography>
               <CoursePie

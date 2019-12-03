@@ -35,22 +35,19 @@ const styles = theme => ({
   textField: {
     marginLeft: theme.spacing(1),
     marginRight: theme.spacing(1),
-    width: "40%",
+    marginBottom: "28px",
+    width: "45%",
   },
   instruction: {
     marginLeft: theme.spacing(1),
     marginRight: theme.spacing(1),
     marginTop: theme.spacing(2),
   },
-  pie: {
-    width:"50%",
-  },
 
   button:{
-    width:"45%",
-    marginTop: '28px ',
+    width:"50%",
     marginBottom: '28px ',
-
+    textTransform: "none",
   }
 });
 
@@ -58,7 +55,7 @@ const initState =
 {
   labels: [
     'Tomatoes',
-    'Cucumbers',
+    'Cucumbersadasdasdasdas',
     'Onions'
   ],
   datasets: [{
@@ -76,7 +73,7 @@ const initState =
   }]
 }
 
-class CoursePie extends React.Component
+class StudentPie extends React.Component
 {
   constructor(props) {
     super(props);
@@ -94,11 +91,6 @@ class CoursePie extends React.Component
     if(prevProps.pieData!=this.props.pieData)
     {
       this.setState({data:this.props.pieData});
-    }
-    if(prevProps.justDeleted!=this.props.justDeleted)
-    {
-      this.props.getData(this.state.amount);
-      this.props.revertJustDeleted();
     }
   }
 
@@ -134,7 +126,7 @@ class CoursePie extends React.Component
             required
             error={!this.state.isNumber}
             id="standard-required"
-            label="Number of Top Students"
+            label="Number of Top Courses"
             type="number"
             InputProps={{ inputProps: { min: 0} }}
             onChange={this.handleNumberChange}
@@ -159,9 +151,9 @@ class CoursePie extends React.Component
 }
 
 
-CoursePie.propTypes = {
+StudentPie.propTypes = {
   classes:PropTypes.object.isRequired,
 };
 
 
-export default withStyles(styles)(CoursePie);
+export default withStyles(styles)(StudentPie);

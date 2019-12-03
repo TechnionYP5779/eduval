@@ -16,19 +16,10 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import SendIcon from '@material-ui/icons/Send';
 import Alert from 'react-bootstrap/Alert'
-import GetAppIcon from '@material-ui/icons/GetApp';
-import Tooltip from '@material-ui/core/Tooltip';
 
 import server from "../../Server/Server";
 
-import TeacherPie from "./TeacherPie";
-
-const LightTooltip = withStyles(theme => ({
-  tooltip: {
-    boxShadow: theme.shadows[1],
-    fontSize: 20,
-  },
-}))(Tooltip);
+import StudentPie from "./StudentPie";
 
 const styles = theme => ({
   card: {
@@ -57,12 +48,7 @@ const styles = theme => ({
     width:"45%",
     marginTop: '28px ',
 
-  },
-
-  export:{
-    color: "LimeGreen"
-  },
-
+  }
 });
 
 function getRandomColor() {
@@ -89,30 +75,30 @@ class UserGraphsCard extends React.Component
   {
     console.log("Top", top);
     var self=this;
-    server.getTeacherEmonPie(function(response){
+    server.getStudentEmonPie(function(response){
       console.log("Get Pie", response);
       var data = response.data;
       var sum_others=data.totalEmons;
-      var students=data.students.sort(function(a,b){
+      var courses=data.courses.sort(function(a,b){
         return b.emons - a.emons;
       });;
-      console.log("Students", students);
+      console.log("Courses", courses);
       var index = 0;
       var newlabels=[];
       var newdata=[];
       var colors = [];
       var hover_colors = [];
-      for (index=0; index<Math.min(top,students.length); index++)
+      for (index=0; index<Math.min(top,courses.length); index++)
       {
-          newlabels.push(students[index].name);
-          newdata.push(students[index].emons);
+          newlabels.push(courses[index].name);
+          newdata.push(courses[index].emons);
           colors.push(getRandomColor());
           hover_colors.push(getRandomColor());
-          sum_others -=students[index].emons;
+          sum_others -=courses[index].emons;
       }
       if(sum_others>0)
       {
-        newlabels.push("Other Students");
+        newlabels.push("Other Courses");
         newdata.push(sum_others);
         colors.push(getRandomColor());
         hover_colors.push(getRandomColor());
@@ -136,37 +122,13 @@ class UserGraphsCard extends React.Component
   componentDidMount(){
     this.getPieStudentPieData(5);
   }
-
-  exportStuff(){
-    let anchor = document.createElement("a");
-    document.body.appendChild(anchor);
-    server.exportTeacherLogs(function(response)
-    {
-      console.log("EXPORTED?");
-    }, function(error){
-      console.log("Error in exportLogs in exportStuff in CourseGraphCard.js",error);
-    })
-
-  }
-
-
   render(){
     const classes = this.props.classes;
     return(
       <Card className={classes.card}>
         <CardHeader
           className={classes.title}
-          title="Teacher Graphs and Data"
-          action={
-            <LightTooltip title={"Export Teacher Log"} placement="top-start" className={classes.tooltip}>
-              <IconButton aria-label="export"
-              className={classes.export}
-              onClick={this.exportStuff}
-              >
-                <GetAppIcon  />
-              </IconButton>
-            </LightTooltip>
-          }
+          title="General Course Graphs"
         />
         <CardContent>
           {!this.state.piedata &&
@@ -176,10 +138,10 @@ class UserGraphsCard extends React.Component
           }
           {this.state.piedata &&
             <div>
-              <Typography variant="h6" gutterBottom>
-                Emon Division between Students for this Teacher
+              <Typography variant="h5" gutterBottom>
+                Emon Division between Courses for this Student
               </Typography>
-              <TeacherPie
+              <StudentPie
                 pieData={this.state.piedata}
                 getData={(val)=>(this.getPieStudentPieData(val))}
                />
