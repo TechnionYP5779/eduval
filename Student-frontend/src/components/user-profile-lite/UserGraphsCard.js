@@ -15,7 +15,8 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import SendIcon from '@material-ui/icons/Send';
-import Alert from 'react-bootstrap/Alert'
+import Alert from 'react-bootstrap/Alert';
+import { withTranslation } from 'react-i18next';
 
 import server from "../../Server/Server";
 
@@ -98,7 +99,7 @@ class UserGraphsCard extends React.Component
       }
       if(sum_others>0)
       {
-        newlabels.push("Other Courses");
+        newlabels.push(self.props.t("Other Courses"));
         newdata.push(sum_others);
         colors.push(getRandomColor());
         hover_colors.push(getRandomColor());
@@ -124,22 +125,24 @@ class UserGraphsCard extends React.Component
   }
   render(){
     const classes = this.props.classes;
+    const { t } = this.props;
+
     return(
       <Card className={classes.card}>
         <CardHeader
           className={classes.title}
-          title="General Course Graphs"
+          title={t("General Course Graphs")}
         />
         <CardContent>
           {!this.state.piedata &&
             <div>
-              Loading..
+              {t("Loading")}...
             </div>
           }
           {this.state.piedata &&
             <div>
               <Typography variant="h5" gutterBottom>
-                Emon Division between Courses for this Student
+                {t("Emon Division between Courses for this Student")}
               </Typography>
               <StudentPie
                 pieData={this.state.piedata}
@@ -159,4 +162,4 @@ UserGraphsCard.propTypes = {
 };
 
 
-export default withStyles(styles)(UserGraphsCard);
+export default withTranslation()(withStyles(styles)(UserGraphsCard));

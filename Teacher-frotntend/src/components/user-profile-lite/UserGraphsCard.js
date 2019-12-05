@@ -18,6 +18,7 @@ import SendIcon from '@material-ui/icons/Send';
 import Alert from 'react-bootstrap/Alert'
 import GetAppIcon from '@material-ui/icons/GetApp';
 import Tooltip from '@material-ui/core/Tooltip';
+import { withTranslation } from 'react-i18next';
 
 import server from "../../Server/Server";
 
@@ -112,7 +113,7 @@ class UserGraphsCard extends React.Component
       }
       if(sum_others>0)
       {
-        newlabels.push("Other Students");
+        newlabels.push(self.props.t("Other Students"));
         newdata.push(sum_others);
         colors.push(getRandomColor());
         hover_colors.push(getRandomColor());
@@ -152,13 +153,14 @@ class UserGraphsCard extends React.Component
 
   render(){
     const classes = this.props.classes;
+    const { t } = this.props;
     return(
       <Card className={classes.card}>
         <CardHeader
           className={classes.title}
-          title="Teacher Graphs and Data"
+          title={t("Teacher Graphs and Data")}
           action={
-            <LightTooltip title={"Export Teacher Log"} placement="top-start" className={classes.tooltip}>
+            <LightTooltip title={t("Export Teacher Log")} placement="top-start" className={classes.tooltip}>
               <IconButton aria-label="export"
               className={classes.export}
               onClick={this.exportStuff}
@@ -171,13 +173,13 @@ class UserGraphsCard extends React.Component
         <CardContent>
           {!this.state.piedata &&
             <div>
-              Loading..
+              {t('Loading')}...
             </div>
           }
           {this.state.piedata &&
             <div>
               <Typography variant="h6" gutterBottom>
-                Emon Division between Students for this Teacher
+                {t("Emon Division between Students for this Teacher")}
               </Typography>
               <TeacherPie
                 pieData={this.state.piedata}
@@ -197,4 +199,4 @@ UserGraphsCard.propTypes = {
 };
 
 
-export default withStyles(styles)(UserGraphsCard);
+export default withTranslation()(withStyles(styles)(UserGraphsCard));

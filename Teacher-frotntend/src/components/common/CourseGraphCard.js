@@ -25,6 +25,7 @@ import {
 import server from "../../Server/Server";
 
 import CoursePie from "./CoursePie";
+import { withTranslation } from 'react-i18next';
 
 const LightTooltip = withStyles(theme => ({
   tooltip: {
@@ -64,6 +65,7 @@ const styles = theme => ({
   button:{
     width:"45%",
     marginTop: '28px ',
+    textTransform: 'none',
 
   },
 
@@ -122,7 +124,7 @@ class CourseGraphCard extends React.Component
       }
       if(sum_others>0)
       {
-        newlabels.push("Other Students");
+        newlabels.push(self.props.t("Other Students"));
         newdata.push(sum_others);
         colors.push(getRandomColor());
         hover_colors.push(getRandomColor());
@@ -168,13 +170,15 @@ class CourseGraphCard extends React.Component
 
   render(){
     const classes = this.props.classes;
+    const { t } = this.props;
+
     return(
       <Card className={classes.card}>
         <CardHeader
           className={classes.title}
-          title="Course Graphs and Data"
+          title={t("Course Graphs and Data")}
           action={
-            <LightTooltip title={"Export Course Log"} placement="top-start" className={classes.tooltip}>
+            <LightTooltip title={t("Export Course Log")} placement="top-start" className={classes.tooltip}>
               <IconButton aria-label="export"
               className={classes.export}
               onClick={this.exportStuff}
@@ -187,13 +191,13 @@ class CourseGraphCard extends React.Component
         <CardContent>
           {!this.state.piedata &&
             <div>
-              Loading..
+              {t("Loading")}...
             </div>
           }
           {this.state.piedata &&
             <div>
               <Typography variant="h6" gutterBottom>
-                Emon Division between Students for this Teacher
+                {t("Emon Division between Students for this Teacher")}
               </Typography>
               <CoursePie
                 pieData={this.state.piedata}
@@ -215,4 +219,4 @@ CourseGraphCard.propTypes = {
 };
 
 
-export default withStyles(styles)(CourseGraphCard);
+export default withTranslation()(withStyles(styles)(CourseGraphCard));

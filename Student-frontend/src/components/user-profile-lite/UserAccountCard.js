@@ -15,7 +15,9 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import SendIcon from '@material-ui/icons/Send';
-import Alert from 'react-bootstrap/Alert'
+import Alert from 'react-bootstrap/Alert';
+
+import { withTranslation } from 'react-i18next';
 
 import {
   Row,
@@ -267,38 +269,40 @@ class UserAccountCard extends React.Component
 
   render(){
     const classes = this.props.classes;
+    const { t } = this.props;
+
     return(
       <Card className={classes.card}>
       {(this.state.details.demoStudent) &&
         <Alert variant = "warning">
-          <Alert.Heading style={{color:"white"} }>Welcome to the System!</Alert.Heading>
+          <Alert.Heading style={{color:"white"} }>{t("Welcome to the System!")}</Alert.Heading>
           <p>
-            This is your first time in the system. <br/>
-            In order to keep all the Emons you've accumulated, you need to set a new password! <br/>
-            ADVICE: You might want to change the username and email as you're required to enter them when you log in.
+            {t("This is your first time in the system")}. <br/>
+            {t("In order to keep all the Emons you've accumulated, you need to set a new password!")} <br/>
+            {t("ADVICE: You might want to change the username and email as you're required to enter them when you log in")}.
           </p>
         </Alert>
       }
       {(this.state.tooMany) &&
         <Alert variant = "warning">
-          <Alert.Heading style={{color:"white"} }>Your Account is blocked!</Alert.Heading>
+          <Alert.Heading style={{color:"white"} }>{t("Your Account is blocked!")}</Alert.Heading>
           <p>
-            You've accessed your account too many times. <br/>
-            Contact system administrator or look for instructions in your mail for further instructions.
+            {t("You've accessed your account too many times")}. <br/>
+            {t("Contact system administrator or look for instructions in your mail for further instructions")}.
           </p>
         </Alert>
       }
       {this.state.wrongPassword &&
         <Alert variant = "danger">
-          <Alert.Heading style={{color:"white"}}>Wrong Confirmation Password!</Alert.Heading>
-            <p> The password near the button has to be your correct one. <br />
-            Please contact administrator for further information.</p>
+          <Alert.Heading style={{color:"white"}}>{t("Wrong Confirmation Password!")}</Alert.Heading>
+            <p> {t("The password near the button has to be your correct one")}. <br />
+            {t("Please contact administrator for further information")}.</p>
         </Alert>
       }
       {this.state.fieldError &&
         <Alert variant = "dark">
-          <Alert.Heading style={{color:"white"}}>One of the Fields filled is wrong!</Alert.Heading>
-            <p> Check which field is marked with red or consult an administrator</p>
+          <Alert.Heading style={{color:"white"}}>{t("One of the Fields filled is wrong!")}</Alert.Heading>
+            <p> {t("Check which field is marked with red or consult an administrator")}</p>
         </Alert>
       }
 
@@ -315,7 +319,7 @@ class UserAccountCard extends React.Component
                 required
                 error={this.state.usernameTaken}
                 id="standard-required"
-                label="Username"
+                label={t("Username")}
                 value={this.props.details.username}
                 className={classes.textField}
                 onChange={this.handleUsernameChange}
@@ -325,7 +329,7 @@ class UserAccountCard extends React.Component
                 required
                 error={!this.state.isEmail || this.state.emailTaken}
                 id="standard-required"
-                label="Email"
+                label={t("Email")}
                 type="email"
                 value={this.props.details.email}
                 onChange={this.handleEmailChange}
@@ -334,7 +338,7 @@ class UserAccountCard extends React.Component
               />
               <TextField
                 id="standard-required"
-                label="First Name"
+                label={t("First Name")}
                 value={this.props.details.firstName}
                 onChange={this.handleFirstNameChange}
 
@@ -343,7 +347,7 @@ class UserAccountCard extends React.Component
               />
               <TextField
                 id="standard-required"
-                label="Last Name"
+                label={t("Last Name")}
                 value={this.props.details.lastName}
                 onChange={this.handleLastNameChange}
                 className={classes.textField}
@@ -353,7 +357,7 @@ class UserAccountCard extends React.Component
               <TextField
                 id="standard-required"
                 type="password"
-                label="New Password"
+                label={t("New Password")}
                 onChange={this.handleNewPasswordChange}
                 value={this.state.details.newPassword}
                 className={classes.textField}
@@ -362,7 +366,7 @@ class UserAccountCard extends React.Component
               <TextField
                 error={!this.state.isPhoneNumber}
                 id="standard-required"
-                label="Phone Number"
+                label={t("Phone Number")}
                 onChange={this.handlePhoneNumberChange}
                 value={this.props.details.phoneNum}
                 className={classes.textField}
@@ -376,7 +380,7 @@ class UserAccountCard extends React.Component
                 required={!this.state.details.demoStudent}
                 id="standard-required"
                 type="password"
-                label="Password"
+                label={t("Password")}
                 value={this.state.details.old_password}
                 onChange={this.handleConfirmPasswordChange}
                 className={classes.textField}
@@ -389,7 +393,7 @@ class UserAccountCard extends React.Component
                   type="submit"
                   endIcon={<SendIcon/>}
                 >
-                  Send
+                  {t("Send")}
                 </Button>
 
             </div>
@@ -417,4 +421,4 @@ UserAccountCard.propTypes = {
 };
 
 
-export default withStyles(styles)(UserAccountCard);
+export default withTranslation()(withStyles(styles)(UserAccountCard));

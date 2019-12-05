@@ -16,6 +16,8 @@ import server from "../../Server/Server"
 import TimeoutAlert from "../../components/common/TimeoutAlert"
 import UserAccountCard from "./UserAccountCard";
 
+import { withTranslation } from 'react-i18next';
+
 class UserAccountDetails extends React.Component {
 
   constructor(props) {
@@ -126,16 +128,17 @@ class UserAccountDetails extends React.Component {
 
   render()
   {
+    const { t } = this.props;
   return(
     <div>
       {this.state.error &&
       <TimeoutAlert className="mb-0" theme="danger" msg={this.state.error} time={10000}/>
       }
       {this.state.success &&
-      <TimeoutAlert className="mb-0" theme="success" msg={"Success! Your profile has been updated!"} time={10000}/>
+      <TimeoutAlert className="mb-0" theme="success" msg={t("Success! Your profile has been updated!")} time={10000}/>
       }
       <UserAccountCard
-      title="Account Details"
+      title={t("Account Details")}
       details={this.state.details}
       updateTeacher={this.update}
       wrongPassword={this.state.wrong_password}
@@ -152,4 +155,4 @@ class UserAccountDetails extends React.Component {
 }
 
 
-export default UserAccountDetails;
+export default withTranslation()(UserAccountDetails);

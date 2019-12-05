@@ -16,7 +16,9 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import SendIcon from '@material-ui/icons/Send';
-import Alert from 'react-bootstrap/Alert'
+import Alert from 'react-bootstrap/Alert';
+import { withTranslation } from 'react-i18next';
+
 
 import server from "../../Server/Server";
 
@@ -50,6 +52,7 @@ const styles = theme => ({
     width:"45%",
     marginTop: '28px ',
     marginBottom: '28px ',
+    textTransform: 'none'
 
   }
 });
@@ -114,6 +117,8 @@ class CoursePie extends React.Component
 
   render(){
     const classes = this.props.classes;
+    const { t } = this.props;
+
     const options = {
       legend: {
           display: true,
@@ -134,7 +139,7 @@ class CoursePie extends React.Component
             required
             error={!this.state.isNumber}
             id="standard-required"
-            label="Number of Top Students"
+            label={t("Number of Top Students")}
             type="number"
             InputProps={{ inputProps: { min: 0} }}
             onChange={this.handleNumberChange}
@@ -149,7 +154,7 @@ class CoursePie extends React.Component
           color="primary"
           type="submit"
           >
-            Generate Graph
+            {t("Generate Graph")}
           </Button>
         </form>
         <Pie data={this.state.data} options={options}  />
@@ -164,4 +169,4 @@ CoursePie.propTypes = {
 };
 
 
-export default withStyles(styles)(CoursePie);
+export default withTranslation()(withStyles(styles)(CoursePie));
