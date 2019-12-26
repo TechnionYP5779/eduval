@@ -89,6 +89,85 @@ async function dbRowToProperObject(obj) {
 	return retObj;
 }
 
+async function dbRowToCSVObject(obj) {
+	const retObj = { ...obj };		// shallow copy
+	retObj.time = obj.dtime;
+	delete retObj.dtime;
+	delete retObj.live;
+	let promise = null;
+	switch (obj.msgType) {
+	case 0:
+		delete retObj.msgType;
+		retObj.messageType = 'EMON';
+		delete retObj.msgReason;
+		retObj.value = obj.val;
+		delete retObj.val;
+
+		if (retObj.value < 0) {
+			delete retObj.lessonNumber;
+			retObj.value = -obj.val;
+			const knexConnection = knex(dbConfig);
+
+			promise = knexConnection('ShopItems')
+				.select()
+				.where({
+					itemId: obj.msgReason,
+				})
+				.then((result) => {
+					knexConnection.client.destroy();
+					return result[0];
+				});
+			retObj.messageType = 'PURCHASE';
+		}
+
+		break;
+	case 1:
+		delete retObj.msgType;
+		retObj.messageType = 'EMOJI';
+		delete retObj.msgReason;
+
+		switch (obj.val) {
+		case 0:
+			retObj.value = 'EMOJI_HAPPY';
+			break;
+		case 1:
+			retObj.value = 'EMOJI_THUMBS_UP';
+			break;
+		case 2:
+			retObj.value = 'EMOJI_ANGEL';
+			break;
+		case 3:
+			retObj.value = 'EMOJI_GRIN';
+			break;
+		case 4:
+			retObj.value = 'EMOJI_SHUSH';
+			break;
+		case 5:
+			retObj.value = 'EMOJI_ZZZ';
+			break;
+		case 6:
+			retObj.value = 'EMOJI_ANGRY';
+			break;
+		case 7:
+			retObj.value = 'EMOJI_THUMBS_DOWN';
+			break;
+		default:
+			retObj.value = 'ERROR_EMOJI';
+		}
+		delete retObj.val;
+		break;
+	default:
+		retObj.messageType = 'INVALID_MESSAGE';
+	}
+	if (promise) {
+		return promise.then((item) => {
+			retObj.item = item;
+			return retObj;
+		});
+	}
+	return retObj;
+}
+
 function isAnInteger(obj) {
 	return !Number.isNaN(Number(obj)) && Number.isInteger(Number(obj));
 }
@@ -150,7 +229,7 @@ const getStudentLogCsv = async (event, context, callback) => {
 		.then(async (result) => {
 			knexConnection.client.destroy();
 
-			let resArray = await Promise.all(result.map(dbRowToProperObject));
+			let resArray = await Promise.all(result.map(dbRowToCSVObject));
 
 			const csvHeader = Object.keys(resArray[0]).sort().join(',');
 
@@ -193,7 +272,7 @@ const getAllLogCsv = async (event, context, callback) => {
 		.then(async (result) => {
 			knexConnection.client.destroy();
 
-			let resArray = await Promise.all(result.map(dbRowToProperObject));
+			let resArray = await Promise.all(result.map(dbRowToCSVObject));
 
 			const csvHeader = Object.keys(resArray[0]).sort().join(',');
 
