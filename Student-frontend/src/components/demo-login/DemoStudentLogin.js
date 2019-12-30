@@ -141,6 +141,8 @@ class DemoStudentLogin extends React.Component {
       localStorage.setItem('student_id', response.data.studentId);
       localStorage.setItem('payload', JSON.stringify(response.data.payload));
 
+      localStorage.removeItem('lessonHash');
+
       Auth.accessToken = response.data.accessToken;
       Auth.idToken = response.idToken;
       Auth.expiresAt = expiresAt;

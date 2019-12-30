@@ -1,5 +1,5 @@
 import React from "react";
-import history from '../history';
+import {historyNoRefresh as history} from '../history';
 import axios from 'axios';
 import Alert from 'react-bootstrap/Alert'
 import {
@@ -55,6 +55,21 @@ export default class DemoLesson extends React.Component {
       localStorage.removeItem('sub');
       localStorage.removeItem('student_id');
 
+      if(this.state.lessonHash === '') {
+        this.setState({ lessonHash: localStorage.getItem('lessonHash') });
+        history.replace(`${this.props.location.pathname}?id=${localStorage.getItem('lessonHash')}`);
+      }
+      else {
+        localStorage.setItem('lessonHash', this.state.lessonHash);
+      }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if(prevProps.location !== this.props.location) {
+      console.log('updaaaaaate')
+      this.setState({ lessonHash: localStorage.getItem('lessonHash') });
+      history.replace(`${this.props.location.pathname}?id=${localStorage.getItem('lessonHash')}`);
+    }
   }
 
 
