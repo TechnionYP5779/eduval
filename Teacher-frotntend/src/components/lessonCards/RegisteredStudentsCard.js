@@ -133,7 +133,6 @@ class RegisteredStudentsCard extends React.Component
     }
     this.setExpanded = this.setExpanded.bind(this)
     this.handleExpandClick = this.handleExpandClick.bind(this)
-    console.log("Is CourseDetails?", this.props.courseDetails);
   }
   setExpanded(value)
   {

@@ -39,12 +39,18 @@ const EmojiEnum = {
     };
 
    function TableEntry(props) {
-        console.log("AASFASFASASfas");
+        console.log("TableEntryProps", props);
         const messageType = props.messageType;
         if(messageType === "EMON") {
           return <div>{props.value} <img alt="Emons" style={{width:"1.5em", marginLeft:"0.2em", marginBottom:"0.2em"}} src={CoinImage} /></div>;
         }else {
-          return <div style={{fontSize:'1.3em'}}>{EmojiEnum[props.emojiType]}</div>
+          return <div style={{fontSize:'1.3em'}}>
+            {EmojiEnum[props.emojiType]}
+            {props.emojis.map((emoji, idx) => (
+              EmojiEnum[emoji]
+            ))
+            }
+            </div>
         }
       }
 class CourseDetails extends React.Component {
@@ -74,8 +80,16 @@ class CourseDetails extends React.Component {
 
             server.getCondensedLog((response) => {
               this.setState({condensed: response.data});
-            }, null, course);
-        }, null, course);
+            }, 
+            function(error){
+              console.log("Error in getCondensedLog in constuctor", error)
+            }
+            , course);
+        }, 
+        function(error){
+          console.log("Error in getEmonBalanceByCourse in constuctor", error)
+        }
+        , course);
 
         server.getLog((response) => {
           this.setState({ItemsListThree: response.data.filter((elem) => elem.messageType === "PURCHASE")});
@@ -155,18 +169,21 @@ class CourseDetails extends React.Component {
               </Row>
               
               <Row>
+              <Card style = {{height:"100%",width:"100%",marginLeft:"16px"}} className="mb-4">
+            <   CardHeader className="border-bottom">
+                  <h6 className="m-0">{t("Course Activity Graph")}</h6>
+                </CardHeader>
                 {
                   !this.state.condensed &&
-                  <h2 style = {{margin:"auto"}}>{t("Waiting For Graph")}</h2>
+                  <h2 style = {{textAlign:"center"}}>{t("Waiting For Graph")}</h2>
                 }
                 {
                   this.state.condensed &&
-                  <Card style = {{height:"100%",width:"100%",marginLeft:"16px"}} className="mb-4">
                     <CardBody className="p-0 pb-3">
                       <StudentLessonGraph style = {{margin:"auto"}} condensed={this.state.condensed} courseName={this.state.courseName} />
                     </CardBody>
-                  </Card>
                 }
+                </Card>
               </Row>
             </Col>
       
@@ -177,36 +194,50 @@ class CourseDetails extends React.Component {
                 </CardHeader>
 
                 <CardBody className="p-0 pb-3">
-                  <table className="table mb-0">
-                    <thead className="bg-light">
-                      <tr>
-                        <th scope="col" className="border-0">
-                          {t("Day")}
-                        </th>
-                        <th scope="col" className="border-0">
-                          {t("Hour")}
-                        </th>
-                        <th scope="col" className="border-0">
-                          {t("Got")}
-                        </th>
-                      </tr>
-                    </thead>
-              <tbody>
-              {  Array.from(this.state.PostsListThree).map((post, idx) => (
+                  {
+                    !this.state.condensed &&
+                    <h2 style = {{margin:"auto", textAlign:"center"}}>{t("Waiting For Activity")}</h2>
+                  }
+                  { 
+                    this.state.condensed &&
+                    <div>
+                      <table className="table mb-0">
+                        <thead className="bg-light">
+                          <tr>
+                            <th style={{textAlign:"center"}} scope="col" className="border-0">
+                              {t("Lesson Number")}
+                            </th>
+                            <th style={{textAlign:"center"}} scope="col" className="border-0">
+                              {t("Day")}
+                            </th>
+                            <th style={{textAlign:"center"}} scope="col" className="border-0">
+                              {t("Emons")}
+                            </th>
+                            <th style={{textAlign:"center"}} scope="col" className="border-0">
+                              {t("Emoji")}
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
 
-                <tr>
-                  <td>{post.time.padStart(2,'0').split('T')[0] }</td>
-                  <td>{new Date(post.time).getHours().toString().padStart(2,'0') + ':' + new Date(post.time).getMinutes().toString().padStart(2,'0')}</td>
-                  <td><TableEntry messageType={post.messageType} value={post.value} emojiType={post.emojiType}/></td>
-                </tr>))}
-              </tbody>
-            </table>
-          </CardBody>
-        </Card>
-      </Col>
-    </Row>
+                                { this.state.condensed.slice().reverse().map((lesson, idx) => (
+                                    <tr>
+                                      <td style={{textAlign:"center"}}>{this.state.condensed.length - idx}</td>
+                                      <td style={{textAlign:"center"}}>{lesson.date }</td>
+                                      <td style={{textAlign:"center"}}><TableEntry messageType={"EMON"} value={lesson.emons} emojis={[]}/></td>
+                                      <td style={{textAlign:"center"}}><TableEntry messageType={"NOTEMON"} value={-5} emojis={lesson.emojis}/></td>
+                                    </tr>
+                                  ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  }
 
-      </Container>
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+        </Container>
     );
    }
 }
