@@ -19,6 +19,8 @@ import FormatListNumberedIcon from '@material-ui/icons/FormatListNumbered';
 import Alert from 'react-bootstrap/Alert'
 import server from "../../Server/Server"
 
+import { withTranslation } from 'react-i18next'
+
 const styles = theme => ({
   card: {
     maxWidth: "90%",
@@ -180,6 +182,7 @@ class DemoStudentLogin extends React.Component {
 
 render(){
     const classes = this.props.classes;
+    const { t } = this.props;
     return (
       <Card className={classes.card}>
         {(this.state.studentSeatTaken || this.state.studentNameTaken) &&
@@ -214,7 +217,7 @@ render(){
             required
             error={this.state.emptyName || this.state.studentNameTaken}
             id="standard-required"
-            label="Student Name"
+            label={t("Student Name")}
             className={classes.textField}
             margin="normal"
             InputProps={{
@@ -255,7 +258,7 @@ render(){
             endIcon={<Icon>send</Icon>}
             onClick={this.startDemoLesson}
           >
-            {this.state.student_name=="Drunkadiy" ? "Drunkadiy is not Allowed" : "Enter Lesson"}
+            {this.state.student_name=="Drunkadiy" ? "Drunkadiy is not Allowed" : t("Enter Lesson")}
           </Button>
         </CardContent>
 
@@ -265,4 +268,4 @@ render(){
 }
 
 
-export default withStyles(styles)(DemoStudentLogin);
+export default withTranslation()(withStyles(styles)(DemoStudentLogin));

@@ -150,33 +150,34 @@ class MyCourses extends React.Component {
     }
     let sub=new Buffer( localStorage.getItem('sub')).toString('base64');
    
-      let res=[];
+    let res=[];
 
-      server.getStudentCourses((response) => {
-        this.setState({PostsListThree: response.data});
+    server.getStudentCourses((response) => {
+      console.log("getStudentCourses", response);
+      this.setState({PostsListThree: response.data});
 
-        const getContent = function(url) {
-          return new Promise((resolve, reject) => {
-            const lib = url.startsWith('https') ? require('https') : require('http');
-            const request = lib.get(url, (response) => {
-              if (response.statusCode < 200 || response.statusCode > 299) {
-                  reject(new Error('Failed to load page, status code: ' + response.statusCode));
-                }
+      const getContent = function(url) {
+        return new Promise((resolve, reject) => {
+          const lib = url.startsWith('https') ? require('https') : require('http');
+          const request = lib.get(url, (response) => {
+            if (response.statusCode < 200 || response.statusCode > 299) {
+                reject(new Error('Failed to load page, status code: ' + response.statusCode));
+              }
 
-              const body = [];
-              response.on('data', (chunk) => body.push(chunk));
-              response.on('end', () => resolve(body.join('')));
-            });
-            request.on('error', (err) => reject(err))
-          })
-        };        
-        
-        let client;
+            const body = [];
+            response.on('data', (chunk) => body.push(chunk));
+            response.on('end', () => resolve(body.join('')));
+          });
+          request.on('error', (err) => reject(err))
+        })
+      };        
+      
+      let client;
 
-        let connect = async () => {
-    	return getContent('https://qh6vsuof2f.execute-api.eu-central-1.amazonaws.com/dev/iot/keys').then((res) => {
-    		res = JSON.parse(res)
-    		client = awsIot.device({
+      let connect = async () => {
+        return getContent('https://qh6vsuof2f.execute-api.eu-central-1.amazonaws.com/dev/iot/keys').then((res) => {
+          res = JSON.parse(res)
+          client = awsIot.device({
                 region: res.region,
                 protocol: 'wss',
                 accessKeyId: res.accessKey,
@@ -185,65 +186,68 @@ class MyCourses extends React.Component {
                 port: 443,
                 host: res.iotEndpoint
             });
-    	})
+        })
 
-        }
+      }
 
-        var j;
-        for (j = 0; j < this.state.PostsListThree.length; j++) {
-          server.getLessonStatus((response) => {
-            var current_id = ((response.request.responseURL).split('lesson')[1]).split('/')[1];
-            
-            if(response.data === "LESSON_START") {
+      var j=0;
+      for (j = 0; j < this.state.PostsListThree.length; j++) {
+        server.getLessonStatus((response) => {
+          console.log("Lesson get Lesson status for", this.state, response);
+          var current_id = ((response.request.responseURL).split('lesson')[1]).split('/')[1];
+          
+          if(response.data === "LESSON_START") {
+            var insert = this.state.lessons_status;
+            var insert_student_status = this.state.lessons_student_status
+            insert[current_id] = false;
+            this.setState({lessons_status: insert});
+
+            server.getLessonPresentStudents((response) => {
+              console.log("getLessonPresentsStudents", response);
+              var Student_id = localStorage.getItem('sub');
+              for (var student of response.data){
+                if(student.id == Student_id){
+
+                  insert_student_status[current_id] = true;
+                  this.setState({lessons_student_status: insert_student_status});
+                  break;
+                }
+              }
+              console.log("Result of resume lessons", insert_student_status);
+            }, null, current_id);
+          } else {
+            this.state.lessons_status[current_id] = true;
+            this.setState({lessons_status: this.state.lessons_status});
+          }
+
+        }, (error)=>{
+          console.log("Error in getLessonStatus in MyCourses", error);
+        }, this.state.PostsListThree[j].id);
+      }
+
+      var i;
+      for (i = 0; i < this.state.PostsListThree.length; i++) {
+        let LessonsStatusURL = 'lesson/'+ this.state.PostsListThree[i].id +'/status';
+        connect().then(() => {
+          client.subscribe(LessonsStatusURL);
+          client.on('message', (topic, message) => {
+
+          var current_id = ((topic).split('lesson')[1]).split('/')[1];
+          if(message == "LESSON_START"){
               var insert = this.state.lessons_status;
-              var insert_student_status = this.state.lessons_student_status
               insert[current_id] = false;
               this.setState({lessons_status: insert});
-
-              server.getLessonPresentStudents((response) => {
-                var Student_id = parseInt(localStorage.getItem('student_id'));
-                for (var student of response.data){
-                  if(student.id == Student_id){
-
-                    insert_student_status[current_id] = true;
-                    this.setState({lessons_student_status: insert_student_status});
-                    break;
-                  }
-                }
-              }, null, current_id);
-            } else {
-              this.state.lessons_status[current_id] = true;
-              this.setState({lessons_status: this.state.lessons_status});
+            }else{
+              var insert = this.state.lessons_status;
+                insert[current_id] = true;
+              this.setState({lessons_status: insert});
             }
-
-          }, (error)=>{
-            console.log(error);
-          }, this.state.PostsListThree[j].id);
-        }
-
-        var i;
-        for (i = 0; i < this.state.PostsListThree.length; i++) {
-          let LessonsStatusURL = 'lesson/'+ this.state.PostsListThree[i].id +'/status';
-          connect().then(() => {
-            client.subscribe(LessonsStatusURL);
-            client.on('message', (topic, message) => {
-
-            var current_id = ((topic).split('lesson')[1]).split('/')[1];
-            if(message == "LESSON_START"){
-                var insert = this.state.lessons_status;
-                insert[current_id] = false;
-                this.setState({lessons_status: insert});
-              }else{
-                var insert = this.state.lessons_status;
-                  insert[current_id] = true;
-                this.setState({lessons_status: insert});
-              }
-            })
-          });
-        }
+          })
+        });
+      }
       }, (error)=>{
-        console.log(error);
-     });
+        console.log("Error in getStudentCourses for Student", error);
+    });
 
   }
 

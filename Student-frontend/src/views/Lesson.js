@@ -230,6 +230,19 @@ class Lesson extends React.Component {
        self.setState({demoStudent: student_payload["https://emon-teach.com/demo_student"]});
      }
 
+     server.getLessonStatus(
+      function(response){
+        if(response.data === "LESSON_END")
+        {
+          history.push("/my-courses/");
+        }
+      },
+      function(error){
+        console.log("Error in getLessonStatus in componentDidmount in Lesson", error);
+      },
+      this.state.lesson_id
+     )
+
      const getHistory=() =>{
       this.setState(prevState => ({
       reward_money : 0
@@ -239,7 +252,6 @@ class Lesson extends React.Component {
       }));
       server.getLessonMessages(function(response)
        {
-         console.log("Got Lesson Status", response);
          //iterating over the recieved messages
         var data=response.data;
         for(var res of data){
@@ -261,7 +273,7 @@ class Lesson extends React.Component {
      }}, function(error){
        console.log("Error in getLessonDetails in componentDidMount in Lesson.js ", error);
      }, self.state.lesson_id, self.state.student_id);
-   }
+    }
 
     var LessonsMessageURL='lesson/'+this.state.lesson_id+'/messages/'+this.state.student_id;
 
@@ -270,9 +282,8 @@ class Lesson extends React.Component {
     }
 
     let onMessages =  (topic, message) => {
-      console.log("topic, message");
-      console.log(topic,message);
       if(topic === LessonsMessageURL){
+          console.log("topic, message", topic,JSON.parse(message));
           var res=JSON.parse(message);
           if(res.messageType === "EMOJI"){
               this.setState(prevState => ({
@@ -292,28 +303,27 @@ class Lesson extends React.Component {
           }
 
       }else{
-            var self = this;
-            server.deleteLessonMessages(function(error){
-              console.log("Error in deleteLessonMessages in onMessages in Lesson.js", error);
-            }, self.state.lesson_id, self.state.student_id);
+        console.log("topic, message", topic,message);
+        var self = this;
+        server.deleteLessonMessages(function(error){
+          console.log("Error in deleteLessonMessages in onMessages in Lesson.js", error);
+        }, self.state.lesson_id, self.state.student_id);
 
-            this.setState({message: "The lesson ended", success: false, message_modal_open:false});
-            window.scrollTo(0, 0);
-            if(this.state.demoStudent)
-            {
-              history.push("/user-profile-lite/");
-            }
-            else {
-              window.location.href = "/course-summery/" + JSON.stringify( {
-                  id: this.state.lesson_id,
-                  reward_money: this.state.reward_money,
-                  emojis: this.state.currentEmojis
-                })
-            }
+        this.setState({message: "The lesson ended", success: false, message_modal_open:false});
+        window.scrollTo(0, 0);
+        if(this.state.demoStudent)
+        {
+          history.push("/user-profile-lite/");
+        }
+        else {
+          window.location.href = "/course-summery/" + JSON.stringify( {
+              id: this.state.lesson_id,
+              reward_money: this.state.reward_money,
+              emojis: this.state.currentEmojis
+            })
+        }
 
-          }
-
-
+      }
     }
 
     let onOffline = () => {} /* Basically we had it in the teacher part and
