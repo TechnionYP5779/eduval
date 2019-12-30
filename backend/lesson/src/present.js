@@ -128,11 +128,14 @@ const updatePresentStudents = async (event, context, callback) => {
 				return Promise.reject(createError.Conflict('The requested desk is already taken.'));
 			}
 
-			return Promise.resolve();
+			return knexConnection('PresentStudents')
+				.insert(objToInsert);
 		})
-		.then(() => knexConnection('PresentStudents')
-			.insert(objToInsert))
-		.then(() => management.getUser({ id: event.body.id }))
+		.then(() => management.getUser({
+			id: event.body.id,
+			fields: 'email,user_metadata',
+			include_fields: true,
+		}))
 		.then(profile => ({
 			id: event.body.id,
 			email: profile.email,
@@ -140,9 +143,19 @@ const updatePresentStudents = async (event, context, callback) => {
 			phoneNum: profile.user_metadata.phone_number,
 			desk: objToInsert.desk,
 		}))
-		.then((notificationToSend) => {
+		.then(async (notificationToSend) => {
+			knexConnection.client.destroy();
+
+			await axios.post(
+				`${process.env.LAMBDA_ENDPOINT}/lesson/${event.pathParameters.courseId}/messages/${encodeURI(event.body.id)}`,
+				{ messageType: 'EMON', messageReason: '1', value: 5 },
+				{
+					headers: { Authorization: event.headers.Authorization },
+				},
+			);
+
 			iot.connect().then(() => {
-				iot.client.publish(`lesson/${event.pathParameters.courseId}/present`, JSON.stringify(notificationToSend), {}, (uneededResult) => {
+				iot.client.publish(`lesson/${event.pathParameters.courseId}/present`, JSON.stringify(notificationToSend), {}, () => {
 					iot.client.end(false);
 					callback(null, {
 						statusCode: 200,
@@ -151,23 +164,15 @@ const updatePresentStudents = async (event, context, callback) => {
 				});
 			});
 		})
-		.then(async (result) => {
-			knexConnection.client.destroy();
-			return axios.post(
-				`${process.env.LAMBDA_ENDPOINT}/lesson/${event.pathParameters.courseId}/messages/${encodeURI(event.body.id)}`,
-				{ messageType: 'EMON', messageReason: '1', value: 5 },
-				{
-					headers: { Authorization: event.headers.Authorization },
-				},
-			);
-		})
 		.catch((err) => {
+			knexConnection('PresentStudents').where({ studentId: objToInsert.studentId, courseId: objToInsert.courseId }).del();
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console
 			console.log(`ERROR updating present students: ${err}`);
+			// eslint-disable-next-line no-console
 			console.log(err);
-			console.log(JSON.stringify(err));
+			// console.log(JSON.stringify(err));
 			return callback(createError.InternalServerError('Error updating present students.'));
 		});
 };

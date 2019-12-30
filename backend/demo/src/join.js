@@ -35,6 +35,7 @@ const registerDemoStudent = async (event, context, callback) => {
 		uppercase: true,
 		symbols: true,
 	});
+
 	// eslint-disable-next-line camelcase
 	const [given_name, ...restOfName] = event.body.nickname.split(' ');
 	// eslint-disable-next-line camelcase
@@ -44,11 +45,14 @@ const registerDemoStudent = async (event, context, callback) => {
 	let courseId = null;
 	let decodedToken = null;
 	let accessToken = null;
+	let userSub = null;
 
+	// Find demo hash
 	return knexConnection('DemoHashes')
 		.where({
 			demoId: event.pathParameters.demoHash,
 		})
+		// Check demo hash found & get lesson number, status
 		.then((result) => {
 			// eslint-disable-next-line prefer-destructuring
 			courseId = result[0].courseId;
@@ -62,11 +66,22 @@ const registerDemoStudent = async (event, context, callback) => {
 				return Promise.reject(createError.InternalServerError('More than one demo lesson with this hash.'));
 			}
 
-			return knexConnection('Courses').select('lessonNumber').where({ courseId });
+			return knexConnection('Courses').select('lessonNumber', 'status').where({ courseId });
 		})
+		// Check lesson started & get present students
 		.then((result) => {
 			emailSuffix = `fake${crypto.createHash('md5').update(courseId.toString()).digest('hex')}${result[0].lessonNumber}.email`;
 			email = `${username}@${emailSuffix}`;
+
+			if (result[0].status === 'LESSON_END') {
+				callback(null, {
+					statusCode: 409,		// HTTP Gone
+					body: JSON.stringify({
+						error: 'COURSE_NOT_STARTED',
+					}),
+				});
+				return Promise.reject(createError.Gone('The course is not active.'));
+			}
 
 			return knexConnection('PresentStudents')
 				.select()
@@ -75,6 +90,7 @@ const registerDemoStudent = async (event, context, callback) => {
 					desk: event.body.seatNumber,
 				});
 		})
+		// Check desk taken
 		.then((result) => {
 			if (result.length !== 0) {
 				callback(null, {
@@ -88,28 +104,11 @@ const registerDemoStudent = async (event, context, callback) => {
 
 			return Promise.resolve();
 		})
-		.then(() => knexConnection('Courses')
-			.select('status')
-			.where({
-				courseId,
-			}))
-		.then((result) => {
-			if (result[0].status === 'LESSON_END') {
-				callback(null, {
-					statusCode: 409,		// HTTP Gone
-					body: JSON.stringify({
-						error: 'COURSE_NOT_STARTED',
-					}),
-				});
-				return Promise.reject(createError.Gone('The course is not active.'));
-			}
-
-			return Promise.resolve();
-		})
 		.then(() => management.getUsers({
 			search_engine: 'v3',
 			q: `email:*@${emailSuffix} AND name:${event.body.nickname}`,
 		}))
+		// Check name taken
 		.then((users) => {
 			if (users.length !== 0) {
 				callback(null, {
@@ -140,12 +139,14 @@ const registerDemoStudent = async (event, context, callback) => {
 			},
 			connection: 'Username-Password-Authentication',
 		}))
-		.then(() => {
+		// Log in with user
+		.then((response) => {
 			const authentication = new auth0.AuthenticationClient({
 				domain: 'e-mon.eu.auth0.com',
 				clientId: process.env.AUTH0_CLIENT_ID,
 				clientSecret: process.env.AUTH0_CLIENT_SECRET,
 			});
+			userSub = response.user_id;
 
 			return authentication.passwordGrant({
 				username,
@@ -153,25 +154,14 @@ const registerDemoStudent = async (event, context, callback) => {
 				realm: 'Username-Password-Authentication',
 			});
 		})
+		// Save token & update registered
 		.then((response) => {
 			decodedToken = jwt.decode(response.id_token);
 			accessToken = response.access_token;
 
 			// idToken = Buffer.from(decodedToken.sub).toString('base64');
 			auth0Token = response.id_token;
-			return Promise.resolve();
-		})
-		.then(() => {
-			knexConnection.client.destroy();
-
-			return axios({
-				url: `${process.env.LAMBDA_ENDPOINT}/course/${courseId}/registered`,
-				method: 'post',
-				data: [email],
-				headers: {
-					Authorization: `Bearer ${auth0Token}`,
-				},
-			});
+			return knexConnection('Registered').insert({ studentId: decodedToken.sub, courseId });
 		})
 		.then(() => axios.post(`${process.env.LAMBDA_ENDPOINT}/lesson/${courseId}/present`, {
 			id: decodedToken.sub,
@@ -181,7 +171,10 @@ const registerDemoStudent = async (event, context, callback) => {
 				Authorization: `Bearer ${auth0Token}`,
 			},
 		}))
+		// Done
 		.then(() => {
+			knexConnection.client.destroy();
+
 			callback(null, {
 				statusCode: 200,
 				body: JSON.stringify({
@@ -194,6 +187,15 @@ const registerDemoStudent = async (event, context, callback) => {
 			});
 		})
 		.catch((err) => {
+			if (userSub !== null) {
+				// eslint-disable-next-line no-console
+				console.log('CLEANUP');
+				if (decodedToken !== null) {
+					knexConnection('Registered').where({ studentId: decodedToken.sub, courseId }).del();
+					knexConnection('PresentStudents').where({ studentId: decodedToken.sub, courseId }).del();
+				}
+				management.deleteUser({ id: userSub });
+			}
 			// Disconnect
 			knexConnection.client.destroy();
 			// eslint-disable-next-line no-console

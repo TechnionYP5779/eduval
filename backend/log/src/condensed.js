@@ -101,6 +101,23 @@ const getCondensedLog = async (event, context, callback) => {
 				});
 			}
 		})
+		.then(() => knexConnection('Logs')
+			.where({
+				courseId: event.pathParameters.courseId,
+				studentId,
+			})
+			.select('lessonNumber', 'dtime'))
+		.then((result) => {
+			if (result.length !== 0) {
+				result.forEach((x) => {
+					// assume same date for every log with same lesson number
+					let date = JSON.stringify(x.dtime).split('T')[0];
+					date = date.substr(0, date.length - 1);
+					toRet[x.lessonNumber].date = date;
+					// console.log(x.dtime);
+				});
+			}
+		})
 		.then(async () => {
 			knexConnection.client.destroy();
 
