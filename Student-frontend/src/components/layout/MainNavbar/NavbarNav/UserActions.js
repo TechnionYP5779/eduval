@@ -35,11 +35,18 @@ export default class UserActions extends React.Component {
 
   componentDidMount() {
     var self = this;
-    server.getStudentProfile(function(response){
-        self.setState({username: response.data.name});
-      }, function(error){
+    var student_payload = server.getStudentProfile( function(error){
+        console.log("Error in getting Teacher Profile for Nav Bar");
+        console.log(error);
     });
-    this.toggleUserActions = this.toggleUserActions.bind(this);
+    if (student_payload)
+    {
+      self.setState({username: student_payload["https://emon-teach.com/first_name"]+" "+student_payload["https://emon-teach.com/last_name"]});
+    }
+    else
+    {
+      console.log("Problem at componentDidMount at UserActions.js!");
+    }
   }
 
   toggleUserActions() {
@@ -69,7 +76,7 @@ export default class UserActions extends React.Component {
               src={require("./../../../../images/avatars/owl.png")}
               alt="User Avatar"
             />{" "}
-            <span className="d-none d-md-inline-block">{this.state.username}</span>
+            <span>{this.state.username}</span>
           </DropdownToggle>
           <Collapse tag={DropdownMenu} right small open={this.state.visible}>
             <DropdownItem tag={Link} to="user-profile-lite">

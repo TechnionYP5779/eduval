@@ -2,6 +2,10 @@
 import history from '../history';
 import React from "react";
 import axios from 'axios';
+import clsx from 'clsx';
+
+import Alert from 'react-bootstrap/Alert'
+
 import {
   Container,
   Row,
@@ -13,13 +17,32 @@ import {
   FormGroup,
   FormInput,
   Badge,
-  Button
 } from "shards-react";
+import PropTypes from 'prop-types';
+
+import { withStyles } from '@material-ui/core/styles';
 
 import PageTitle from "../components/common/PageTitle";
+import CourseCard from "../components/common/CourseCard";
+import server from "../Server/Server";
+
 import awsIot  from 'aws-iot-device-sdk';
 
-import Modal from 'react-modal';
+import PlayCircleFilledWhiteRoundedIcon from '@material-ui/icons/PlayCircleFilledWhiteRounded';
+import Modal from '@material-ui/core/Modal';
+import Backdrop from '@material-ui/core/Backdrop';
+import Fade from '@material-ui/core/Fade';
+import Button from '@material-ui/core/Button';
+import ClearIcon from '@material-ui/icons/Clear';
+import Delete from '@material-ui/icons/Delete';
+import TextField from '@material-ui/core/TextField';
+
+import FormatListNumberedIcon from '@material-ui/icons/FormatListNumbered';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import SendIcon from '@material-ui/icons/Send';
+import { withTranslation } from 'react-i18next';
+
+
 const customStyles = {
   content : {
     top                   : '50%',
@@ -32,7 +55,65 @@ const customStyles = {
   }
 };
 
-Modal.setAppElement('#root');
+const styles = theme => ({
+  modal: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  paper: {
+    backgroundColor: theme.palette.background.paper,
+    border: '2px solid #000',
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2, 4, 3),
+  },
+
+  buttonModal:
+  {
+    width: "50%",
+    position: 'relative',
+  },
+
+  sendDesk:
+  {
+    backgroundColor: "LimeGreen",
+    color: "white",
+    borderColor: "white",
+  },
+
+  qr: {
+    margin: "auto",
+    display: "block",
+    maxWidth: "20%"
+  },
+  regularLesson:
+  {
+    borderWidth: "medium",
+    borderStyle: "solid",
+  },
+
+  resumeLesson:
+  {
+    backgroundColor: "#77dd77"
+  },
+
+  joinLesson:
+  {
+    backgroundColor:"Orange",
+  },
+  textField: {
+    margin: "auto",
+    width: "100%",
+    marginBottom: '15px ',
+  },
+  title:{
+    color: "DarkBlue",
+    align: "center"
+  },
+
+
+});
+
 class MyCourses extends React.Component {
   constructor(props) {
     super(props);
@@ -45,12 +126,22 @@ class MyCourses extends React.Component {
       lessons_student_status: {},
       modalIsOpen: false,
       post_id:-1,
-      deskNum: -1
+      student_seat: -1,
+      studentSeatTaken: false,
+      emptySeat: true,
+
+      desk_modal_open: false,
+      desk_button_disabled: false,
+      errored: false,
     };
 
     this.showModal = this.showModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
-    this.handleNameInput = this.handleNameInput.bind(this);
+
+    this.setDeskModalChange = this.setDeskModalChange.bind(this)
+    this.handleDeskModalOpen = this.handleDeskModalOpen.bind(this)
+    this.handleDeskModalClose = this.handleDeskModalClose.bind(this)
+    this.updateStudentSeat = this.updateStudentSeat.bind(this);
 
 
 
@@ -58,35 +149,31 @@ class MyCourses extends React.Component {
         'Authorization': 'Bearer ' + localStorage.getItem('idToken')
     }
     let sub=new Buffer( localStorage.getItem('sub')).toString('base64');
-    axios.get('https://api.emon-teach.com/student/byToken/'+sub,
-     {headers: headers})
-      .then(response =>localStorage.setItem('student_id', response.data.id) );
+   
       let res=[];
 
-      axios.get('https://api.emon-teach.com/course/byStudent/'+localStorage.getItem('student_id'),
-     {headers: headers})
-     .then((response) => {
-     this.setState({PostsListThree: response.data});
+      server.getStudentCourses((response) => {
+        this.setState({PostsListThree: response.data});
 
+        const getContent = function(url) {
+          return new Promise((resolve, reject) => {
+            const lib = url.startsWith('https') ? require('https') : require('http');
+            const request = lib.get(url, (response) => {
+              if (response.statusCode < 200 || response.statusCode > 299) {
+                  reject(new Error('Failed to load page, status code: ' + response.statusCode));
+                }
 
-           const getContent = function(url) {
-      return new Promise((resolve, reject) => {
-    	    const lib = url.startsWith('https') ? require('https') : require('http');
-    	    const request = lib.get(url, (response) => {
-    	      if (response.statusCode < 200 || response.statusCode > 299) {
-    	         reject(new Error('Failed to load page, status code: ' + response.statusCode));
-    	       }
+              const body = [];
+              response.on('data', (chunk) => body.push(chunk));
+              response.on('end', () => resolve(body.join('')));
+            });
+            request.on('error', (err) => reject(err))
+          })
+        };        
+        
+        let client;
 
-    	      const body = [];
-    	      response.on('data', (chunk) => body.push(chunk));
-    	      response.on('end', () => resolve(body.join('')));
-    	    });
-    	    request.on('error', (err) => reject(err))
-        })
-    };
-    let client;
-
-      let connect = async () => {
+        let connect = async () => {
     	return getContent('https://qh6vsuof2f.execute-api.eu-central-1.amazonaws.com/dev/iot/keys').then((res) => {
     		res = JSON.parse(res)
     		client = awsIot.device({
@@ -100,110 +187,155 @@ class MyCourses extends React.Component {
             });
     	})
 
-    }
+        }
 
-    var j;
-    for (j = 0; j < this.state.PostsListThree.length; j++) {
-      axios.get('https://api.emon-teach.com/lesson/'+ this.state.PostsListThree[j].id +'/status',
-          {headers: headers})
-          .then((response) => {
-            
+        var j;
+        for (j = 0; j < this.state.PostsListThree.length; j++) {
+          server.getLessonStatus((response) => {
             var current_id = ((response.request.responseURL).split('lesson')[1]).split('/')[1];
-          if(response.data === "LESSON_START"){
-            var insert = this.state.lessons_status;
-            var insert_student_status = this.state.lessons_student_status
-            insert[current_id] = false;
-            this.setState({lessons_status: insert});
-            axios.get('https://api.emon-teach.com/lesson/'+ current_id +'/present',
-                {headers: headers})
-                .then((response) => {
-                   var Student_id = parseInt(localStorage.getItem('student_id'));
-                    for (var student of response.data){
-                      if(student.id == Student_id){
-                        
-                        insert_student_status[current_id] = true;
-                        this.setState({lessons_student_status: insert_student_status});
-                        break;
-                      }
-                    }
-                });
-          
-          }else{
             
+            if(response.data === "LESSON_START") {
+              var insert = this.state.lessons_status;
+              var insert_student_status = this.state.lessons_student_status
+              insert[current_id] = false;
+              this.setState({lessons_status: insert});
+
+              server.getLessonPresentStudents((response) => {
+                var Student_id = parseInt(localStorage.getItem('student_id'));
+                for (var student of response.data){
+                  if(student.id == Student_id){
+
+                    insert_student_status[current_id] = true;
+                    this.setState({lessons_student_status: insert_student_status});
+                    break;
+                  }
+                }
+              }, null, current_id);
+            } else {
               this.state.lessons_status[current_id] = true;
-             this.setState({lessons_status: this.state.lessons_status});
-          }
-          
-        }).catch((error)=>{
-          console.log(error);
-        });
-    }
+              this.setState({lessons_status: this.state.lessons_status});
+            }
 
-     var i;
-    for (i = 0; i < this.state.PostsListThree.length; i++) {
-      
-      let LessonsStatusURL = 'lesson/'+ this.state.PostsListThree[i].id +'/status';
-      connect().then(() => {
-        client.subscribe(LessonsStatusURL);
-        client.on('message', (topic, message) => {
-          
-        var current_id = ((topic).split('lesson')[1]).split('/')[1];
-         if(message == "LESSON_START"){
-            var insert = this.state.lessons_status;
-            insert[current_id] = false;
-            this.setState({lessons_status: insert});
-          }else{
-            var insert = this.state.lessons_status;
-              insert[current_id] = true;
-             this.setState({lessons_status: insert});
-          }
-        })
-      });
+          }, (error)=>{
+            console.log(error);
+          }, this.state.PostsListThree[j].id);
+        }
 
-  }
+        var i;
+        for (i = 0; i < this.state.PostsListThree.length; i++) {
+          let LessonsStatusURL = 'lesson/'+ this.state.PostsListThree[i].id +'/status';
+          connect().then(() => {
+            client.subscribe(LessonsStatusURL);
+            client.on('message', (topic, message) => {
 
-   })
-  .catch((error)=>{
-     console.log(error);
-  });
-
-  }
-
-
-  insertDeskNumber() {
-    var Student_id = parseInt(localStorage.getItem('student_id'));
-    var lesson_id = this.state.post_id;
-      let config = {
-          headers: {'Authorization': 'Bearer ' + localStorage.getItem('idToken')}
-      };
-      var txt;
-      this.showModal();
-        axios.post('https://api.emon-teach.com/lesson/'+ lesson_id +'/present',{
-          id:  Student_id,
-          desk: this.state.deskNum}, config).then(function(response){
-            history.push("/lesson/" + lesson_id);
+            var current_id = ((topic).split('lesson')[1]).split('/')[1];
+            if(message == "LESSON_START"){
+                var insert = this.state.lessons_status;
+                insert[current_id] = false;
+                this.setState({lessons_status: insert});
+              }else{
+                var insert = this.state.lessons_status;
+                  insert[current_id] = true;
+                this.setState({lessons_status: insert});
+              }
+            })
           });
-      
-     }
+        }
+      }, (error)=>{
+        console.log(error);
+     });
 
-showModal(id) {
-  if(this.state.lessons_student_status[id]){
-    history.push("/lesson/" + id);
-  }else{
-    this.setState({modalIsOpen: true, titleModal: "Enter your desk number " , desk_num: "767"});
-    this.setState({post_id: id}); 
   }
+
+  setDeskModalChange(value)
+  {
+    this.setState({desk_modal_open: value})
+  }
+
+  handleDeskModalOpen = (id) =>
+  {
+    this.setState({post_id: id});
+    this.setDeskModalChange(true);
+  };
+
+  handleDeskModalClose = () => {
+    this.setDeskModalChange(false);
+  };
+
+
+  insertDeskNumber(seatNumber, errorCallback) {
+    var Student_id = parseInt(localStorage.getItem('student_id'));
+    console.log(this.state);
+    console.log(errorCallback)
+    var lesson_id = this.state.post_id;
+    console.log("I got lesson id " + lesson_id);
+    let config = {
+        headers: {'Authorization': 'Bearer ' + localStorage.getItem('idToken')}
+    };
+    var txt;
+    this.showModal(lesson_id);
+    if(seatNumber<0)
+    {
+      this.setState({errored:true});
+      return;
+    }
+    console.log("SEAT NUMBER");
+    console.log(seatNumber);
+    this.setState({
+      studentSeatTaken:false,
+      emptySeat: false,
+      errored: false
+    })
+
+    var self = this;
+    server.lessonRegisterPresentStudent(() =>
+    {
+      history.push("/lesson/" + lesson_id);
+    }, (error) =>
+    {
+        console.log(error);
+        console.log("Failed presenting maself");
+        if(error.response)
+        {
+          if(error.response.status === 409)
+          {
+            self.setState({studentSeatTaken: true})
+          }
+          else
+          {
+            self.setState({errored: true});
+          }
+        }
+        else
+        {
+          self.setState({errored: true});
+        }
+        self.setState({desk_button_disabled: false});
+    }, lesson_id, seatNumber);
+  }
+
+  showModal(id) {
+    this.setState({modalIsOpen: true, titleModal: "Enter your desk number " , desk_num: "767"});
+    this.setState({post_id: id});
   }
 
   closeModal() {
     this.setState({modalIsOpen: false});
   }
 
-  handleNameInput(input){
-    this.setState({deskNum: input.target.value});
+  updateStudentSeat(evnt){
+    if(evnt.target.value === "")
+    {
+      this.setState({emptySeat: true});
+    }
+    else {
+      this.setState({emptySeat: false})
+    }
+    this.setState({student_seat: evnt.target.value});
+    this.setState({studentSeatTaken: false})
   }
-
   render() {
+    const classes = this.props.classes;
     const {
       PostsListOne,
       PostsListTwo,
@@ -212,38 +344,16 @@ showModal(id) {
     } = this.state;
     let showModal = this.showModal;
     let closeModal = this.closeModal;
-
+    const { t } = this.props;
 
     return (
-<div>
+    <div>
 
-  <Modal
-        isOpen={this.state.modalIsOpen}
-        onRequestClose={this.closeModal}
-        style={customStyles}
-      >
-      <h5>Please enter your desk number</h5>
-      <Form>
-        <FormGroup>
-          <label htmlFor="deskNum">Desk number</label>
-          <FormInput id="deskNum"  onChange={this.handleNameInput}/>
-        </FormGroup>
-        </Form>
-
-        <Button disabled={this.state.disabled} theme="success" onClick={()=>{
-        let action;
-        this.setState({disabled: true});
-        this.insertDeskNumber();
-      }}>Enter</Button>
-      <Button theme="danger" disabled={this.state.disabled} style={{float: "right"}} onClick={closeModal}>Cancel</Button>
-
-
-      </Modal>
 
       <Container fluid className="main-content-container px-4">
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title="My Courses" subtitle="Manage eveyrthing in one place"
+          <PageTitle sm="4" title={t("My Courses")} subtitle={t("Manage eveyrthing in one place")}
                      className="text-sm-left" />
         </Row>
 
@@ -255,37 +365,32 @@ showModal(id) {
           {
             PostsListThree.map((post, idx) => (
             <Col lg="4" key={idx}>
-              <Card small className="card-post mb-4">
-                <CardBody>
-                  <h4 className="card-title">{post.name}</h4>
-                  <p className="card-text text-muted">{post.description}</p>
-                </CardBody>
-                <CardFooter className="border-top d-flex">
-                  <div className="card-post__author d-flex">
-                    <div className="d-flex flex-column justify-content-center ml-3">
-                    <a href={"/course-details/" + post.id}><Button size="sm" theme="white">
-                      <i className="far fa-edit mr-1" /> View more
-                    </Button></a>
-                    </div>
-                  </div>
+              <CourseCard
 
-                  <div className="my-auto ml-auto">
+              demoLink={post.demoLink}
+              name={post.name}
+              description={post.description}
+              disabled_play={this.state.lessons_status[post.id]}
+              play_text={this.state.lessons_student_status[post.id] ? t("Resume") : t("Join") }
+              play_pushed={this.state.lessons_student_status[post.id]}
+              id={post.id}
+              play_errored={this.state.errored}
+              studentSeatTaken={this.state.studentSeatTaken}
+              emptySeat={this.state.emptySeat}
+              setPostWhenModalOpen={()=>
+              {
+                this.setState({post_id: post.id});
+              }}
+              insertDeskNumber={(seatNumber)=>
+                {
+                  this.insertDeskNumber(seatNumber);
+                }
+              }
+              playClicked=
+              {()=>{history.push("/lesson/" + post.id);}}
 
-                    <Button  size="sm" theme="white" href={"/store/" + post.id}>
-                      <i className="fas fa-dollar-sign mr-1" /> Shop
-                    </Button>
+              />
 
-                  </div>
-
-                  <div className="my-auto ml-auto">
-
-                    <Button disabled = {this.state.lessons_status[post.id]} size="sm" theme= {this.state.lessons_status[post.id] == false ? 'success' : 'white'}onClick={() => {this.showModal(post.id)}}>
-                      <i className="far fa-bookmark mr-1" /> {this.state.lessons_student_status[post.id] ? "Resume" : "Join" }
-                    </Button>
-
-                  </div>
-                </CardFooter>
-              </Card>
             </Col>
           ))}
         </Row>
@@ -299,4 +404,16 @@ showModal(id) {
 
 }
 
-export default MyCourses;
+MyCourses.propTypes = {
+  classes:PropTypes.object.isRequired,
+};
+
+
+export default withTranslation()(withStyles(styles)(MyCourses));
+
+// <CourseCard
+//   name={post.name}
+//   description={post.description}
+//   id={post.id}
+//   play_pushed={this.state.lessons_student_status[post.id]}
+// />

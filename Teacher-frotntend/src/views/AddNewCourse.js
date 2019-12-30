@@ -1,15 +1,16 @@
 import React from "react";
 import { Container, Row, Card} from "shards-react";
 
-
 import PageTitle from "../components/common/PageTitle";
 import Editor from "../components/add-new-post/Editor";
 import SidebarActions from "../components/add-new-post/SidebarActions";
 import SidebarCategories from "../components/add-new-post/SidebarCategories";
 import NewCourseForm from "../components/add-new-post/NewCourseForm";
 import TimeoutAlert from "../components/common/TimeoutAlert";
+import { withTranslation } from "react-i18next";
+import { capitalize } from '../utils/strings';
 
-export default class AddNewCourse extends React.Component {
+class AddNewCourse extends React.Component {
 
   constructor(props){
     super(props);
@@ -43,13 +44,14 @@ export default class AddNewCourse extends React.Component {
 
   render(){
     var handler  =   this.handler;
+    const { t } = this.props;
 
     // <i className="fa fa-info mx-2"></i> Success! Your course has been added!
     // </TimeoutAlert>
 
   //   <i className="fa fa-info mx-2"></i> {this.state.error}
   // </TimeoutAlert>
-    var successMsg = "Success! Your course has been added!";
+    var successMsg = t("Success! Your course has been added!");
     return (
           <div class="main-content container-fluid">
             {this.state.error &&
@@ -63,7 +65,7 @@ export default class AddNewCourse extends React.Component {
 
               {/* Page Header */}
               <Row noGutters className="page-header py-4">
-                <PageTitle sm="4" title="Add New Course" subtitle="Your Courses" className="text-sm-left" />
+                <PageTitle sm="4" title={capitalize(t("Add New Course"))} subtitle={t("Your Courses")} className="text-sm-left" />
               </Row>
 
               <Row>
@@ -78,3 +80,5 @@ export default class AddNewCourse extends React.Component {
     );
   }
 }
+
+export default withTranslation()(AddNewCourse);

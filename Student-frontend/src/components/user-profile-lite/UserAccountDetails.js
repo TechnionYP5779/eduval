@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
 import {
   Card,
   CardHeader,
@@ -10,168 +9,163 @@ import {
   Form,
   FormGroup,
   FormInput,
-  FormSelect,
-  FormTextarea,
-  Container,
-  Button,
-  Alert
+  Button
 } from "shards-react";
 
-import server from "../../Server/Server";
-
-import axios from 'axios';
+import server from "../../Server/Server"
+import TimeoutAlert from "../../components/common/TimeoutAlert"
+import UserAccountCard from "./UserAccountCard";
+import { withTranslation } from 'react-i18next';
 
 class UserAccountDetails extends React.Component {
 
   constructor(props) {
-  super(props);
+    super(props);
 
-  this.state = {
-    details:
+    this.state = {
+      details:{
+        username: "",
+        firstName: "",
+        lastName: "",
+        newPassword: "",
+        oldPassword:"",
+        email: "",
+        phoneNum: ""
+      },
+      wrong_password:false,
+      too_many_attempts:false,
+      username_taken: false,
+      email_taken: false,
+    };
+
+
+    this.update = this.update.bind(this);
+  }
+
+  update(teacher_details){
+    let self = this;
+    this.setState({disabled: true});
+
+    var tmp_dets=teacher_details;
+    delete tmp_dets.demoStudent;
+    if(tmp_dets.newPassword=="")
     {
-      id: localStorage.getItem('student_id'),
-      authIdToken: "",
-      name: "",
-      password: "",
-      email: "",
-      phoneNum: ""
+      delete tmp_dets.newPassword;
     }
-  };
+    if(tmp_dets.lastName=="")
+    {
+      delete tmp_dets.lastName;
+    }
+    if(tmp_dets.firstName=="")
+    {
+      delete tmp_dets.firstName;
+    }
+    if(tmp_dets.phoneNum=="")
+    {
+      delete tmp_dets.phoneNum;
+    }
+    //Theoretically we might want to check whether anything was changed at all?
+    server.updateStudent(function(response)
+    {
+      var payload = JSON.parse(localStorage.getItem('payload'));
+      payload["https://emon-teach.com/phone_number"]=tmp_dets.phoneNum;
+      payload["https://emon-teach.com/first_name"]=tmp_dets.firstName;
+      payload["https://emon-teach.com/last_name"]=tmp_dets.lastName;
+      payload["https://emon-teach.com/username"]=tmp_dets.username;
+      payload["https://emon-teach.com/demo_student"]=false;
+      payload["email"]=tmp_dets.email;
+      console.log("New Payload", payload);
+      localStorage.setItem('payload', JSON.stringify(payload));
 
-  this.updateName = this.updateName.bind(this);
-  this.updateEmail = this.updateEmail.bind(this);
-  this.updatePhoneNumber = this.updatePhoneNumber.bind(this);
-  this.update = this.update.bind(this);
-}
-
-updateName(evnt){
-  let dets = this.state.details;
-  dets.name = evnt.target.value;
-  this.setState({details: dets})
-}
-
-
-update(){
-  let self = this;
-  let config = {
-    headers: {'Authorization': 'Bearer ' + localStorage.getItem('idToken')}
-  };
-  axios.put('https://api.emon-teach.com/student', {
-    id:  this.state.details.id,
-    // authIdToken: this.state.details.authIdToken,
-    // name: this.state.details.name,
-    // email: this.state.details.email,
-    phoneNum: this.state.details.phoneNum
-  }, config)
-  .then((response) => {
       self.setState({error: false, success: true, disabled: false});
-      window.scrollTo(0, 0);})
-      .catch((error) => {console.log("failed", error);
-      self.setState({error: "An error has occured", success: false, disabled: false});
-      window.scrollTo(0, 0);});
-}
+      window.scrollTo(0, 0);
+      window.location.reload(true);
+    }, function(error){
+      if(error.response)
+      {
+        if(error.response.status==403){
+          self.setState({wrong_password:true});
+        }
+        else if(error.response.status==429){
+          self.setState({too_many_attempts:true});
+        }
+        else if(error.response.status==400){
+          if(error.response.data.error=="USERNAME_TAKEN")
+          {
+            self.setState({username_taken:true});
+          }
+          else if(error.response.data.error=="EMAIL_TAKEN")
+          {
+            self.setState({email_taken:true});
+          }
+        }
 
-updateEmail(evnt){
-  var dets = this.state.details;
-  dets.email = evnt.target.value;
-  this.setState({details: dets})
-}
+        else
+        {
+          console.log("Error in updateTeacher in update in UserAccountDetails", error);
+          self.setState({error: "An error has occured", success: false, disabled: false});
+          window.scrollTo(0, 0);
+        }
+      }
+    }, tmp_dets);
+  }
 
-updatePhoneNumber(evnt){
-  var dets = this.state.details;
-  dets.phoneNum = evnt.target.value;
-  this.setState({details: dets})
-}
-componentDidMount() {
-  var self = this;
-  server.getStudentProfile(function(response){
-    
-    self.setState({details: response.data});
-  }, function(error){
-  });
 
-  
-}
+  componentDidMount() {
+    var self = this;
 
-render()
- {
-   return(
-     <div>
-
-   {this.state.error &&
-    <Container fluid className="px-0">
-      <Alert className="mb-0" theme="danger">
-        <i className="fa fa-info mx-2"></i> {this.state.error}
-      </Alert>
-    </Container>
+    var student_payload = server.getStudentProfile( function(error){
+        console.log("Error in getting Student Profile for Nav Bar");
+        console.log(error);
+    });
+    if (student_payload)
+    {
+      var new_dets = {
+        username: student_payload["https://emon-teach.com/username"],
+        firstName: student_payload["https://emon-teach.com/first_name"],
+        lastName: student_payload["https://emon-teach.com/last_name"],
+        newPassword: "",
+        oldPassword: "",
+        email: student_payload["email"],
+        phoneNum: student_payload["https://emon-teach.com/phone_number"],
+        demoStudent: student_payload["https://emon-teach.com/demo_student"]
     }
-    {this.state.success &&
-    <Container fluid className="px-0">
-      <Alert className="mb-0" theme="success">
-        <i className="fa fa-info mx-2"></i> Success! Your profile has been updated!
-      </Alert>
-    </Container>
+      self.setState({details: new_dets});
     }
+    else
+    {
+      console.log("Problem at componentDidMount at UserAccountDetails.js!");
+    }
+  }
 
 
-
-   <Card small className="mb-4">
-     <CardHeader className="border-bottom">
-       <h6 className="m-0">Change Details</h6>
-     </CardHeader>
-     <ListGroup flush>
-       <ListGroupItem className="p-3">
-         <Row>
-           <Col>
-             <Form onSubmit={e => this.handleSubmit(e)}>
-               <Row form>
-                 {/* First Name */}
-                 <Col md="6" className="form-group">
-                   <label htmlFor="feFirstName">Name</label>
-                   <FormInput
-                     id="Name"
-                     placeholder="Name"
-                     disabled={true}
-                     value = {this.state.details.name}
-                     onChange={this.updateName}
-                   />
-                 </Col>
-                 {/* Last Name */}
-               </Row>
-               <Row form>
-                 {/* Email */}
-                 <Col md="6" className="form-group">
-                   <label htmlFor="feEmail">Email</label>
-                   <FormInput
-                     type="email"
-                     disabled={true}
-                     id="feEmail"
-                     placeholder="Email Address"
-                     value = {this.state.details.email}
-                      onChange={this.updateEmail}
-                   />
-                 </Col>
-               </Row>
-               <FormGroup>
-                 <label htmlFor="feAddress">Phone Number</label>
-                 <FormInput
-                   type="tel"
-                   id="feAddress"
-                   value = {this.state.details.phoneNum}
-                   onChange={this.updatePhoneNumber}
-                 />
-               </FormGroup>
-               <Button theme="accent" onClick={this.update} >Update Account</Button>
-             </Form>
-           </Col>
-         </Row>
-       </ListGroupItem>
-     </ListGroup>
-   </Card>
-
-      </div>);
+  render()
+  {
+    const { t } = this.props;
+  return(
+    <div>
+      {this.state.error &&
+      <TimeoutAlert className="mb-0" theme="danger" msg={this.state.error} time={10000}/>
+      }
+      {this.state.success &&
+      <TimeoutAlert className="mb-0" theme="success" msg={t("Success! Your profile has been updated!")} time={10000}/>
+      }
+      <UserAccountCard
+      title={t("Account Details")}
+      details={this.state.details}
+      updateTeacher={this.update}
+      wrongPassword={this.state.wrong_password}
+      changedOldPassword={()=>{this.setState({wrong_password:false})}}
+      tooMany={this.state.too_many_attempts}
+      usernameTaken={this.state.username_taken}
+      changedUsername={()=>{this.setState({username_taken:false})}}
+      emailTaken={this.state.email_taken}
+      changedEmail={()=>{this.setState({email_taken:false})}}
+      />
+    </div>
+    );
+  }
 }
-};
 
 
-export default UserAccountDetails;
+export default withTranslation()(UserAccountDetails);

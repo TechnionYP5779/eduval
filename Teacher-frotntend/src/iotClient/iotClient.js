@@ -7,7 +7,8 @@ class iotClient {
 
 
   constructor(topic){
-    this.iotTopic = topic;
+    this.iotTopicPresent = IOT_CONFIG.topicPresent;
+    this.iotTopicMessage = IOT_CONFIG.topicMessages;
   }
 
   config = {
@@ -28,13 +29,14 @@ class iotClient {
       callback(response);
     })
     .catch(function(error){
-      console.log(error);
+      console.log("Error in getKeys in iotClient.js", error);
       callbackError(error);
     });
   }
 
   connect(courseId, connectCallback, messageCallback, offlineCallback){
-    this.iotTopic = this.iotTopic(courseId);
+    this.messageTopic = this.iotTopicMessage(courseId);
+    this.presentTopic = this.iotTopicPresent(courseId);
     this.client = awsIot.device({
       region: this.iotKeys.region,
       protocol: 'wss',
@@ -45,17 +47,18 @@ class iotClient {
       host: this.iotKeys.iotEndpoint
     });
     const onConnect = () => {
-        this.client.subscribe(this.iotTopic);
-        connectCallback();
+      this.client.subscribe(this.messageTopic);
+      this.client.subscribe(this.presentTopic);
+      connectCallback();
     };
 
     const onMessage = (topic, message) => {
         message = new TextDecoder("utf-8").decode(message);
-        messageCallback();
+        messageCallback(topic,message);
     };
 
     const onError = (error) => {
-      console.log("onError", error);
+      console.log("Error in connect in iotClient.js", error);
       offlineCallback();
     };
     const onReconnect = () => {
@@ -79,9 +82,8 @@ class iotClient {
   }
 
 }
-
-let iotPresent = new iotClient(IOT_CONFIG.topicPresent);
-let iotMessages = new iotClient(IOT_CONFIG.topicMessages);
-
 // export default iotPresent;
-export {iotPresent, iotMessages};
+
+let iotclient = new iotClient();
+
+export default iotclient;

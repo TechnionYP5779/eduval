@@ -10,6 +10,8 @@ class Auth {
   idToken;
   expiresAt;
   sub;
+  payload;
+  profile;
 
   auth0 = new auth0.WebAuth({
     domain: AUTH_CONFIG.domain,
@@ -17,7 +19,7 @@ class Auth {
     redirectUri: AUTH_CONFIG.callbackUrl,
     responseType: 'token id_token',
     sso: false,
-    scope: 'openid  profile email user_metadata app_metadata'
+    scope: 'openid profile email user_metadata app_metadata'
   });
 
   constructor() {
@@ -36,6 +38,7 @@ class Auth {
     let idToken = localStorage.getItem('idToken');
     let expiresAt = localStorage.getItem('expiresAt');
     let sub = localStorage.getItem('sub');
+    let payload = localStorage.getItem('payload');
 
     if (accessToken != null)
       this.accessToken = accessToken;
@@ -49,12 +52,14 @@ class Auth {
 
   login() {
     this.auth0.authorize();
+    console.log("Auth0 Login");
   }
 
   handleAuthentication() {
     this.auth0.parseHash((err, authResult) => {
       if (authResult && authResult.accessToken && authResult.idToken) {
         this.setSession(authResult);
+        console.log("Auth0 handled authentication");
       } else if (err) {
         history.replace('/');
         console.log(err);
@@ -72,18 +77,34 @@ class Auth {
   }
 
   setSession(authResult) {
+    console.log("Set Session Called");
     // Set the time that the access token will expire at
     let expiresAt = (authResult.expiresIn * 1000) + new Date().getTime();
     this.accessToken = authResult.accessToken;
     this.idToken = authResult.idToken;
     this.expiresAt = expiresAt;
     this.sub = authResult.idTokenPayload.sub;
+    this.payload = authResult.idTokenPayload;
+    let self = this;
+
+    auth.getUserInfo(function(error, profile){
+      if(error)
+      {
+        console.log("Error in getUserInfo in setSession in Auth.js");
+      }
+      else
+      {
+        self.profile = profile;
+        localStorage.setItem('authProfile', JSON.stringify(profile));
+      }
+    });
 
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('expiresAt', expiresAt);
     localStorage.setItem('accessToken', authResult.accessToken);
     localStorage.setItem('idToken', authResult.idToken);
     localStorage.setItem('sub', authResult.idTokenPayload.sub);
+    localStorage.setItem('payload', JSON.stringify(authResult.idTokenPayload));
 
     // navigate to the home route
     this.registerTeacher();
@@ -103,11 +124,11 @@ class Auth {
         'Authorization': "Bearer " + localStorage.getItem('idToken')
       }
     };
-    let teacher_id = localStorage.getItem('teacher_id');
-    if (teacher_id != null){
-      history.replace('/');
-      return;
-    }
+    // let teacher_id = localStorage.getItem('teacher_id');
+    // if (teacher_id != null){
+    //   history.replace('/');
+    //   return;
+    // }
 
     let sub = this.sub;
     if(sub == null){
@@ -150,6 +171,7 @@ class Auth {
 
 
   renewSession() {
+    console.log("Renew Session Called");
     this.auth0.checkSession({}, (err, authResult) => {
        if (authResult && authResult.accessToken && authResult.idToken) {
          this.setSession(authResult);
@@ -173,7 +195,10 @@ class Auth {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('idToken');
     localStorage.removeItem('sub');
+
+    localStorage.removeItem('payload');
     localStorage.removeItem('teacher_id');
+    localStorage.removeItem('profile');
 
     this.auth0.logout({
       returnTo: window.location.origin

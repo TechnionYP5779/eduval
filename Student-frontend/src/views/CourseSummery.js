@@ -19,6 +19,7 @@ import {
 } from "shards-react";
 import PageTitle from "../components/common/PageTitle";
 import "./CourseSummery.css"
+import server from "../Server/Server";
 class CourseSummery extends React.Component {
     constructor(props) {
       super(props);
@@ -57,74 +58,67 @@ class CourseSummery extends React.Component {
           this.state.lesson_id = res.id;
           this.state.Emojis = [...res.emojis];
 
-
-          let headers = {
-            'Authorization': 'Bearer ' + localStorage.getItem('idToken')
-            };
-            axios.get('https://api.emon-teach.com/course/'+this.state.lesson_id,
-              {headers: headers})
-              .then((response) => {
-              this.setState(
-                {course_name: response.data.name ,
-                  course_description : response.data.description,
-                  course_location: response.data.location,
-                  course_start_date: response.data.startDate.substring(0,10),
-                  course_end_date: response.data.endDate.substring(0,10)});
-            })
-            .catch((error)=>{
-              console.log(error);
-            });
+          server.getCourse((response) => {
+            this.setState({
+                course_name: response.data.name,
+                course_description : response.data.description,
+                course_location: response.data.location,
+                course_start_date: response.data.startDate.substring(0,10),
+                course_end_date: response.data.endDate.substring(0,10)
+              });
+          }, (error) => {
+            console.log(error);
+          }, this.state.lesson_id);
       }
     render(){
         return(
-            <Container fluid className="main-content-container px-4 pb-4">
-        {/* Page Header */}
-        <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title={this.state.course_name}
-          subtitle="Course Summary" className="text-sm-left" />
-        </Row>
+          <Container fluid className="main-content-container px-4 pb-4">
+            {/* Page Header */}
+            <Row noGutters className="page-header py-4">
+              <PageTitle sm="4" title={this.state.course_name}
+              subtitle="Course Summary" className="text-sm-left" />
+            </Row>
 
-        <Row>
-          {/* Editor */}
-  <Card style = {{height:"100%",width:"60%",marginLeft:"16px"}} className="mb-4">
-    <CardHeader className="border-bottom">
-      <h6 className="m-0">Summary</h6>
-    </CardHeader>
-    <ListGroup flush>
-      <ListGroupItem className="p-3">
-        <Row>
-          <Col>
-            <Form>
-              <Row form>
-                {/* Course Name */}
-                  <p>Class Name: {this.state.course_name}</p>
-                </Row>
+            <Row>
+              {/* Editor */}
+              <Card style = {{height:"100%",width:"60%",marginLeft:"16px"}} className="mb-4">
+                <CardHeader className="border-bottom">
+                  <h6 className="m-0">Summary</h6>
+                </CardHeader>
+                <ListGroup flush>
+                  <ListGroupItem className="p-3">
+                    <Row>
+                      <Col>
+                        <Form>
+                          <Row form>
+                            {/* Course Name */}
+                            <p>Class Name: {this.state.course_name}</p>
+                          </Row>
 
-                <Row form>
-                {/* Lesson description */}
-                  <p>Lesson's description: {this.state.course_description}</p>
-                </Row>
+                          <Row form>
+                            {/* Lesson description */}
+                            <p>Lesson's description: {this.state.course_description}</p>
+                          </Row>
 
+                          <Row form>
+                            {/* Course Location */}
+                            <p>Location: {this.state.course_location}</p>
+                          </Row>
 
-              <Row form>
-                 {/* Course Location */}
-                  <p>Location: {this.state.course_location}</p>
-                </Row>
+                          <Row form>
+                            {/* E-Mony earned */}
+                            <p>Total E-Money: {this.state.total_reward_money}</p>
+                          </Row>
 
-                <Row form>
-                 {/* E-Mony earned */}
-                  <p>Total E-Mony: {this.state.total_reward_money}</p>
-                </Row>
-
-              <a href={"/Overview"}>
-              <Button theme="success" onClick={()=>{}} style={{float:"left"}}>Finish</Button>
-              </a>
-            </Form>
-          </Col>
-        </Row>
-      </ListGroupItem>
-    </ListGroup>
-  </Card>
+                          <a href={"/Overview"}>
+                            <Button theme="success" onClick={()=>{}} style={{float:"left"}}>Finish</Button>
+                          </a>
+                        </Form>
+                      </Col>
+                    </Row>
+                  </ListGroupItem>
+                </ListGroup>
+              </Card>
 
       <Col>
          <Card small className="mb-4">

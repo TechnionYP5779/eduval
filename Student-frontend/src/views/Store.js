@@ -17,6 +17,7 @@ import PageTitle from "../components/common/PageTitle";
 import TimeoutAlert from "../components/common/TimeoutAlert";
 import awsIot  from 'aws-iot-device-sdk';
 import CoinImage from "../images/midEcoin.png"
+import server from '../Server/Server';
 
 
 
@@ -38,66 +39,39 @@ class Store extends React.Component {
         'Authorization': 'Bearer ' + localStorage.getItem('idToken')
     };
     //getting data on the course
-    axios.get('https://api.emon-teach.com/course/'+this.props.match.params.id,
-     {headers: headers})
-      .then(response =>{this.setState({course: response.data});} );
+    server.getCourse((response) => {
+        this.setState({course: response.data});
+    },null, this.props.match.params.id);
 
-//getting emon balance of student in the course
-    axios.get('https://api.emon-teach.com/student/'+ localStorage.getItem('student_id')
-    + '/emonBalance/byCourse/'+this.props.match.params.id,
-     {headers: headers})
-      .then(response =>{this.setState({balance: response.data ? response.data : 0});} );
+    //getting emon balance of student in the course
+    server.getEmonBalanceByCourse((response) =>{
+      this.setState({balance: response.data ? response.data : 0});
+    }, null, this.props.match.params.id);
 
-//adding a fake item to the course
-      // axios.post('https://api.emon-teach.com/shop/'+this.props.match.params.id+ '/items',
-      // {id:0, name:"Cool Item", description:"cool",cost:1,amountAvailable:4,sellByDate: "2019-06-12"},
-      //  {headers: headers})
-      //   .then(response =>{console.log(response.data); } );
+    //adding a fake item to the course
+    // axios.post('https://api.emon-teach.com/shop/'+this.props.match.params.id+ '/items',
+    // {id:0, name:"Cool Item", description:"cool",cost:1,amountAvailable:4,sellByDate: "2019-06-12"},
+    //  {headers: headers})
+    //   .then(response =>{console.log(response.data); } );
 
-        axios.get('https://api.emon-teach.com/shop/'+this.props.match.params.id+ '/items',
-         {headers: headers})
-         .then(response =>{var data = Array.from(response.data); this.setState({PostsListThree: data.filter(elem => elem.amountAvailable>0) }); } );
+    server.getShopItems((response) =>{
+      var data = Array.from(response.data);
+      this.setState({
+        PostsListThree: data.filter(elem => elem.amountAvailable>0)
+      });
+    }, null, this.props.match.params.id);
 
-
-
-
-      let res=[];
-
-
-
-
-
-
-           const getContent = function(url) {
-      return new Promise((resolve, reject) => {
-    	    const lib = url.startsWith('https') ? require('https') : require('http');
-    	    const request = lib.get(url, (response) => {
-    	      if (response.statusCode < 200 || response.statusCode > 299) {
-    	         reject(new Error('Failed to load page, status code: ' + response.statusCode));
-    	       }
-
-    	      const body = [];
-    	      response.on('data', (chunk) => body.push(chunk));
-    	      response.on('end', () => resolve(body.join('')));
-    	    });
-    	    request.on('error', (err) => reject(err))
-        })
-    };
-
-
-
-
-
-
+    let res=[];
   }
-   sleep(milliseconds) {
-  var start = new Date().getTime();
-  for (var i = 0; i < 1e7; i++) {
-    if ((new Date().getTime() - start) > milliseconds){
-      break;
+
+  sleep(milliseconds) {
+    var start = new Date().getTime();
+    for (var i = 0; i < 1e7; i++) {
+      if ((new Date().getTime() - start) > milliseconds){
+        break;
+      }
     }
   }
-}
 
   stringToColour(str) {
     var hash = 0;
@@ -140,45 +114,40 @@ class Store extends React.Component {
       this.setState({message: "you dont have enough Emons to buy this item ", error: true ,success :false});
       return;
     }
-    if(post.amountAvailable == 0){
+    if(post.amountAvailable === 0){
       this.setState({message: "The item is sold out ", error: true,success :false});
       return;
     }
 
-    var headers = {
-        'Authorization': 'Bearer ' + localStorage.getItem('idToken')
-    };
-    axios.post('https://api.emon-teach.com/shop/'+this.props.match.params.id+ '/order',
-    {studentId: localStorage.getItem('student_id') ,itemId: post.id , amount : 1},
-     {headers: headers})
-      .then(response =>{this.setState({message: "The items is successfully bought", success: true, error:false}); } );
+    server.orderItem((response) =>{
+      this.setState({message: "The items is successfully bought", success: true, error:false});
+    }, null, this.props.match.params.id, post.id, 1);
 
-      this.sleep(500);
-      //getting emon balance of student in the course
-    axios.get('https://api.emon-teach.com/student/'+ localStorage.getItem('student_id')
-    + '/emonBalance/byCourse/'+this.props.match.params.id,
-     {headers: headers})
-      .then(response =>{this.setState({balance: response.data ? response.data : 0}); post.amountAvailable-- });
+    this.sleep(500);
+    //getting emon balance of student in the course
 
+    server.getEmonBalanceByCourse((response) =>{
+      this.setState({
+        balance: response.data ? response.data : 0
+      });
+      post.amountAvailable--;
+    }, null, this.props.match.params.id);
 
-    axios.get('https://api.emon-teach.com/shop/'+this.props.match.params.id+ '/items',
-     {headers: headers})
-      .then(response =>{this.setState({PostsListThree: response.data.filter(elem => elem.amountAvailable>0) }); } );
-
-
-
-
+    server.getShopItems(response =>{
+      this.setState({
+        PostsListThree: response.data.filter(elem => elem.amountAvailable>0)
+      }); 
+    }, null, this.props.match.params.id);
   }
-   getRandomColor() {
-  var letters = '0123456789ABCDEF';
-  var color = '#';
-  for (var i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
+
+  getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
   }
-  return color;
-
-
-   }
 
 
   render() {
