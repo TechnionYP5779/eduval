@@ -7,21 +7,62 @@ import {
   Col,
   Card,
   CardBody,
+  CardHeader,
   CardFooter,
   Button
 } from "shards-react";
+
+import Card2 from '@material-ui/core/Card';
+import CardHeader2 from '@material-ui/core/CardHeader';
+import CardMedia2 from '@material-ui/core/CardMedia';
+import CardContent2 from '@material-ui/core/CardContent';
+import CardACtions2 from '@material-ui/core/CardActions';
+import IconButton from '@material-ui/core/IconButton';
+import Avatar from '@material-ui/core/Avatar';
+import { makeStyles } from '@material-ui/core/styles';
+import { red } from '@material-ui/core/colors';
+import Delete from '@material-ui/icons/Delete';
+import Collapse from '@material-ui/core/Collapse';
+import Typography from '@material-ui/core/Typography';
+import { withTranslation } from 'react-i18next'
+import { capitalize } from '../utils/strings';
+
+import CourseCard from "../components/common/CourseCard";
 
 import server from "../Server/Server";
 
 import PageTitle from "../components/common/PageTitle";
 import TimeoutAlert from "../components/common/TimeoutAlert"
 
+const useStyles = makeStyles(theme => ({
+  card: {
+    maxWidth: 345,
+  },
+  media: {
+    height: 0,
+    paddingTop: '56.25%', // 16:9
+  },
+  expand: {
+    transform: 'rotate(0deg)',
+    marginLeft: 'auto',
+    transition: theme.transitions.create('transform', {
+      duration: theme.transitions.duration.shortest,
+    }),
+  },
+  expandOpen: {
+    transform: 'rotate(180deg)',
+  },
+  avatar: {
+    backgroundColor: red[500],
+  },
+}));
+
+
 class MyCourses extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-
       courses: [],
 
     };
@@ -29,14 +70,23 @@ class MyCourses extends React.Component {
 
   componentDidMount() {
     var self = this;
-    server.getAllCourses(function(response){
-        self.setState({courses: response.data});
-      }, function(error){
-    });
     server.getActiveLesson(function(response){
+      console.log("Getting Active Lesson");
+      console.log(response);
       if (response.data)
+      {
         self.setState({activeLesson: response.data});
-    }, (err)=>{console.log("err", err);});
+      }
+      else
+      {
+        self.setState({activeLesson: -1})
+      }
+      server.getAllCourses(function(response){
+        console.log(response);
+          self.setState({courses: response.data});
+        }, function(error){
+      });
+    }, (err)=>{console.log("getActiveLesson error in componentDidMount in MyCourses.js", err);});
   }
 
 
@@ -44,6 +94,7 @@ class MyCourses extends React.Component {
     const {
       courses
     } = this.state;
+    const { t } = this.props;
 
     return (
       <div class="main-content container-fluid">
@@ -53,7 +104,7 @@ class MyCourses extends React.Component {
       <Container fluid className="main-content-container px-4">
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title="My Courses" subtitle="Manage eveyrthing in one place"
+          <PageTitle sm="4" title={capitalize(t("My Courses"))} subtitle={t("Manage eveyrthing in one place")}
                      className="text-sm-left" />
         </Row>
 
@@ -64,61 +115,65 @@ class MyCourses extends React.Component {
             courses.length === 0 &&
             <Card small className="card-post mb-4">
               <CardBody>
-                <h4 className="card-title">No Courses?</h4>
-                <p className="card-text text-muted">Create a new course right now!</p>
+                <h4 className="card-title">{t("No Courses?")}</h4>
+                <p className="card-text text-muted">{t("Create a new course right now!")}</p>
               </CardBody>
               <CardFooter className="border-top d-flex">
                 <div className="card-post__author d-flex" style={{width:"100%"}}>
                   <a href="/add-new-course" style={{width:"100%"}}><Button style={{width:"100%"}}>
-                    <i className="far fa-edit mr-1" /> Try here
+                    <i className="far fa-edit mr-1" /> {t("Try here")}
                   </Button></a>
                 </div>
               </CardFooter>
             </Card>
           }
           {courses.map((course, idx) => (
-            <Col lg="4" key={idx}>
-              <Card small className="card-post mb-4">
-                <CardBody>
-                  <h4 className="card-title">{course.name}</h4>
-                  <p className="card-text text-muted">{course.description}</p>
-                </CardBody>
-                <CardFooter className="border-top d-flex" style={{padding: "16px"}}>
-                  <div className="card-post__author d-flex">
-                    <div className="d-flex flex-column justify-content-center ml-1">
-                    <a href={"/course-details/" + course.id}><Button disabled={this.state.disabled} size="sm" theme="white" style={{padding: "6px"}}>
-                      <i className="far fa-edit mr-1" /> <br/>View more
-                    </Button></a>
-                    </div>
-                  </div>
-                  <div className="card-post__author d-flex">
-                    <div className="d-flex flex-column justify-content-center ml-1">
-                    <a href={"/manage-store/" + course.id}><Button disabled={this.state.disabled} size="sm" theme="white" style={{padding: "6px"}}>
-                      <i className="material-icons mr-1">store</i> <br/>Manage Store
-                    </Button></a>
-                    </div>
-                  </div>
-                  <div className="my-auto ml-auto">
-                    <Button disabled={this.state.disabled || (this.state.activeLesson && this.state.activeLesson !== course.id)} style={{padding: "6px"}} size="sm" theme={(this.state.activeLesson !== course.id && "white") || (this.state.activeLesson === course.id && "primary")}
-                      onClick={()=>{
-                        this.setState({disabled: true});
-                        if (this.state.activeLesson === course.id){
-                          history.push("/lesson/" + course.id);
-                          return;
-                        }
-                        let self = this;
-                        server.changeLessonStatus(function(response){
-                          history.push("/lesson/" + course.id);
-                        }, function(error){
-                          console.log("error" ,error);
-                          self.setState({disabled: false, error: "An error has occured"});
-                        }, course.id, "LESSON_START");
-                      }}>
-                      <i className="far fa-bookmark mr-1" /> <br/>{this.state.activeLesson !== course.id && "Start lesson"} {this.state.activeLesson === course.id && "Resume lesson"}
-                    </Button>
-                  </div>
-                </CardFooter>
-              </Card>
+            <Col sm="6" lg="4" key={idx}>
+              <CourseCard
+
+              demoLink={course.demoLink}
+              name={course.name}
+              description={course.description}
+              disabled_play={this.state.disabled ||
+                (this.state.activeLesson!=-1 && this.state.activeLesson !== course.id)}
+              play_pushed={this.state.activeLesson === course.id}
+              id={course.id}
+              playClicked=
+              {()=>{
+                this.setState({disabled: true});
+                if (this.state.activeLesson === course.id){
+                  history.push("/lesson/" + course.id);
+                  return;
+                }
+                let self = this;
+                server.changeLessonStatus(function(response){
+                  history.push("/lesson/" + course.id);
+                }, function(error){
+                  console.log("Error in changeLessonStatus in playClicked passed to CourseCard in MyCourses.js" ,error);
+                  self.setState({disabled: false, error: "An error has occured while starting a lesson"});
+                }, course.id, "LESSON_START");
+              }}
+
+              deleteCourse=
+              {() =>{
+
+                this.setState({disabled: true});
+                if (this.state.activeLesson === course.id){
+                  console.log("I don't know how but you're somehow trying to delete a live course");
+                  return;
+                }
+                let self = this;
+                server.deleteCourse(function(response){
+                  history.push("/my-courses");
+                }, function(error){
+                  console.log("Error in deleteCourse in MyCourses.js" ,error);
+                  self.setState({disabled: false, error: "An error has occured while deleing a course "});
+                }, course.id);
+              }
+
+              }
+
+              />
             </Col>
           ))}
         </Row>
@@ -129,4 +184,4 @@ class MyCourses extends React.Component {
   }
 }
 
-export default MyCourses;
+export default withTranslation()(MyCourses);

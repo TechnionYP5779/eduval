@@ -1,1 +1,5 @@
 li {list-style-type: none;}
+
+strong {
+    font-weight: bold !important;
+}

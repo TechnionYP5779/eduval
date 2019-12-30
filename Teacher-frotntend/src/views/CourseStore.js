@@ -14,15 +14,14 @@ import {
   Form,
   FormGroup,
   FormInput,
-  Alert
 } from "shards-react";
+import Alert from 'react-bootstrap/Alert';
 
 import Modal from 'react-modal';
 
 import server from "../Server/Server";
 
 import PageTitle from "../components/common/PageTitle";
-import TimeoutAlert from "../components/common/TimeoutAlert";
 
 Modal.setAppElement('#root');
 
@@ -60,6 +59,10 @@ class CourseStore extends React.Component {
       modalIsOpen: false,
 
       modalDeleteIsOpen: false,
+
+      error:"",
+
+      errorInModal: false,
 
       products: [],
 
@@ -120,24 +123,40 @@ class CourseStore extends React.Component {
   }
 
   handleNameInput(input){
+    this.setState({
+      error:"",
+      errorInModal:false,
+    });
     let item = this.state.current_item;
     item.name = input.target.value;
     this.setState({current_item: item})
   }
 
   handlePriceInput(input){
+    this.setState({
+      error:"",
+      errorInModal:false,
+    });
     let item = this.state.current_item;
     item.cost = input.target.value;
     this.setState({current_item: item})
   }
 
   handleAmountInput(input){
+    this.setState({
+      error:"",
+      errorInModal:false,
+    });
     let item = this.state.current_item;
     item.amountAvailable = input.target.value;
     this.setState({current_item: item})
   }
 
   handleLastDateInput(input){
+    this.setState({
+      error:"",
+      errorInModal:false,
+    });
     let item = this.state.current_item;
     item.sellByDate = input.target.value;
 
@@ -145,6 +164,10 @@ class CourseStore extends React.Component {
   }
 
   handleDescriptionInput(input){
+    this.setState({
+      error:"",
+      errorInModal:false,
+    });
     let item = this.state.current_item;
     item.description = input.target.value;
     this.setState({current_item: item})
@@ -192,13 +215,16 @@ class CourseStore extends React.Component {
     var self = this;
     server.getCourse(function(response){
       self.setState({course: response.data});
-    }, (err)=>{}, this.props.match.params.id);
+    }, (err)=>{console.log("Error in getCourse in componentDidMount in CourseStore.js", err);}
+    , this.props.match.params.id);
     server.getProducts((response)=>{
       self.setState({products: response.data});
-    }, (err)=>{console.log(err);}, this.props.match.params.id);
+    }, (err)=>{console.log("Error in getProducts in componentDidMount in CourseStore.js", err);}
+      , this.props.match.params.id);
     server.getProductUse((response)=>{
       self.setState({used_items: response.data});
-    }, (err)=>{console.log(err);}, this.props.match.params.id);
+    }, (err)=>{console.log("Error in getProductUse in componentDidMount in CourseStore.js", err);}
+    , this.props.match.params.id);
   }
 
   stringToColour(str) {
@@ -267,10 +293,14 @@ class CourseStore extends React.Component {
       >
       <h3>Are you sure you want to delete "{this.state.current_item.name}"?</h3>
 
-      <Button disabled={this.state.disabled} theme="success" onClick={()=>{
+      <Button disabled={this.state.disabled} theme="success"
+      onClick={()=>{
         self.setState({disabled: true});
         server.deleteItem((response)=>{window.location.reload();},
-        (err)=>{self.setState({disabled: false, error: "An error has occured"});},
+        (err)=>{
+          console.log("Error in deleteItem in Button in modal of deleteItem in CourseStore.js",err);
+          self.setState({disabled: false, error: "An error has occured"});
+        },
         self.state.current_item.id, self.props.match.params.id);
       }}>Yes</Button>
       <Button theme="danger" disabled={this.state.disabled} style={{float: "right"}} onClick={closeDeleteModal}>No</Button>
@@ -330,6 +360,11 @@ class CourseStore extends React.Component {
         contentLabel="Example Modal"
       >
       <h3>{this.state.titleModal}</h3>
+      {this.state.error && this.state.errorInModal &&
+        <Alert variant = "warning">
+          <Alert.Heading style={{color:"white"} }>{this.state.error}</Alert.Heading>
+        </Alert>
+      }
       <Form>
         <FormGroup>
           <label htmlFor="itemName">Item Name</label>
@@ -360,23 +395,44 @@ class CourseStore extends React.Component {
       <Button disabled={this.state.disabled} theme="success" onClick={()=>{
         let action;
         self.setState({disabled: true});
-        if (self.state.current_item.id < 0){
-          //adding new item
-          server.createNewItem((response)=>{
-            window.location.reload();
-          }, (err)=>{self.setState({disabled: false, error: "An error has occured"}); window.scrollTo(0, 0);}, self.state.current_item, self.props.match.params.id);
+        if(self.state.current_item.cost<=0 || self.state.current_item.amountAvailable<=0)
+        {
+          self.setState({
+            disabled:false,
+            error:"Price and Amount have to be positive!",
+            errorInModal:true
+          });
         }
-        else{
-          server.updateItem((response)=>{
-            window.location.reload();
-          }, (err)=>{self.setState({disabled: false, error: "An error has occured"}); window.scrollTo(0, 0);}, self.state.current_item, self.props.match.params.id);
-          //updating existing item
+        else
+        {
+          if (self.state.current_item.id < 0){
+            //adding new item
+            server.createNewItem((response)=>{
+              window.location.reload();
+            }, (err)=>{
+              console.log("Error in createNewItem in Adding New Item button in CourseStore.js", err);
+              self.setState({disabled: false, error: "An error has occured"}
+            );
+            window.scrollTo(0, 0);}, self.state.current_item, self.props.match.params.id);
+          }
+          else{
+            server.updateItem((response)=>{
+              window.location.reload();
+            }, (err)=>{
+              console.log("Error in updateItem in Updating New Item button in CourseStore.js", err);
+              self.setState({disabled: false, error: "An error has occured"
+            });
+            window.scrollTo(0, 0);}, self.state.current_item, self.props.match.params.id);
+            //updating existing item
+          }
         }
       }}>Save</Button>
       <Button theme="danger" disabled={this.state.disabled} style={{float: "right"}} onClick={closeItemModal}>Cancel</Button>
       </Modal>
-      {this.state.error &&
-      <TimeoutAlert className="mb-0" theme="danger" msg={this.state.error} time={10000}/>
+      {this.state.error && !this.state.errorInModal &&
+        <Alert variant = "warning">
+          <Alert.Heading style={{color:"white"} }>{this.state.error}</Alert.Heading>
+        </Alert>
       }
       <Container fluid className="main-content-container px-4">
         {/* Page Header */}

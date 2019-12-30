@@ -1,6 +1,8 @@
 /* eslint jsx-a11y/anchor-is-valid: 0 */
 import history from '../history';
 import React from "react";
+import Badge from 'react-bootstrap/Alert'
+
 import {
   Container,
   Row,
@@ -8,7 +10,6 @@ import {
   Card,
   CardBody,
   CardFooter,
-  Badge,
   Button,
   CardHeader,
   ListGroup,
@@ -42,7 +43,12 @@ import DropdownInputGroups from "../components/components-overview/DropdownInput
 import CustomSelect from "../components/components-overview/CustomSelect";
 
 import PageTitle from "../components/common/PageTitle";
-import {iotPresent, iotMessages} from "../iotClient/iotClient";
+import AttendStudentCard from "../components/lessonCards/AttendStudentCard";
+import RegisteredStudentsCard from "../components/lessonCards/RegisteredStudentsCard";
+import StudentMessageCard from "../components/lessonCards/StudentMessageCard";
+import { withTranslation } from "react-i18next";
+
+import iotclient from "../iotClient/iotClient";
 import server from "../Server/Server";
 
 
@@ -178,14 +184,24 @@ class Lesson extends React.Component {
 
       students: [],
 
-      course_name: ""
+      registered_students:[],
+
+      course_id:this.props.match.params.id,
+
+      course_name: "",
+
+      student_message_counter: [0,0,0,0,0],
+
     };
 
     this.unchooseStudent = this.unchooseStudent.bind(this);
     this.handleShowUpdate = this.handleShowUpdate.bind(this);
+    this.handleSuccessTrue = this.handleSuccessTrue.bind(this);
   }
 
-  handleShowUpdate(type, color){
+  handleShowUpdate(obj){
+    var type = obj.content;
+    var color = obj.color;
     let messaged_students = new Set([]);
     if (this.state.show_messaged == type){
       this.setState({show_messaged: false, messaged_students: messaged_students});
@@ -207,31 +223,140 @@ class Lesson extends React.Component {
     this.setState({chosen_students : tmp_chosen});
   }
 
+  handleSuccessTrue = () => {
+    this.setState({success:true});
+
+    if(this.state.success==true) {
+        setTimeout(function(){
+             this.setState({success:false});
+        }.bind(this),10000);  // wait 5 seconds, then reset to false
+   }
+  };
+
+
   componentDidMount() {
 
     let self = this;
-
     let courseId = this.props.match.params.id;
 
-    let onConnectPresent = ()=>{
-      server.getAttendingStudents(function(response){
-        response.data.sort(function(a,b){
-          return parseInt(a.desk)-parseInt(b.desk);
+
+
+    server.getRegisteredStudents(function(responseReg){
+      self.setState({registered_students: responseReg.data});
+    }, (error)=>{console.log("Error in getRegisteredStudents in componentDidMount in Lessons.js", error)}, courseId);
+
+    let onConnect = ()=>{
+
+      server.getAttendingStudents(function(responseAtt){
+        responseAtt.data.sort(function(a,b){
+          return a.id.localeCompare(b.id);
         });
-        self.setState({students: response.data});
-      }, (error)=>{}, courseId);
+        console.log("getAttendingStudents", responseAtt);
+
+        server.getAttendingStudentsEmons(function(responseEmon){
+          responseEmon.data.sort(function(a,b){
+            return a.studentId.localeCompare(b.studentId);
+          });
+          console.log("getAttendingStudentsEmons", responseEmon);
+          var tmp = [];
+          var index = 0;
+
+          for (index = 0; index<responseEmon.data.length; index++){
+            if((responseAtt.data[index]).id == (responseEmon.data[index]).studentId)
+            {
+              var newstud =
+              {
+                id: (responseAtt.data[index]).id,
+                name: (responseAtt.data[index]).name,
+                email: (responseAtt.data[index]).email,
+                phoneNum: (responseAtt.data[index]).phoneNum,
+                desk: (responseAtt.data[index]).desk,
+                emons: (responseEmon.data[index]).emons
+              }
+              tmp.push(newstud);
+            }
+            else {
+              console.log("ERROR THERE ARE DIFFERENT ID's IN THE RESPONSES");
+            }
+          }
+          tmp.sort(function(a,b){
+            return parseInt(a.desk)-parseInt(b.desk);
+          });
+          self.setState({students: tmp});
+
+          }, function(error) {
+            console.log("Error in getAttendingStudentsEmons in componentDidMount in Lessons.js", error)
+          }, courseId)
+
+
+      }, (error)=>{console.log("Error in getAttendingStudents in componentDidMount in Lessons.js", error)}, courseId);
+
+      server.getMessagesFromStudents(function(response){
+        self.setState({messages: response.data});
+
+        var count = [0,0,0,0,0];
+        for (var i in self.state.messages){
+          for (var c in [...Array(5).keys()])
+            {
+              if (self.state.messages[i].content == self.state.message_types[c].content)
+              count[c] ++;
+            }
+        }
+        self.setState({student_message_counter: count})
+
+      }, (error)=>{
+        console.log("Error in getMessagesFromStudents in componentDidMount in Lessons.js", error);
+      }, courseId);
+
       if (!self.state.connected)
         self.setState({connected: true});
     }
 
-    let onConnectMessages = ()=>{
-      server.getMessagesFromStudents(function(response){
-        self.setState({messages: response.data});
-      }, (error)=>{
-        console.log(error);
-      }, courseId);
+    let onMessages = (topic,message)=>
+    {
+      if(topic=="lesson/"+courseId+"/teacherMessages")
+      {
+        console.log(self.state.messages);
+        var tmp = self.state.student_message_counter;
+        console.log("new message");
+        console.log(JSON.parse(message));
+        for (var c in [...Array(5).keys()])
+        {
+          if (JSON.parse(message).content == self.state.message_types[c].content)
+          {
+            tmp[c]++;
+          }
+        }
+        console.log(tmp);
+        self.setState({student_message_counter: tmp});
+        /*Updated counter, now update message log*/
+
+        var tmpmessages = self.state.messages;
+        tmpmessages.push(JSON.parse(message));
+        self.setState({messages: tmpmessages});
+      }
+      else if (topic=="lesson/"+courseId+"/present")
+      {
+        var tmpstudents = self.state.students;
+        var newstud =
+        {
+          id: JSON.parse(message).id,
+          name:JSON.parse(message).name,
+          email: JSON.parse(message).email,
+          phoneNum: JSON.parse(message).phoneNum,
+          desk: JSON.parse(message).desk,
+        };
+        newstud.emons=5;
+        newstud.desk=JSON.parse(message).desk;
+        tmpstudents.push(newstud);
+        self.setState({students:tmpstudents});
+      }
+
+      else {
+        console.log("Got Unexpected Topic???");
+      }
       if (!self.state.connected)
-        self.setState({connected: true});
+          self.setState({connected: true});
     }
 
     let onOffline = ()=>{
@@ -240,17 +365,18 @@ class Lesson extends React.Component {
     }
 
 
-    iotPresent.getKeys(function(response){
-      iotPresent.connect(courseId, onConnectPresent, onConnectPresent, onOffline);
-    }, (error)=>{});
-
-    iotMessages.getKeys(function(response){
-      iotMessages.connect(courseId, onConnectMessages, onConnectMessages, onOffline);
-    }, (error)=>{});
+    iotclient.getKeys(function(response){
+      iotclient.connect(courseId, onConnect, onMessages, onOffline);
+    }, (error)=>{
+        console.log("Error in getKeys in componentDidMount in Lessons.js", error);
+      });
 
     server.getCourse(function(response){
       self.setState({course_name: response.data.name});
-    }, (error)=>{}, courseId);
+    }, (error)=>
+        {
+          console.log("Error in getCourse in componentDidMount in Lessons.js", error);
+        }, courseId);
 
   }
 
@@ -272,175 +398,123 @@ class Lesson extends React.Component {
 
     let self = this;
 
+    const { t } = this.props;
+
     return (
       <div>
       {this.state.error &&
-      <TimeoutAlert className="mb-0" theme="danger" msg={"An error has occured!"} time={10000}/>
+      <TimeoutAlert className="mb-0" theme="danger" msg={t("An error has occured")+"!"} time={10000}/>
       }
       {this.state.success &&
-      <TimeoutAlert className="mb-0" theme="success" msg={"Messages sent successfully!"} time={10000}/>
+      <TimeoutAlert className="mb-0" theme="success" msg={t("Messages sent successfully!")} time={10000}/>
       }
       <Container fluid className="main-content-container px-4">
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title={this.state.course_name} subtitle="Lesson View" className="text-sm-left" />
+          <PageTitle sm="4" title={this.state.course_name} subtitle={t("Lesson View")} className="text-sm-left" />
         </Row>
         {/* First Row of Posts */}
         <Row>
           <Col lg="8" className="mb-4">
-            <Card small className="mb-4">
-              <CardHeader className="border-bottom">
-                <Row>
-                  <Col sm="11">
-                    <h5 className="m-0">Attending Students</h5>
-                    <h6 style={{fontSize:"12px"}}>Pick the students you want to send E-Money too</h6>
-                  </Col>
-                  <Col sm="1">
-                    <Button style={{padding:"0px"}} onClick={()=>{this.setState({showing_student:!this.state.showing_student});}}>
-                      {this.state.showing_student && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CE;</i>}
-                      {!this.state.showing_student && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CF;</i>}
-                    </Button>
-                  </Col>
-                </Row>
-              </CardHeader>
+            <AttendStudentCard
+            title={t("Attending Students")}
+            subtitle={t("Pick the students you want to send E-Money to")}
+            students={this.state.students}
+            isChosen = {(id) =>
+            {
+              return (this.state.chosen_students.indexOf(id) >= 0);
+            }}
+            buttonClick = {(id) =>
+              {
+                if (this.state.chosen_students.indexOf(id) >= 0)
+                {
+                  unchooseStudent(id);
+                }
+                else {
+                  let tmp_chosen = this.state.chosen_students;
+                  tmp_chosen.push(id);
+                  this.setState({chosen_students : tmp_chosen, success: false, error: false});
+                }
+              }
+            }
 
-              {this.state.showing_student && <ListGroup flush>
-                <ListGroupItem className="p-0 px-3 pt-3">
-                  <Row>
 
-                      {this.state.students.map((student, idx) => {
-                        let color = "#007bff";
-                        if (messaged_students.has(student.id))
-                          color = show_messaged_color;
-                        return (<Col xs="3" key={idx}>
-                        {
-                          this.state.chosen_students.indexOf(student.id) >= 0 &&
-                          <Button disabled={this.state.disabled} style={{margin:"6px", fontWeight: "600", fontSize: "0.9em", width: "100%", "--mess-color" : color}} className="mb-2 mr-1 badge1 custom-active" data-badge={"Desk #" + student.desk} onClick={()=>{
-                            unchooseStudent(student.id);
-                          }}>
-                            {student.name}
-                          </Button>
-                        }
-                        {
-                          this.state.chosen_students.indexOf(student.id) < 0 &&
-                          <Button outline disabled={this.state.disabled} style={{margin:"6px", fontWeight: "600", fontSize: "0.9em", borderWidth:"2px", width: "100%", "--mess-color" : color}} className="mb-2 mr-1 badge1 custom-button" data-badge={"desk #" + student.desk} onClick={()=>{
-                            let tmp_chosen = this.state.chosen_students;
-                            tmp_chosen.push(student.id);
-                            this.setState({chosen_students : tmp_chosen, success: false, error: false});
-                          }}>
-                            {student.name}
-                          </Button>
-                        }
-                        </Col>
-                    )})}
+            isMessaged = {(id) =>
+              {
+                return(messaged_students.has(id));
+              }
+            }
 
-                  </Row>
-                </ListGroupItem>
-              </ListGroup>}
-            </Card>
+            messageColored = {() => {
+              return show_messaged_color;}}
+            />
+            <StudentMessageCard
+            title={t("Messages from Students")}
+            subtitle={t("Click button to see who sent the messages")}
+            student_message_counter={self.state.student_message_counter}
+            show_questions={()=>{handleShowUpdate(this.state.message_types[0]);}}
+            show_go_out={()=>{handleShowUpdate(this.state.message_types[1])}}
+            show_answer={()=>{handleShowUpdate(this.state.message_types[2]);}}
+            show_confused={()=>{handleShowUpdate(this.state.message_types[3]);}}
+            show_louder={()=>{handleShowUpdate(this.state.message_types[4]);}}
 
-            <Card small className="mb-4">
-              <CardHeader className="border-bottom">
-                <Row>
-                  <Col sm="11">
-                    <h5 className="m-0">Messages from Students</h5>
-                    <h6 style={{fontSize:"12px"}}>Click <i className="material-icons">&#xE8F4;</i> to see students who sent messages or <i className="material-icons">&#xE8F5;</i> to hide them.</h6>
-                  </Col>
-                  <Col sm="1">
-                    <Button style={{padding:"0px"}} onClick={()=>{this.setState({showing_messages:!this.state.showing_messages});}}>
-                      {this.state.showing_messages && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CE;</i>}
-                      {!this.state.showing_messages && <i className="material-icons" style={{fontSize:"26px"}}>&#xE5CF;</i>}
-                    </Button>
-                  </Col>
-                </Row>
-              </CardHeader>
+            clearMessages = {(num)  =>
+              {
+                server.deleteLessonMessages(
+                  function(response){console.log("Deleted Messages "+ num)}, function(error)
+                  {
+                    console.log("Error in deleteLessonMessages in clearMessages passed to StudentMessageCard in Lessons.js", error);
+                    console.log("Error clearing messages of type " + num);
+                  }, this.state.course_id, this.state.message_types[num].content
+                );
 
-              {this.state.showing_messages && <table className="table mb-0">
-                <thead className="bg-light" style={{color:"#485170", borderBottom: "solid 1px #eceeef"}}>
-                  <tr>
-                    <th scope="col" className="border-0" style={{fontWeight:"600", textAlign: "end"}}>#</th>
-                    <th scope="col" className="border-0" style={{fontWeight:"600", textAlign: "center"}}>Show Senders</th>
-                    <th scope="col" className="border-0" style={{fontWeight:"600", width: "45%"}}>Message Type</th>
-                    <th scope="col" className="border-0" style={{fontWeight:"600"}}>
-                    <Button onClick={()=>{
-                      this.setState({show_messaged: false});
-                      messaged_students.clear();
-                      server.deleteLessonMessages(()=>{
-                        server.getMessagesFromStudents((response)=>{
-                          self.setState({messages: response.data});
-                        }, (error)=>{}, this.props.match.params.id);
-                      }, ()=>{}, this.props.match.params.id)
-                    }}>
-                    Clear Messages
-                    </Button>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                {this.state.message_types.map((messtype, idx) => {
-                  var count = 0;
-                  for (var i in this.state.messages){
-                    if (this.state.messages[i].content == messtype.content)
-                      count ++;
-                  }
-                  return (
-                  <tr style={{color:messtype.color, "--mess-color" : messtype.color, borderBottom: "solid 1px #eceeef"}} key={idx}>
+                var tmpcounter = this.state.student_message_counter;
+                tmpcounter[num]=0;
+                this.setState({student_message_counter: tmpcounter});
+              }}
 
-                    <td scope="col" className="border-0" style={{fontWeight:"600", textAlign: "end"}}>{count}</td>
-                    <td scope="col" className="border-0" style={{fontWeight:"600", textAlign: "center"}}>
-                      {show_messaged != messtype.content && <Button className="mb-2 mr-1 custom-button" onClick={()=>{handleShowUpdate(messtype.content, messtype.color);}}>
-                        <i className="material-icons">&#xE8F4;</i>
-                      </Button>}
-                      {show_messaged == messtype.content && <Button className="mb-2 mr-1 custom-active" onClick={()=>{handleShowUpdate(messtype.content, messtype.color);}}>
-                        <i className="material-icons">&#xE8F5;</i>
-                      </Button>}
-                    </td>
-                    <td scope="col" className="border-0" style={{fontWeight:"600"}}>{messtype.text}</td>
-                  </tr>
-                );}
-              )}
-              </tbody>
-              </table>}
-            </Card>
+            />
 
           </Col>
 
-          <Col lg="4" className="mb-4">
+          <Col lg="4" className="mb-4" >
             {/* Sliders & Progress Bars */}
             <Card small className="mb-4">
               <CardHeader className="border-bottom">
-                <h6 className="m-0">Rewards & Emojis</h6>
+                <h6 className="m-0">{t("Rewards & Emojis")}</h6>
               </CardHeader>
               <ListGroup flush>
               <div className="mb-2 pb-1" style={{margin:"10px"}}>
-                <h6 style={{fontSize:"12px"}}>Choose an emoji to send</h6>
+                <h6 style={{fontSize:"12px"}}>{t("Choose an emoji to send")}</h6>
                 </div>
                 <Row style={{margin:"2px"}}>
                 {smileys.map((smile, idx) => (
                   <Col xs="3" key={idx}>
-                    <Button outline disabled={this.state.disabled} style={{fontSize:"1.3em"}} theme={smile.type} className="mb-2 mr-1" onClick={()=>{
+                    <Button outline disabled={this.state.disabled} style={{fontSize:"1.3em"}} theme={smile.type} className="mb-2 mr-1"
+                    onClick={()=>{
                       if (this.state.chosen_students.length === 0)
                         return;
                       this.setState({disabled: true});
                       let counter = 0;
                       let success = true;
-                      let error = false;
+                      let error_state = false;
                       let self = this;
                       server.sendEmoji(function(response){
                         counter ++;
                         if (counter === self.state.chosen_students.length){
-                          self.setState({chosen_students: [], success: success, error: error, disabled: false});
+                          self.handleSuccessTrue();
+                          self.setState({chosen_students: [], error: error_state, disabled: false});
                           window.scrollTo(0, 0);
                         }
                       }, function(error){
                         success = false;
-                        error = true;
+                        error_state = true;
                         counter ++;
                         if (counter === self.state.chosen_students.length){
-                          self.setState({chosen_students: [], success: success, error: error, disabled: false});
+                          self.setState({chosen_students: [], success: success, error: error_state, disabled: false});
                           window.scrollTo(0, 0);
                         }
-                        console.log("error", error);
+                        console.log("Error in sendEmoji in onClick passed to Rewards & Emojis in Lessons.js", error);
                       }, smile.name, this.state.chosen_students, this.props.match.params.id);
                     }}>
                       {smile.smile}
@@ -451,7 +525,7 @@ class Lesson extends React.Component {
                 <hr style={{backgroundColor: "#a4a4a4", width: "95%"}} />
 
                 <div className="mb-2 pb-1" style={{margin:"10px"}}>
-                  <h6 style={{fontSize:"12px"}}>Or choose amount of E-Money to send</h6>
+                  <h6 style={{fontSize:"12px"}}>{t("Or choose amount of E-Money to send")}</h6>
                   </div>
                   <Row style={{margin:"2px"}}>
                   {this.state.coins.map((coin, idx) => (
@@ -462,23 +536,44 @@ class Lesson extends React.Component {
                         this.setState({disabled: true});
                         let counter = 0;
                         let success = true;
-                        let error = false;
+                        let error_state = false;
                         let self = this;
+                        console.log("self.state.chosen_students");console.log(self.state.chosen_students);
+                        var tmpstudents = self.state.students;
+                        var index =  0;
+
+                        for (index = 0; index<self.state.chosen_students.length; index++)
+                        {
+                          var currindex = tmpstudents.findIndex(
+                            function(student, ind, array){
+                              console.log("Looking for");
+                              console.log(self.state.chosen_students[index]);
+                              return student.id==self.state.chosen_students[index];
+                          })
+                          var currstud = tmpstudents[currindex];
+                          console.log("currstud");
+                          console.log(currstud);
+                          currstud.emons += coin.value;
+                          tmpstudents[currindex] = currstud;
+                        }
+
                         server.sendEMoney(function(response){
                           counter ++;
                           if (counter === self.state.chosen_students.length){
-                            self.setState({chosen_students: [], success: success, error: error, disabled: false});
+                            self.handleSuccessTrue();
+                            self.setState({chosen_students: [], error: error_state, disabled: false, students: tmpstudents});
+
                             window.scrollTo(0, 0);
                           }
                         }, function(error){
                           success = false;
-                          error = true;
+                          error_state = true;
                           counter ++;
                           if (counter === self.state.chosen_students.length){
-                            self.setState({chosen_students: [], success: success, error: error, disabled: false});
+                            self.setState({chosen_students: [], success: success, error: error_state, disabled: false});
                             window.scrollTo(0, 0);
                           }
-                          console.log("error", error);
+                          console.log("Error in sendEMoney in onClick passed to Rewards & Emojis in Lessons.js", error);
                         }, coin.value, "participation", this.state.chosen_students, this.props.match.params.id);
                       }}>
                       <img
@@ -509,32 +604,43 @@ class Lesson extends React.Component {
               // </div>
             }
                     <div className="mb-2 pb-1" style={{margin:"10px"}}>
-                  <Button theme="primary" disabled={this.state.disabled} style={{float:"right"}} className="mb-2 mr-1" onClick={()=>{
+                  <Button theme="primary" disabled={this.state.disabled}
+                  style={{float:"right"}}
+                  className="mb-2 mr-1"
+                  onClick={()=>{
                     this.setState({disabled: true});
                     let self = this;
                     server.changeLessonStatus(function(response){
                       server.deleteLessonMessages(()=>{
-                        history.replace('/');
-                      }, ()=>{
+                        history.push("/my-courses");
+                      }, (err)=>{
+                        console.log("Error in deleteLessonMessages in onClick in End Class in Lessons.js", err);
                       }, self.props.match.params.id);
                     }, function(error){
-                      console.log(error);
+                      console.log("Error in changeLessonStatus in onClick in End Class in Lessons.js", error);
                       self.setState({disabled: false, error: true});
                     }, this.props.match.params.id, "LESSON_END");
                   }}>
-                    End Class
+                    {t("End Class")}
                   </Button>
                   </div>
 
               </ListGroup>
             </Card>
           </Col>
-        </Row>
 
+        </Row>
+        <Row>
+          <RegisteredStudentsCard
+          registered_students={this.state.registered_students}
+          students={this.state.students}
+          courseDetails={false}
+          />
+        </Row>
       </Container>
       </div>
     );
   }
 }
 
-export default Lesson;
+export default withTranslation()(Lesson);
