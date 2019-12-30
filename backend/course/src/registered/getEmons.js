@@ -51,6 +51,7 @@ const getRegisteredWithEmons = async (event, context, callback) => {
 			.select(knexConnection.ref('studentId').as('studentLogId'))
 			.where('msgType', 0)	// EMon messages
 			.andWhere('live', false)
+			.andWhere('courseId', event.pathParameters.courseId)
 			.groupBy('studentId')
 			.as('Table1'),
 		'Registered.studentId',
