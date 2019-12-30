@@ -256,8 +256,9 @@ class UserAccountCard extends React.Component
     }
   }
 
-  submit()
+  submit(event)
   {
+    event.preventDefault();
     if (!this.state.isPhoneNumber || this.state.oldPassword==""
           || !this.state.isEmail || this.state.usernameTaken || this.state.emailTaken)
     {
@@ -303,7 +304,7 @@ class UserAccountCard extends React.Component
         title={this.state.title}
         />
         <CardContent>
-          <form className={classes.container} action="#" onSubmit={this.submit}>
+          <form className={classes.container} onSubmit={this.submit}>
             <div>
               <TextField
                 required

@@ -514,30 +514,6 @@ class Server {
   }
 
   /*
-  =================== Get Students ====================
-  @params:
-    - callback: function to do in case of success that has one paramater - the response
-      + response is {data: [student objects]}
-    - callbackError: function to do in case of error that has one paramater - the error
-      + error is {response: {data: {error object}}}
-    - courseId: the course id
-  @use conditions:
-    - User should be logged in when called.
-  */
-  getRegisteredStudents(callback, callbackError, courseId){
-    let teacher_id_sub = localStorage.getItem('sub');
-    if (teacher_id_sub == null || !auth.isAuthenticated()){
-      let error = {response: {data: {error: "Error in getRegisteredStudents in Server.js"}}};
-      callbackError(error);
-      return;
-    }
-    var teacher_id = encodeURI(teacher_id_sub);
-    axios.get(SERVER_CONFIG.domain + "/course/" + courseId + "/registered", this.getConfig())
-    .then(callback)
-    .catch(callbackError);
-  }
-
-  /*
   =================== Get Course ====================
   @params:
     - callback: function to do in case of success that has one paramater - the response

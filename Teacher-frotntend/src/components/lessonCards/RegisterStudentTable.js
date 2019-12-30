@@ -105,6 +105,7 @@ class RegisterStudentTable extends React.Component {
       rowsPerPage: 5,
       registered_students: this.props.registered_students,
       students: this.props.students,
+      students_string: JSON.stringify(this.props.students),
       rows: [],
       up_for_deletion_name:"",
       up_for_deletion_id:"",
@@ -131,27 +132,30 @@ class RegisterStudentTable extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-
-    if(prevProps.registered_students!=this.props.registered_students
-    || prevProps.students != this.props.students)
+    console.log("Components Updated", this.props.students, prevProps.students, this.state.students);
+    if(prevProps.registered_students!==this.props.registered_students
+    || JSON.stringify(this.props.students) !== this.state.students_string)
     {
       this.setState({registered_students: this.props.registered_students});
       this.setState({students: this.props.students});
+      this.setState({students_string: JSON.stringify(this.props.students)});
 
       var tmprows = [];
       var index;
+      console.log('123sin here: ', this.props.students.map(x => x.id))
       for(index = 0; index<this.props.registered_students.length; index++)
       {
         var student = this.props.registered_students[index];
         var student_missing = this.props.students.findIndex(
           (s) =>
           {
-            return s.id==student.id;
+            return s.id===student.id;
           })==-1;
+        console.log('123looking for ', student.id);
         tmprows.push(createData(student.name, student.email, student.phoneNum,
           student.emons, student.id, student_missing));
       }
-
+      console.log("tmprows", tmprows);
       this.setState({rows:tmprows});
     }
   }
@@ -202,7 +206,6 @@ class RegisterStudentTable extends React.Component {
   {
     const classes = this.props.classes;
     const { t } = this.props;
-    console.log("RegisterStudentTable in CourseDetails?", this.props.courseDetails)
     return (
       <div>
         <Modal
@@ -329,7 +332,7 @@ class RegisterStudentTable extends React.Component {
                               )
                             }
                           >
-                            {column.format && typeof value === 'number' ? column.format(value) : value}
+                            {value}
                           </TableCell>
                         );
                       })}

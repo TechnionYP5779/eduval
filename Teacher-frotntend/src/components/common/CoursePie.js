@@ -131,13 +131,14 @@ class CoursePie extends React.Component
     return(
       <div>
 
-        <form className={classes.container} action="#" onSubmit={()=>{
+        <form className={classes.container} onSubmit={(event)=>{
+          event.preventDefault();
           this.props.getData(this.state.amount);
           console.log(this.state.amount);
         }}>
           <TextField
             required
-            error={!this.state.isNumber}
+            error={!this.state.isNuגmber}
             id="standard-required"
             label={t("Number of Top Students")}
             type="number"

@@ -85,6 +85,8 @@ class TeacherPie extends React.Component
     }
     this.setNumber = this.setNumber.bind(this);
     this.handleNumberChange = this.handleNumberChange.bind(this);
+
+    this.submit = this.submit.bind(this);
   }
 
   componentDidUpdate(prevProps, prevState)
@@ -104,6 +106,12 @@ class TeacherPie extends React.Component
     this.setNumber(evnt.target.value);
   }
 
+  submit(event)
+  {
+    event.preventDefault();
+    this.props.getData(this.state.amount);
+    console.log(this.state.amount);
+  }
 
   render(){
     const classes = this.props.classes;
@@ -119,11 +127,7 @@ class TeacherPie extends React.Component
     };
     return(
       <div>
-
-        <form className={classes.container} action="#" onSubmit={()=>{
-          this.props.getData(this.state.amount);
-          console.log(this.state.amount);
-        }}>
+        <form className={classes.container} onSubmit={this.submit}>
           <TextField
             required
             error={!this.state.isNumber}
