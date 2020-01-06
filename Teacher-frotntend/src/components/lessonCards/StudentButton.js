@@ -42,7 +42,10 @@ const styles = theme => ({
     borderWidth: "medium",
     borderStyle: "solid",
     textTransform: "none",
-    padding: " 5px 15px"
+    padding: " 5px 15px",
+    overflow:"hidden",
+    textOverflow:"ellipsis",
+    whiteSpace:"nowrap"
   },
 
   margin: {
@@ -127,14 +130,19 @@ class StudentButton extends React.Component
       student: this.props.student,
       color: this.props.color
     }
-    console.log(this.state.student_name);
   }
 
   render()
   {
     const classes = this.props.classes;
     return(
-      <div style={{display: "inline-block", marginLeft: "1em", marginRight:"3em", marginBottom: "1em "}}>
+      <div style={{
+          display: "inline-block",
+          marginLeft: "1em", 
+          marginRight:"2em", 
+          marginBottom: "2em ",
+          maxWidth:"30%",
+         }}>
         <Badge color="primary"
         badgeContent={"#" + this.state.student.desk}
         overlap="rectangle"
@@ -142,6 +150,8 @@ class StudentButton extends React.Component
           horizontal:"left",
           vertical:"top",
         }}
+        style={{
+          maxWidth:"100%",}}
         >
           <Badge color="secondary"
           badgeContent={"Emons:" + this.state.student.emons}
@@ -150,6 +160,8 @@ class StudentButton extends React.Component
             horizontal:"right",
             vertical:"bottom",
           }}
+          style={{
+            maxWidth:"100%",}}
           >
 
             <Button
@@ -229,7 +241,15 @@ class StudentButton extends React.Component
                 this.props.buttonClick(this.state.student.id);
               }}
               >
-                {this.state.student.name}
+                <div style={{
+                  overflow:"hidden",
+                  textOverflow:"ellipsis",
+                  whiteSpace:"nowrap"}}
+                >
+                {
+                this.state.student.name
+                }
+                </div>
             </Button>
           </Badge>
         </Badge>

@@ -124,9 +124,15 @@ class Server {
 
     let headers = new Headers();
     headers.append('Authorization', this.getConfig().headers.Authorization);
+    let fileName = null;
 
     fetch(file, { headers })
-        .then(response => response.blob())
+        .then(response => {
+          // response.headers.forEach((v, k) => console.log(k,v))
+          // fileName = response.headers.get('Content-Disposition').split('filename="')[1];
+          // fileName = fileName.substring(0, fileName.length - 1);
+          return response.blob();
+        })
         .then(blobby => {
             let objectUrl = window.URL.createObjectURL(blobby);
 
@@ -156,9 +162,15 @@ class Server {
 
     let headers = new Headers();
     headers.append('Authorization', this.getConfig().headers.Authorization);
+    let fileName = null;
 
     fetch(file, { headers })
-        .then(response => response.blob())
+        .then(response => {
+          // response.headers.forEach((v, k) => console.log(k,v))
+          // fileName = response.headers.get('Content-Disposition').split('filename="')[1];
+          // fileName = fileName.substring(0, fileName.length - 1);
+          return response.blob();
+        })
         .then(blobby => {
             let objectUrl = window.URL.createObjectURL(blobby);
 

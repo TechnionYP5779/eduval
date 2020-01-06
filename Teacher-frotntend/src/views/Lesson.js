@@ -200,6 +200,7 @@ class Lesson extends React.Component {
   }
 
   handleShowUpdate(obj){
+    console.log("messages", this.state.messages);
     var type = obj.content;
     var color = obj.color;
     let messaged_students = new Set([]);
@@ -251,13 +252,11 @@ class Lesson extends React.Component {
         responseAtt.data.sort(function(a,b){
           return a.id.localeCompare(b.id);
         });
-        console.log("getAttendingStudents", responseAtt);
 
         server.getAttendingStudentsEmons(function(responseEmon){
           responseEmon.data.sort(function(a,b){
             return a.studentId.localeCompare(b.studentId);
           });
-          console.log("getAttendingStudentsEmons", responseEmon);
           var tmp = [];
           var index = 0;
 
@@ -467,7 +466,22 @@ class Lesson extends React.Component {
                     console.log("Error clearing messages of type " + num);
                   }, this.state.course_id, this.state.message_types[num].content
                 );
-
+                var indexes_to_remove=[];
+                for(var m in this.state.messages)
+                {
+                  if (this.state.messages[m].content == this.state.message_types[num].content)
+                  {
+                    indexes_to_remove.push(m);
+                  }
+                }
+                var counter=0;
+                var filtered_messages = this.state.messages;
+                for (var i in [...Array(indexes_to_remove.length).keys()])
+                {
+                  filtered_messages.splice(i-counter,1);
+                  counter++;
+                }
+                this.setState({messages:filtered_messages});
                 var tmpcounter = this.state.student_message_counter;
                 tmpcounter[num]=0;
                 this.setState({student_message_counter: tmpcounter});

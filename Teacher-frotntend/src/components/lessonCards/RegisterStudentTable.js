@@ -51,7 +51,6 @@ const styles = theme => ({
   },
 
   loggedOn: {
-    backgroundColor: "white ",
   },
   delete:{
     color: "red",
@@ -132,7 +131,6 @@ class RegisterStudentTable extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    console.log("Components Updated", this.props.students, prevProps.students, this.state.students);
     if(prevProps.registered_students!==this.props.registered_students
     || JSON.stringify(this.props.students) !== this.state.students_string)
     {
@@ -142,7 +140,6 @@ class RegisterStudentTable extends React.Component {
 
       var tmprows = [];
       var index;
-      console.log('123sin here: ', this.props.students.map(x => x.id))
       for(index = 0; index<this.props.registered_students.length; index++)
       {
         var student = this.props.registered_students[index];
@@ -151,11 +148,9 @@ class RegisterStudentTable extends React.Component {
           {
             return s.id===student.id;
           })==-1;
-        console.log('123looking for ', student.id);
         tmprows.push(createData(student.name, student.email, student.phoneNum,
           student.emons, student.id, student_missing));
       }
-      console.log("tmprows", tmprows);
       this.setState({rows:tmprows});
     }
   }
@@ -331,8 +326,19 @@ class RegisterStudentTable extends React.Component {
                                 }
                               )
                             }
+                            style={{maxWidth:"20em"}}
                           >
-                            {value}
+                            <div style={{
+                              overflow:"hidden",
+                              textOverflow:"ellipsis",
+                              whiteSpace:"nowrap"}}
+                            >
+                              {
+                              (column.id=="email" && value.includes("@fake")) && value.substring(value.length-6,value.length)==".email" ?
+                              "Demo student with No Registered Mail":
+                              value
+                              }
+                            </div>
                           </TableCell>
                         );
                       })}

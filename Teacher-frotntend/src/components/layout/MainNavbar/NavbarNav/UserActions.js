@@ -13,6 +13,12 @@ import {
 import auth from "../../../../Auth/Auth"
 import server from "../../../../Server/Server"
 
+function nameShortener(name, size) {
+  return(name.length>25+size? name.substring(0,22)+"..." : name);
+}
+
+
+
 export default class UserActions extends React.Component {
 
   _isMounted = false;
@@ -42,7 +48,8 @@ export default class UserActions extends React.Component {
     });
     if (teacher_payload)
     {
-      self.setState({username: teacher_payload["https://emon-teach.com/first_name"]+" "+ teacher_payload["https://emon-teach.com/last_name"]});
+      var fnlen = teacher_payload["https://emon-teach.com/first_name"].length;
+      self.setState({username: nameShortener(teacher_payload["https://emon-teach.com/first_name"],0)+" "+ nameShortener(teacher_payload["https://emon-teach.com/last_name"],25-fnlen)});
     }
     else
     {
