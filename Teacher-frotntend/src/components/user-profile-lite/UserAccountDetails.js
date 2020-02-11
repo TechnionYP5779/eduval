@@ -37,6 +37,7 @@ class UserAccountDetails extends React.Component {
       too_many_attempts:false,
       username_taken: false,
       email_taken: false,
+      weak_password: false,
     };
 
 
@@ -71,6 +72,7 @@ class UserAccountDetails extends React.Component {
     }, function(error){
       if(error.response)
       {
+        console.log("Error", error);
         if(error.response.status==403){
           self.setState({wrong_password:true});
         }
@@ -86,6 +88,11 @@ class UserAccountDetails extends React.Component {
           {
             self.setState({email_taken:true});
           }
+          else if(error.response.data.error=="WEAK_PASSWORD")
+          {
+            self.setState({weak_password:true});
+          }
+
         }
 
         else
@@ -148,6 +155,8 @@ class UserAccountDetails extends React.Component {
       changedUsername={()=>{this.setState({username_taken:false})}}
       emailTaken={this.state.email_taken}
       changedEmail={()=>{this.setState({email_taken:false})}}
+      weakPassword={this.state.weak_password}
+      changedWeakPassword={()=>{this.setState({weak_password:false})}}
       />
     </div>
     );

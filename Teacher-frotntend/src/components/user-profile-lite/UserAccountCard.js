@@ -82,6 +82,7 @@ class UserAccountCard extends React.Component
       wrongPassword:this.props.wrongPassword,
       usernameTaken:this.props.usernameTaken,
       emailTaken: this.props.emailTaken,
+      weak_password: this.props.weakPassword,
       tooMany:this.props.tooMany,
       isPhoneNumber:false,
       isEmail: false,
@@ -143,6 +144,11 @@ class UserAccountCard extends React.Component
     if(prevProps.emailTaken!=this.props.emailTaken)
     {
       this.setState({emailTaken: this.props.emailTaken});
+      this.setState({fieldError:true})
+    }
+    if(prevProps.weakPassword!=this.props.weakPassword)
+    {
+      this.setState({weak_password: this.props.weakPassword});
       this.setState({fieldError:true})
     }
     if(prevProps.tooMany!=this.props.tooMany)
@@ -220,12 +226,23 @@ class UserAccountCard extends React.Component
 
   setNewPassword(value)
   {
+    this.props.changedWeakPassword();
     var dets = this.state.details;
     dets.newPassword = value;
     this.setState({details: dets});
   }
   handleNewPasswordChange(evnt)
   {
+    var pass = evnt.target.value;
+    if(pass.length>0 && (pass.length < 8 || pass.toLowerCase() === pass 
+    || pass.toUpperCase() === pass || !pass.match(/[0-9]/)))
+    {
+      this.setState({weak_password:true});
+    }
+    else 
+    {
+      this.setState({weak_password:false});
+    }
     this.setNewPassword(evnt.target.value);
   }
 
@@ -286,7 +303,8 @@ class UserAccountCard extends React.Component
   {
     event.preventDefault();
     if (!this.state.isPhoneNumber || this.state.oldPassword==""
-          || !this.state.isEmail || this.state.usernameTaken || this.state.emailTaken)
+          || !this.state.isEmail || this.state.usernameTaken || this.state.emailTaken
+          || this.state.weak_password)
     {
       this.setState({fieldError:true})
       return
@@ -316,6 +334,14 @@ class UserAccountCard extends React.Component
            {t('Please contact administrator for further information')}.</p>
         </Alert>
       }
+      {this.state.weak_password &&
+        <Alert variant = "danger">
+          <Alert.Heading style={{color:"white"}}>{t('New Password is too weak!')}</Alert.Heading>
+            <p> {t('Any new password should be at least 8 symbols in length, and must contain ')}
+           {t('at least one digit, one upper case english letter, and at least one lower case english letter.')}</p>
+        </Alert>
+      }
+
       {this.state.fieldError &&
         <Alert variant = "dark">
           <Alert.Heading style={{color:"white"}}>{t("One of the Fields filled is wrong!")}</Alert.Heading>
@@ -354,6 +380,7 @@ class UserAccountCard extends React.Component
                 margin="normal"
               />
               <TextField
+                required
                 id="standard-required"
                 label={t("First Name")}
                 value={this.props.details.firstName}
@@ -363,6 +390,7 @@ class UserAccountCard extends React.Component
                 margin="normal"
               />
               <TextField
+                required
                 id="standard-required"
                 label={t("Last Name")}
                 value={this.props.details.lastName}
@@ -374,6 +402,7 @@ class UserAccountCard extends React.Component
               <FormControl className={classes.textField} margin="normal">
                 <InputLabel htmlFor="standard-adornment-password">{"New Password"+(this.state.details.demoStudent?"*": "")}</InputLabel>
                 <Input
+                  error={this.state.weak_password}
                   id="standard-adornment-password"
                   type={this.state.showNewPassword ? 'text' : 'password'}
                   value={this.state.details.newPassword}
