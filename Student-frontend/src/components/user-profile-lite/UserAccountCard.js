@@ -246,8 +246,8 @@ class UserAccountCard extends React.Component
   {
     var re = RegExp('^(0|(\\+[0-9]{3}))[0-9]{9}$','g');
     var arr_result = re.exec(value);
-    console.log("Arr_Result", arr_result);
-    if(!arr_result && value!="")
+    console.log("Arr_Result", arr_result, value);
+    if(!arr_result && value!="" && value!=undefined)
     {
       this.setState({isPhoneNumber: false})
     }
@@ -307,13 +307,17 @@ class UserAccountCard extends React.Component
       }
 
         <CardHeader
-        classes={{
-          title: classes.title,
-        }}
-        title={this.state.title}
+          classes={{
+            title: classes.title,
+          }}
+          title={this.state.title}
         />
         <CardContent>
-          <form className={classes.container} action="#" onSubmit={this.submit}>
+          <form className={classes.container}
+          onSubmit={(event)=>{
+            event.preventDefault();
+            this.submit();
+          }}>
             <div>
               <TextField
                 required
@@ -337,6 +341,7 @@ class UserAccountCard extends React.Component
                 margin="normal"
               />
               <TextField
+                required
                 id="standard-required"
                 label={t("First Name")}
                 value={this.props.details.firstName}
@@ -346,6 +351,7 @@ class UserAccountCard extends React.Component
                 margin="normal"
               />
               <TextField
+                required
                 id="standard-required"
                 label={t("Last Name")}
                 value={this.props.details.lastName}
@@ -353,7 +359,6 @@ class UserAccountCard extends React.Component
                 className={classes.textField}
                 margin="normal"
               />
-
               <TextField
                 id="standard-required"
                 type="password"
@@ -373,9 +378,13 @@ class UserAccountCard extends React.Component
                 margin="normal"
               />
               <Typography className={classes.instruction}>
-                Enter Current Password and Press the Button in Order to Complete the action.
+                {
+                  (!this.state.details.demoStudent ? "Enter Current Password and " : "")
+                  + "Press the Button in Order to Complete the action."
+                }
               </Typography>
-              <TextField
+              { !this.state.details.demoStudent &&
+                <TextField
                 error={this.state.wrongPassword}
                 required={!this.state.details.demoStudent}
                 id="standard-required"
@@ -385,7 +394,7 @@ class UserAccountCard extends React.Component
                 onChange={this.handleConfirmPasswordChange}
                 className={classes.textField}
                 margin="normal"
-              />
+              />}
                 <Button
                   variant="contained"
                   color="primary"
@@ -398,18 +407,6 @@ class UserAccountCard extends React.Component
 
             </div>
           </form>
-        </CardContent>
-        <CardContent>
-          <Row>
-          </Row>
-          <Row>
-            <Col>
-              <form >
-                <div>
-                </div>
-              </form>
-            </Col>
-          </Row>
         </CardContent>
       </Card >
     );

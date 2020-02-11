@@ -120,14 +120,15 @@ class UserAccountDetails extends React.Component {
     });
     if (student_payload)
     {
+      var demo = student_payload["https://emon-teach.com/demo_student"];
       var new_dets = {
-        username: student_payload["https://emon-teach.com/username"],
+        username: demo? "" : student_payload["https://emon-teach.com/username"],
         firstName: student_payload["https://emon-teach.com/first_name"],
         lastName: student_payload["https://emon-teach.com/last_name"],
         newPassword: "",
         oldPassword: "",
-        email: student_payload["email"],
-        phoneNum: student_payload["https://emon-teach.com/phone_number"],
+        email: demo? "" : student_payload["email"],
+        phoneNum: demo? "" : student_payload["https://emon-teach.com/phone_number"],
         demoStudent: student_payload["https://emon-teach.com/demo_student"]
     }
       self.setState({details: new_dets});

@@ -215,55 +215,63 @@ render(){
           title={"Join "+this.state.lessonName}
         />
         <CardContent>
-          <TextField
-            required
-            error={this.state.emptyName || this.state.studentNameTaken}
-            id="standard-required"
-            label={t("Student Name")}
-            className={classes.textField}
-            margin="normal"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <AccountCircle />
-                </InputAdornment>
-              ),
-            }}
-            onChange={this.updateStudentName}
-          />
-          <TextField
-            error={this.state.studentSeatTaken || this.state.emptySeat}
-            required
-            id="standard-number"
-            type="number"
-            InputLabelProps={{
-              shrink: true,
-            }}
-            label="Seat Number"
-            className={classes.textField}
-            margin="normal"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <FormatListNumberedIcon />
-                </InputAdornment>
-              ),
-            }}
-            onChange={this.updateStudentSeat}
-          />
-          <Button
-            disabled={ this.state.studentSeatTaken || this.state.emptySeat
-              || this.state.emptyName || this.state.disabled}
-            variant="contained"
-            color="primary"
-            className={classes.button}
-            endIcon={<Icon>send</Icon>}
-            onClick={this.startDemoLesson}
-          >
-            {this.state.student_name=="Drunkadiy" ? "Drunkadiy is not Allowed" : t("Enter Lesson")}
-          </Button>
-        </CardContent>
+          <form className={classes.container}
+            onSubmit={(event)=>{
+              event.preventDefault();
+              this.startDemoLesson();
+            }}>
+              <div>
 
+                <TextField
+                  required
+                  error={this.state.emptyName || this.state.studentNameTaken}
+                  id="standard-required"
+                  label={t("Student Name")}
+                  className={classes.textField}
+                  margin="normal"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <AccountCircle />
+                      </InputAdornment>
+                    ),
+                  }}
+                  onChange={this.updateStudentName}
+                />
+                <TextField
+                  error={this.state.studentSeatTaken || this.state.emptySeat}
+                  required
+                  id="standard-number"
+                  type="number"
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  label="Seat Number"
+                  className={classes.textField}
+                  margin="normal"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <FormatListNumberedIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                  onChange={this.updateStudentSeat}
+                />
+                <Button
+                  disabled={ this.state.studentSeatTaken || this.state.emptySeat
+                    || this.state.emptyName || this.state.disabled}
+                  variant="contained"
+                  color="primary"
+                  className={classes.button}
+                  endIcon={<Icon>send</Icon>}
+                  type="submit"
+                >
+                  {this.state.student_name=="Drunkadiy" ? "Drunkadiy is not Allowed" : t("Enter Lesson")}
+                </Button>
+              </div>
+          </form>       
+        </CardContent>
       </Card>
     );
   }
