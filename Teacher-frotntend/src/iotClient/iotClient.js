@@ -62,8 +62,8 @@ class iotClient {
       offlineCallback();
     };
     const onReconnect = () => {
-      connectCallback();
     };
+    
     const onOffline = () => {
       offlineCallback();
     };

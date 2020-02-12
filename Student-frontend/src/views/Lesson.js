@@ -244,12 +244,9 @@ class Lesson extends React.Component {
      )
 
      const getHistory=() =>{
-      this.setState(prevState => ({
-      reward_money : 0
-        }));
-        this.setState(prevState => ({
-        currentEmojis : []
-      }));
+      var money = 0;
+      var emojis = [];
+      var self = this;
       server.getLessonMessages(function(response)
        {
          //iterating over the recieved messages
@@ -257,31 +254,33 @@ class Lesson extends React.Component {
         for(var res of data){
           //if got an emoji
           if(res.messageType != "EMON"){
-              self.setState(prevState => ({
-              currentEmojis : [...self.state.currentEmojis, EmojiEnum[res.emojiType]]
-            }));
+              emojis =  [...emojis, EmojiEnum[res.emojiType]]
           }else
           {
-            //if got an emoji
-            var updated_reward_money = self.state.reward_money ? self.state.reward_money : 0;
-            updated_reward_money +=res.value
-
-            self.setState(prevState => ({
-            reward_money : updated_reward_money
-          }));
+            //if got an emony
+            money +=res.value;
+          }
         }
-     }}, function(error){
+        self.setState(
+          {
+            reward_money: money,
+            currentEmojis: emojis
+          }
+        );  
+      }, function(error){
        console.log("Error in getLessonDetails in componentDidMount in Lesson.js ", error);
-     }, self.state.lesson_id, self.state.student_id);
+      }, self.state.lesson_id, self.state.student_id);
     }
 
     var LessonsMessageURL='lesson/'+this.state.lesson_id+'/messages/'+this.state.student_id;
 
     let onConnect = () => {
+      console.log("Connected", this.state.student_id);
       getHistory();
     }
 
     let onMessages =  (topic, message) => {
+      console.log("Message for", this.state.student_id, "topic", topic, "message", message);
       if(topic === LessonsMessageURL){
           console.log("topic, message", topic,JSON.parse(message));
           var res=JSON.parse(message);
@@ -303,7 +302,7 @@ class Lesson extends React.Component {
           }
 
       }else{
-        console.log("topic, message", topic,message);
+        console.log("Message for", this.state.student_id, "topic", topic, "message", message);
         var self = this;
         server.deleteLessonMessages(function(error){
           console.log("Error in deleteLessonMessages in onMessages in Lesson.js", error);
@@ -326,7 +325,9 @@ class Lesson extends React.Component {
       }
     }
 
-    let onOffline = () => {} /* Basically we had it in the teacher part and
+    let onOffline = () => {
+      console.log("Offline", this.state.student_id);
+    } /* Basically we had it in the teacher part and
                               I had no idea whether it's important but it might be*/
     var self = this;
     iotclient.getKeys(function(response){

@@ -49,6 +49,7 @@ class iotClient {
     const onConnect = () => {
       this.client.subscribe(this.messageTopic);
       this.client.subscribe(this.presentTopic);
+      console.log("On Connect")
       connectCallback();
     };
 
@@ -62,9 +63,10 @@ class iotClient {
       offlineCallback();
     };
     const onReconnect = () => {
-      connectCallback();
+      console.log("On reconnect");
     };
     const onOffline = () => {
+      console.log("On offline");
       offlineCallback();
     };
 
