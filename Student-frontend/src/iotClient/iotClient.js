@@ -44,7 +44,9 @@ class iotClient {
       secretKey: this.iotKeys.secretKey,
       sessionToken: this.iotKeys.sessionToken,
       port: 443,
-      host: this.iotKeys.iotEndpoint
+      host: this.iotKeys.iotEndpoint,
+      connectTimeout: 10*1000,
+      maximumReconnectTimeMs: 15*1000,
     });
     const onConnect = () => {
       this.client.subscribe(this.messageTopic);

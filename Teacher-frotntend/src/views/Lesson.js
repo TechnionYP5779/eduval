@@ -278,9 +278,11 @@ class Lesson extends React.Component {
               console.log("ERROR THERE ARE DIFFERENT ID's IN THE RESPONSES");
             }
           }
+          console.log("preSort", tmp);
           tmp.sort(function(a,b){
             return parseInt(a.desk)-parseInt(b.desk);
           });
+          console.log("postSort", tmp);
           self.setState({students: tmp});
 
           }, function(error) {
@@ -348,6 +350,10 @@ class Lesson extends React.Component {
         newstud.emons=5;
         newstud.desk=JSON.parse(message).desk;
         tmpstudents.push(newstud);
+        tmpstudents.sort(function(a,b){
+          return parseInt(a.desk)-parseInt(b.desk);
+        });
+
         self.setState({students:tmpstudents});
       }
 
@@ -459,6 +465,10 @@ class Lesson extends React.Component {
 
             clearMessages = {(num)  =>
               {
+                if(this.state.show_messaged==this.state.message_types[num].content){
+                  //If it's chosen currently, unchoose it
+                  handleShowUpdate(this.state.message_types[num]);
+                }
                 server.deleteLessonMessages(
                   function(response){console.log("Deleted Messages "+ num)}, function(error)
                   {

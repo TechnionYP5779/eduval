@@ -44,17 +44,21 @@ class iotClient {
       secretKey: this.iotKeys.secretKey,
       sessionToken: this.iotKeys.sessionToken,
       port: 443,
-      host: this.iotKeys.iotEndpoint
+      host: this.iotKeys.iotEndpoint,
+      connectTimeout: 10*1000,
+      maximumReconnectTimeMs: 15*1000,
     });
     const onConnect = () => {
+      console.log("On Connect Teacher");
       this.client.subscribe(this.messageTopic);
       this.client.subscribe(this.presentTopic);
       connectCallback();
     };
 
     const onMessage = (topic, message) => {
-        message = new TextDecoder("utf-8").decode(message);
-        messageCallback(topic,message);
+      console.log("On Message Teacher", topic, message);
+      message = new TextDecoder("utf-8").decode(message);
+      messageCallback(topic,message);
     };
 
     const onError = (error) => {
@@ -62,9 +66,11 @@ class iotClient {
       offlineCallback();
     };
     const onReconnect = () => {
+      console.log("On Reconnect Teacher");
     };
-    
+
     const onOffline = () => {
+      console.log("On Offline Teacher");
       offlineCallback();
     };
 

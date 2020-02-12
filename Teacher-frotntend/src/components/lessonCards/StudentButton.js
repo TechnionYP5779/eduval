@@ -132,6 +132,15 @@ class StudentButton extends React.Component
     }
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if(prevProps.student!=this.props.student)
+    {
+      console.log("New Student", this.props.student)
+      this.setState({student: this.props.student});
+    }
+
+  }
+
   render()
   {
     const classes = this.props.classes;

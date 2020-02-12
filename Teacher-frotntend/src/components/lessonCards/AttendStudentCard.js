@@ -152,6 +152,7 @@ class AttendStudentCard extends React.Component
     componentDidUpdate(prevProps, prevState) {
       if(prevProps.students!=this.props.students)
       {
+        console.log("New Students", this.props.students)
         this.setState({students: this.props.students});
       }
     }
