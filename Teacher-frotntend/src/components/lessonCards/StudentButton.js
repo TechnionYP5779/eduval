@@ -33,7 +33,7 @@ var QRCode = require('qrcode.react');
 const LightTooltip = withStyles(theme => ({
   tooltip: {
     boxShadow: theme.shadows[1],
-    fontSize: 20,
+    fontSize: 25,
   },
 }))(Tooltip);
 
@@ -163,103 +163,105 @@ class StudentButton extends React.Component
           maxWidth:"100%",}}
         >
           <Badge color="secondary"
-          badgeContent={"Emons:" + this.state.student.emons}
-          overlap="rectangle"
-          anchorOrigin={{
-            horizontal:"right",
-            vertical:"bottom",
-          }}
-          style={{
-            maxWidth:"100%",}}
-          >
+            badgeContent={"Emons:" + this.state.student.emons}
+            overlap="rectangle"
+            anchorOrigin={{
+              horizontal:"right",
+              vertical:"bottom",
+            }}
+            style={{
+              maxWidth:"100%",}}
+            >
+              <LightTooltip title={this.state.student.name} placement="bottom-end" className={classes.tooltip}>
 
-            <Button
-            color="Green"
-            variant={this.props.isChosen(this.state.student.id)? "contained" :"outlined"}
-            className={clsx([classes.button, classes.regularUnChosen],
-                          {
-                            [ classes.regularChosen]:
-                            this.props.isChosen(this.state.student.id),
-                          },
-                          {
-                            [ classes.tomatoUnChosen]:
-                            !this.props.isChosen(this.state.student.id)
-                            &&this.props.isMessaged(this.state.student.id)
-                            &&this.props.messageColored()=="Tomato",
-                          },
-                          {
-                            [ classes.tomatoChosen]:
-                            this.props.isChosen(this.state.student.id)
-                            &&this.props.isMessaged(this.state.student.id)
-                            &&this.props.messageColored()=="Tomato",
-                          },
-                          {
-                            [ classes.orangeUnChosen]:
-                            !this.props.isChosen(this.state.student.id)
-                            &&this.props.isMessaged(this.state.student.id)
-                            &&this.props.messageColored()=="Orange",
-                          },
-                          {
-                            [ classes.orangeChosen]:
-                            this.props.isChosen(this.state.student.id)
-                            &&this.props.isMessaged(this.state.student.id)
-                            &&this.props.messageColored()=="Orange",
-                          },
-                          {
-                            [ classes.greenUnChosen]:
-                            !this.props.isChosen(this.state.student.id)
-                            &&this.props.isMessaged(this.state.student.id)
-                            &&this.props.messageColored()=="MediumSeaGreen",
-                          },
-                          {
-                            [ classes.greenChosen]:
-                            this.props.isChosen(this.state.student.id)
-                            &&this.props.isMessaged(this.state.student.id)
-                            &&this.props.messageColored()=="MediumSeaGreen",
-                          },
-                          {
-                            [ classes.violetUnChosen]:
-                            (!this.props.isChosen(this.state.student.id))
-                            &&this.props.isMessaged(this.state.student.id)
-                            &&this.props.messageColored()=="Violet",
-                          },
-                          {
-                            [ classes.violetChosen]:
-                            this.props.isChosen(this.state.student.id)
-                            &&this.props.isMessaged(this.state.student.id)
-                            &&this.props.messageColored()=="Violet",
-                          },
-                          {
-                            [ classes.blueslateUnChosen]:
-                            !this.props.isChosen(this.state.student.id)
-                            &&this.props.isMessaged(this.state.student.id)
-                            &&this.props.messageColored()=="SlateBlue",
-                          },
-                          {
-                            [ classes.blueslateChosen]:
-                            this.props.isChosen(this.state.student.id)
-                            &&this.props.isMessaged(this.state.student.id)
-                            &&this.props.messageColored()=="SlateBlue",
-                          },
+                <Button
+                  color="Green"
+                  variant={this.props.isChosen(this.state.student.id)? "contained" :"outlined"}
+                  className={clsx([classes.button, classes.regularUnChosen],
+                              {
+                                [ classes.regularChosen]:
+                                this.props.isChosen(this.state.student.id),
+                              },
+                              {
+                                [ classes.tomatoUnChosen]:
+                                !this.props.isChosen(this.state.student.id)
+                                &&this.props.isMessaged(this.state.student.id)
+                                &&this.props.messageColored()=="Tomato",
+                              },
+                              {
+                                [ classes.tomatoChosen]:
+                                this.props.isChosen(this.state.student.id)
+                                &&this.props.isMessaged(this.state.student.id)
+                                &&this.props.messageColored()=="Tomato",
+                              },
+                              {
+                                [ classes.orangeUnChosen]:
+                                !this.props.isChosen(this.state.student.id)
+                                &&this.props.isMessaged(this.state.student.id)
+                                &&this.props.messageColored()=="Orange",
+                              },
+                              {
+                                [ classes.orangeChosen]:
+                                this.props.isChosen(this.state.student.id)
+                                &&this.props.isMessaged(this.state.student.id)
+                                &&this.props.messageColored()=="Orange",
+                              },
+                              {
+                                [ classes.greenUnChosen]:
+                                !this.props.isChosen(this.state.student.id)
+                                &&this.props.isMessaged(this.state.student.id)
+                                &&this.props.messageColored()=="MediumSeaGreen",
+                              },
+                              {
+                                [ classes.greenChosen]:
+                                this.props.isChosen(this.state.student.id)
+                                &&this.props.isMessaged(this.state.student.id)
+                                &&this.props.messageColored()=="MediumSeaGreen",
+                              },
+                              {
+                                [ classes.violetUnChosen]:
+                                (!this.props.isChosen(this.state.student.id))
+                                &&this.props.isMessaged(this.state.student.id)
+                                &&this.props.messageColored()=="Violet",
+                              },
+                              {
+                                [ classes.violetChosen]:
+                                this.props.isChosen(this.state.student.id)
+                                &&this.props.isMessaged(this.state.student.id)
+                                &&this.props.messageColored()=="Violet",
+                              },
+                              {
+                                [ classes.blueslateUnChosen]:
+                                !this.props.isChosen(this.state.student.id)
+                                &&this.props.isMessaged(this.state.student.id)
+                                &&this.props.messageColored()=="SlateBlue",
+                              },
+                              {
+                                [ classes.blueslateChosen]:
+                                this.props.isChosen(this.state.student.id)
+                                &&this.props.isMessaged(this.state.student.id)
+                                &&this.props.messageColored()=="SlateBlue",
+                              },
 
 
-                        )
-            }
-            onClick={() =>
-              {
-                this.props.buttonClick(this.state.student.id);
-              }}
-              >
-                <div style={{
-                  overflow:"hidden",
-                  textOverflow:"ellipsis",
-                  whiteSpace:"nowrap"}}
-                >
-                {
-                this.state.student.name
-                }
-                </div>
-            </Button>
+                            )
+                  }
+                  onClick={() =>
+                    {
+                      this.props.buttonClick(this.state.student.id);
+                    }}
+                    >
+                    <div style={{
+                      overflow:"hidden",
+                      textOverflow:"ellipsis",
+                      whiteSpace:"nowrap"}}
+                    >
+                    {
+                    this.state.student.name
+                    }
+                    </div>
+                </Button>
+              </LightTooltip>
           </Badge>
         </Badge>
       </div>
