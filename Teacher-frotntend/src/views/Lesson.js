@@ -20,7 +20,7 @@ import {
   FormCheckbox,
   Alert
 } from "shards-react";
-
+import PropTypes from 'prop-types';
 import TimeoutAlert from "../components/common/TimeoutAlert"
 import Colors from "../components/components-overview/Colors";
 import Checkboxes from "../components/components-overview/Checkboxes";
@@ -41,6 +41,13 @@ import SeamlessInputGroups from "../components/components-overview/SeamlessInput
 import CustomFileUpload from "../components/components-overview/CustomFileUpload";
 import DropdownInputGroups from "../components/components-overview/DropdownInputGroups";
 import CustomSelect from "../components/components-overview/CustomSelect";
+import LinkIcon from '@material-ui/icons/Link';
+import { withStyles } from '@material-ui/core/styles';
+import Tooltip from '@material-ui/core/Tooltip';
+import Modal from '@material-ui/core/Modal';
+import Backdrop from '@material-ui/core/Backdrop';
+import Fade from '@material-ui/core/Fade';
+import IconButton from '@material-ui/core/IconButton';
 
 import PageTitle from "../components/common/PageTitle";
 import AttendStudentCard from "../components/lessonCards/AttendStudentCard";
@@ -50,6 +57,42 @@ import { withTranslation } from "react-i18next";
 
 import iotclient from "../iotClient/iotClient";
 import server from "../Server/Server";
+
+var QRCode = require('qrcode.react');
+
+const LightTooltip = withStyles(theme => ({
+  tooltip: {
+    boxShadow: theme.shadows[1],
+    fontSize: 20,
+    marginTop: "-0.5em"
+  },
+}))(Tooltip);
+
+const styles = theme => ({
+  delete:{
+    color: "#2A5DB0"
+  },
+
+  modal: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflowWrap:"break-word",
+  },
+  paper: {
+    backgroundColor: theme.palette.background.paper,
+    border: '2px solid #000',
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2, 4, 3),
+  },
+  qr: {
+    margin: "auto",
+    display: "block",
+    maxWidth: "60%"
+  }
+
+});
+
 
 
 class Lesson extends React.Component {
@@ -192,11 +235,21 @@ class Lesson extends React.Component {
 
       student_message_counter: [0,0,0,0,0],
 
+      link_modal_open: false,
+
+      demo_course: false,
+
+      demo_link: "",
     };
 
     this.unchooseStudent = this.unchooseStudent.bind(this);
     this.handleShowUpdate = this.handleShowUpdate.bind(this);
     this.handleSuccessTrue = this.handleSuccessTrue.bind(this);
+
+    this.setLinkModalChange = this.setLinkModalChange.bind(this)
+    this.handleLinkModalOpen = this.handleLinkModalOpen.bind(this)
+    this.handleLinkModalClose = this.handleLinkModalClose.bind(this)
+
   }
 
   handleShowUpdate(obj){
@@ -377,6 +430,13 @@ class Lesson extends React.Component {
       });
 
     server.getCourse(function(response){
+      console.log("Get Course Response", response)
+      if(response.data.demoLink){
+        self.setState({
+          demo_course:true,
+          demo_link: response.data.demoLink
+        })
+      }
       self.setState({course_name: response.data.name});
     }, (error)=>
         {
@@ -384,7 +444,18 @@ class Lesson extends React.Component {
         }, courseId);
 
   }
+  setLinkModalChange(value)
+  {
+    this.setState({link_modal_open: value})
+  }
 
+  handleLinkModalOpen = () => {
+    this.setLinkModalChange(true);
+  };
+
+  handleLinkModalClose = () => {
+    this.setLinkModalChange(false);
+  };
 
   render() {
 
@@ -402,11 +473,47 @@ class Lesson extends React.Component {
     let handleShowUpdate = this.handleShowUpdate;
 
     let self = this;
+    const classes = this.props.classes;
 
     const { t } = this.props;
 
     return (
       <div>
+        <Modal
+          aria-labelledby="transition-modal-title"
+          aria-describedby="transition-modal-description"
+          className={classes.modal}
+          open={this.state.link_modal_open}
+          onClose={this.handleLinkModalClose}
+          closeAfterTransition
+          BackdropComponent={Backdrop}
+          BackdropProps={{
+            timeout: 500,
+          }}
+        >
+          <Fade in={this.state.link_modal_open}
+          style={{maxWidth: "60%"}}>
+            <div className={classes.paper}>
+              <h2 
+                id="transition-modal-title" 
+                style={{
+                  textAlign:"center",
+                  color:"#2A5DB0",
+                  textDecorationLine: 'underline',
+                }}
+              >Invite Link and QR Code</h2>
+              <h1 
+                style={{
+                  textAlign:"center",
+                  fontFamily: "monospace"
+                }}
+              > {this.state.demo_link}</h1>
+              <QRCode size="2000" value={this.state.demo_link} className={classes.qr}/>
+            </div>
+          </Fade>
+        </Modal>
+
+
       {this.state.error &&
       <TimeoutAlert className="mb-0" theme="danger" msg={t("An error has occured")+"!"} time={10000}/>
       }
@@ -416,7 +523,23 @@ class Lesson extends React.Component {
       <Container fluid className="main-content-container px-4">
         {/* Page Header */}
         <Row noGutters className="page-header py-4">
-          <PageTitle sm="4" title={this.state.course_name} subtitle={t("Lesson View")} className="text-sm-left" />
+          <Col xs="10" sm="10" md="10" lg="10">
+            <PageTitle sm="4" title={this.state.course_name} subtitle={t("Lesson View")} className="text-sm-left" />
+          </Col>
+          <Col xs="2" sm="2" md="2" lg="2" style={{textAlign: "right" }}>
+            <LightTooltip title={t("Show Invite Link and QR Code")} placement="bottom-end" className={classes.tooltip}>
+              <IconButton aria-label="links"
+                className={classes.delete}
+                disabled={!this.state.demo_course}
+                onClick={this.handleLinkModalOpen}
+                edge="end"
+                size="small"
+              >
+                <LinkIcon style={{ fontSize: 60 }}/>
+              </IconButton>
+
+            </LightTooltip>
+          </Col>
         </Row>
         {/* First Row of Posts */}
         <Row>
@@ -667,4 +790,9 @@ class Lesson extends React.Component {
   }
 }
 
-export default withTranslation()(Lesson);
+Lesson.propTypes = {
+  classes:PropTypes.object.isRequired,
+};
+
+
+export default withTranslation()(withStyles(styles)(Lesson));
