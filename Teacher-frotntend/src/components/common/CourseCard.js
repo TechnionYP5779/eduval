@@ -26,6 +26,7 @@ import Fade from '@material-ui/core/Fade';
 import Button from '@material-ui/core/Button';
 import ClearIcon from '@material-ui/icons/Clear';
 import { withTranslation } from 'react-i18next';
+import LinkIcon from '@material-ui/icons/Link';
 
 var QRCode = require('qrcode.react');
 
@@ -103,7 +104,16 @@ const styles = theme => ({
     margin: "auto",
     display: "block",
     maxWidth: "20%"
-  }
+  },
+  qr2: {
+    margin: "auto",
+    display: "block",
+    maxWidth: "60%"
+  },
+
+  link:{
+    color: "#2A5DB0"
+  },
 
 });
 
@@ -119,14 +129,20 @@ class CourseCard extends React.Component
       play_pushed: this.props.play_pushed,
       disabled_play: this.props.disabled_play,
       delete_modal_open: false,
-      demoLink: this.props.demoLink
+      demoLink: this.props.demoLink,
+      demo_course: this.props.demoLink? true : false,
     };
 
     this.handlePlayClick = this.handlePlayClick.bind(this);
     this.handleDeleteCourse = this.handleDeleteCourse.bind(this);
-    this.setDeleteModalChange = this.setDeleteModalChange.bind(this)
-    this.handleDeleteModalOpen = this.handleDeleteModalOpen.bind(this)
-    this.handleDeleteModalClose = this.handleDeleteModalClose.bind(this)
+    this.setDeleteModalChange = this.setDeleteModalChange.bind(this);
+    this.handleDeleteModalOpen = this.handleDeleteModalOpen.bind(this);
+    this.handleDeleteModalClose = this.handleDeleteModalClose.bind(this);
+
+    this.setLinkModalChange = this.setLinkModalChange.bind(this)
+    this.handleLinkModalOpen = this.handleLinkModalOpen.bind(this)
+    this.handleLinkModalClose = this.handleLinkModalClose.bind(this)
+
   }
 
   handlePlayClick()
@@ -151,6 +167,19 @@ class CourseCard extends React.Component
   {
     this.props.deleteCourse();
   }
+  setLinkModalChange(value)
+  {
+    this.setState({link_modal_open: value})
+  }
+
+  handleLinkModalOpen = () => {
+    this.setLinkModalChange(true);
+  };
+
+  handleLinkModalClose = () => {
+    this.setLinkModalChange(false);
+  };
+
 
   render(){
     const classes = this.props.classes;
@@ -158,6 +187,40 @@ class CourseCard extends React.Component
 
     return(
       <div>
+        <Modal
+          aria-labelledby="transition-modal-title"
+          aria-describedby="transition-modal-description"
+          className={classes.modal}
+          open={this.state.link_modal_open}
+          onClose={this.handleLinkModalClose}
+          closeAfterTransition
+          BackdropComponent={Backdrop}
+          BackdropProps={{
+            timeout: 500,
+          }}
+        >
+          <Fade in={this.state.link_modal_open}
+          style={{maxWidth: "60%"}}>
+            <div className={classes.paper}>
+              <h2 
+                id="transition-modal-title" 
+                style={{
+                  textAlign:"center",
+                  color:"#2A5DB0",
+                  textDecorationLine: 'underline',
+                }}
+              >{this.state.name + " Invite Link and QR Code"}</h2>
+              <h1 
+                style={{
+                  textAlign:"center",
+                  fontFamily: "monospace"
+                }}
+              > {this.state.demoLink}</h1>
+              <QRCode size="2000" value={this.state.demoLink} className={classes.qr2}/>
+            </div>
+          </Fade>
+        </Modal>
+
         <Modal
           aria-labelledby="transition-modal-title"
           aria-describedby="transition-modal-description"
@@ -220,7 +283,14 @@ class CourseCard extends React.Component
 
           { this.state.demoLink!=null &&
             <CardContent>
-              <Typography paragraph>{t('Trial Lesson Invite Link')}: <br/> {this.state.demoLink}</Typography>
+              <Typography paragraph>{t('Trial Lesson Invite Link')}: <br/> 
+                <h6 
+                  style={{
+                    textAlign:"center",
+                    fontFamily: "monospace"
+                  }}
+                > {this.state.demoLink}</h6>
+              </Typography>
               <QRCode size="200" value={this.state.demoLink} className={classes.qr}/>
 
             </CardContent>
@@ -243,6 +313,17 @@ class CourseCard extends React.Component
               </IconButton>
             </LightTooltip>
 
+            { this.state.demo_course && 
+              <LightTooltip title={t("Show Invite Link and QR Code")} placement="bottom-end">
+                <IconButton aria-label="links"
+                  className={classes.link}
+                  disabled={!this.state.demo_course}
+                  onClick={this.handleLinkModalOpen}
+                >
+                  <LinkIcon style={{ fontSize: 36 }}/>
+                </IconButton>
+              </LightTooltip>
+            }
             <LightTooltip title={this.state.play_pushed? t("Resume Lesson") : t("Start Lesson")}
               placement="bottom-end">
               <IconButton

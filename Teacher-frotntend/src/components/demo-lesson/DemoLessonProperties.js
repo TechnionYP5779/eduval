@@ -214,21 +214,12 @@ class DemoLessonProperties extends React.Component {
             </Button>
             {
               this.state.invite_link != "" &&
-              <TextField
-                readonly
-                id="standard-readonly"
-                label={t("Link")}
-                className={classes.textField}
-                margin="normal"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LinkIcon />
-                    </InputAdornment>
-                  ),
+              <h1 
+                style={{
+                  textAlign:"center",
+                  fontFamily: "monospace"
                 }}
-                value={this.state.invite_link}
-              />
+              > {this.state.invite_link}</h1>
             }
             {
               this.state.invite_link != "" &&
