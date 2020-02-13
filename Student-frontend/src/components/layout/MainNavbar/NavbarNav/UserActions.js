@@ -22,7 +22,7 @@ export default class UserActions extends React.Component {
 
     this.state = {
       visible: false,
-      username: ""
+      username: "",
     };
 
     this.toggleUserActions = this.toggleUserActions.bind(this);
@@ -60,7 +60,12 @@ export default class UserActions extends React.Component {
   }
 
   login() {
-    auth.login();
+    if (window.location.href.includes("demo-invite?id=")){
+      auth.login(localStorage.getItem("lesson_id"));
+    }
+    else{
+      auth.login();
+    }
   }
 
 

@@ -32,6 +32,11 @@ const styles = theme => ({
     color: "DarkBlue",
     align: "center"
   },
+  subheader:{
+    color: "LimeGreen",
+    align: "center",
+    fontWeight: "bold",
+  },
 
   textField: {
     margin: "auto",
@@ -72,12 +77,12 @@ class DemoStudentLogin extends React.Component {
 
     var self = this;
     server.getTrialLessonByHash(function(response) {
+        localStorage.setItem('lesson_id', response.data.id);
         self.setState(
           {
-            lesson_id : response.data.id});
-        self.setState(
-          {
-            lessonName : response.data.name});
+            lesson_id : response.data.id,         
+            lessonName : response.data.name
+          })
     },
     function(error){
       console.log("Error in getTrialLessonByHash in constructor of DemoStudentLogin in DemoStudentLogin.js", error);
@@ -147,7 +152,6 @@ class DemoStudentLogin extends React.Component {
       Auth.idToken = response.idToken;
       Auth.expiresAt = expiresAt;
       Auth.sub = response.data.sub;
-      Auth.registerstudent()
       console.log("PUSH?");
       history.push("/lesson/" + self.state.lesson_id);
       console.log("PUSH!");
@@ -211,8 +215,10 @@ render(){
         <CardHeader
           classes={{
           title: classes.title,
+          subheader: classes.subheader
           }}
           title={"Join "+this.state.lessonName}
+          subheader={"Notice! If you already have a registered user, you can simply click on 'Login' in the top right corner."}
         />
         <CardContent>
           <form className={classes.container}

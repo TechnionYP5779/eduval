@@ -1,13 +1,27 @@
 import React, { Component } from 'react';
 import loading from './loading.svg';
 import auth from '../Auth/Auth'
+import history from '../history';
 
 import server from "../Server/Server"
 
 class Callback extends Component {
 
   componentDidMount(){
-    auth.handleAuthentication();
+    var self = this;
+    auth.handleAuthentication(function() {
+      var demo_lesson_id = self.props.location.search.split("=")[1];
+      if (demo_lesson_id){
+        server.addStudentToCourse(function(reponse){
+          history.push("/my-courses")
+        }, function(error){
+          console.log("Error in adding Demo Lesson to Registered student");
+          console.log("componentDidMount in Callback.js",error);
+        },demo_lesson_id)
+      } else{
+        history.push("/")
+      }
+    })
   }
 
   render() {

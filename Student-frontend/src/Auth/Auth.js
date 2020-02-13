@@ -29,7 +29,6 @@ class Auth {
     this.getAccessToken = this.getAccessToken.bind(this);
     this.getIdToken = this.getIdToken.bind(this);
     this.renewSession = this.renewSession.bind(this);
-    this.registerstudent = this.registerstudent.bind(this);
     this.getUserInfo = this.getUserInfo.bind(this);
 
     let accessToken = localStorage.getItem('accessToken');
@@ -48,11 +47,13 @@ class Auth {
       this.sub = sub;
   }
 
-  login() {
-    this.auth0.authorize();
+  login(param) {
+    var additional = param? ("?DemoLesson="+param) : "";
+    this.auth0.authorize({redirectUri:AUTH_CONFIG.callbackUrl+additional});
   }
+  
 
-  handleAuthentication() {
+  handleAuthentication(callback) {
     this.auth0.parseHash((err, authResult) => {
       if (authResult && authResult.accessToken && authResult.idToken) {
         this.setSession(authResult);
@@ -61,6 +62,8 @@ class Auth {
         console.log(err);
         alert(`Error: ${err.error}. Check the console for further details.`);
       }
+
+      callback();
     });
   }
 
@@ -88,7 +91,6 @@ class Auth {
     localStorage.setItem('payload', JSON.stringify(authResult.idTokenPayload));
 
     // navigate to the home route
-    this.registerstudent();
   }
 
   getUserInfo(callback){
@@ -97,63 +99,6 @@ class Auth {
       this.auth0.client.userInfo(access_token, callback);
     }
   }
-
-  registerstudent(){
-    let config = {
-      headers: {'Authorization': 'Bearer ' + localStorage.getItem('idToken')}
-    };
-    let student_id = localStorage.getItem('student_id');console.log("REGISTE1RSTUDENT");
-    if (student_id != null){
-      console.log("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD")
-      history.replace('/');
-      return;
-    }
-
-    let sub = this.sub;
-    if(sub == null){
-      console.log("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC")
-      history.replace('/');
-      return;
-    }
-      console.log("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEee")
-    axios.get(SERVER_CONFIG.domain + '/student/byToken/'+new Buffer(sub).toString('base64'), config)
-    .then(function(response){
-      console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaa");
-      localStorage.setItem('student_id', response.data.id);
-      history.replace('/');
-    })
-    .catch(function(error){
-      console.log("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
-      console.log("error");
-        console.log(error);
-      if (!error.response || error.response.status !== 404){
-        console.log(error);
-        history.replace('/');
-        return;
-      }
-      // lazy registration to EMON DB
-      auth.getUserInfo(function(error, profile){
-        if (error) {
-          console.log(error);
-          history.replace('/');
-          return;
-        }
-        axios.post(SERVER_CONFIG.domain + '/student', {authIdToken: new Buffer(sub).toString('base64'),
-          name: profile.nickname,
-          email: profile.email,
-          phoneNum: profile[SERVER_CONFIG.phone_number]}, config)
-        .then(function(response){
-          localStorage.setItem('student_id', response.data);
-          history.replace('/');
-        })
-        .catch(function(error) {
-          console.log(error.response);
-          history.replace('/');
-        });
-      });
-    });
-  }
-
 
   renewSession() {
     this.auth0.checkSession({}, (err, authResult) => {

@@ -399,6 +399,29 @@ class Server {
     .then(callback)
     .catch(callbackError);
   }
+  /*
+  =================== Add Student to Course ====================
+  @params:
+    - callback: function to do in case of success that has one paramater - the response
+    - callbackError: function to do in case of error that has one paramater - the error
+      + error is {response: {data: {error object}}}
+    - students: students to register
+    - courseId: the course id
+  @use conditions:
+    - User should be logged in when called.
+  */
+ addStudentToCourse(callback, callbackError, courseId){
+    let studentSub = localStorage.getItem('sub');
+    if (studentSub == null || !auth.isAuthenticated()){
+      let error = {response: {data: {error: "Error in addStudentToCourse in Server.js"}}};
+      callbackError(error);
+      return;
+    }
+    
+    axios.post(SERVER_CONFIG.domain + '/course/' + courseId + "/registeredIds", JSON.stringify([studentSub]) ,this.getConfig())
+    .then(callback)
+    .catch(callbackError);
+  }
 
 
 }
