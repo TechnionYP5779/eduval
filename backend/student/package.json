@@ -16,7 +16,7 @@
         "aws-iot-device-sdk": "^2.2.1",
         "axios": "^0.18.1",
         "http-errors": "^1.7.2",
-        "knex": "^0.16.5",
+        "knex": "^2.3.0",
         "middy": "^0.27.0",
         "mysql": "^2.16.0"
     },
